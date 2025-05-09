@@ -1,0 +1,181 @@
+import { useState, useRef, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Loader2, Send } from "lucide-react";
+import { ChatMessage } from "@shared/schema";
+
+interface ChatInterfaceProps {
+  chatHistory: ChatMessage[];
+}
+
+export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
+  const { user } = useAuth();
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Initialize with chat history
+  useEffect(() => {
+    if (chatHistory.length > 0) {
+      setMessages(chatHistory.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
+    }
+  }, [chatHistory]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Listen for external questions (from sample questions)
+  useEffect(() => {
+    const handleAskQuestion = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.question) {
+        setMessage(customEvent.detail.question);
+      }
+    };
+
+    window.addEventListener("ask-question", handleAskQuestion);
+    return () => {
+      window.removeEventListener("ask-question", handleAskQuestion);
+    };
+  }, []);
+
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const res = await apiRequest("POST", "/api/chat", { message });
+      return res.json();
+    },
+    onSuccess: (newMessage: ChatMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/history"] });
+    },
+    onError: (error) => {
+      console.error("Failed to send message:", error);
+      // Add a failed message indicator
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          userId: user?.id || 0,
+          message,
+          response: "Sorry, I couldn't process your request. Please try again.",
+          createdAt: new Date(),
+        } as ChatMessage,
+      ]);
+    },
+  });
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !user) return;
+    
+    // Add user message to state immediately for UI feedback
+    const tempMessage: ChatMessage = {
+      id: Date.now(),
+      userId: user.id,
+      message: message.trim(),
+      response: "",
+      createdAt: new Date(),
+    };
+    
+    setMessages((prev) => [...prev, tempMessage]);
+    
+    // Clear input
+    setMessage("");
+    
+    // Send to API
+    sendMessageMutation.mutate(tempMessage.message);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium mb-2">Welcome to the AI Doubt Assistant</h3>
+              <p className="text-muted-foreground mb-6">
+                Ask any question related to UPSC preparation, and I'll provide detailed answers to help you.
+              </p>
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium mb-1">Example questions you can ask:</p>
+                <ul className="space-y-1 list-disc pl-5">
+                  <li>Explain the key features of the Indian Constitution</li>
+                  <li>What were the major causes of the 1857 revolt?</li>
+                  <li>How does the monsoon system affect Indian agriculture?</li>
+                  <li>Explain the structure and functions of the NITI Aayog</li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            messages.map((msg, index) => (
+              <div key={msg.id || index} className="space-y-2">
+                <div className="flex justify-end">
+                  <div className="bg-primary text-primary-foreground rounded-tl-xl rounded-tr-xl rounded-bl-xl p-3 max-w-[80%]">
+                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                  </div>
+                </div>
+                
+                <div className="flex">
+                  {sendMessageMutation.isPending && index === messages.length - 1 ? (
+                    <div className="bg-muted rounded-tl-xl rounded-tr-xl rounded-br-xl p-3 max-w-[80%]">
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <p className="text-sm text-muted-foreground">Generating response...</p>
+                      </div>
+                    </div>
+                  ) : (
+                    msg.response && (
+                      <div className="bg-muted rounded-tl-xl rounded-tr-xl rounded-br-xl p-3 max-w-[80%]">
+                        <p className="text-sm whitespace-pre-wrap">{msg.response}</p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+      
+      <div className="p-4 border-t">
+        <div className="flex space-x-2">
+          <textarea
+            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[60px]"
+            placeholder="Type your question here..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={sendMessageMutation.isPending}
+          />
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={!message.trim() || sendMessageMutation.isPending}
+          >
+            {sendMessageMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+        <p className="text-xs text-center text-muted-foreground mt-2">
+          Ask any UPSC-related questions or doubts for immediate assistance
+        </p>
+      </div>
+    </div>
+  );
+}
