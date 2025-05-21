@@ -1,0 +1,291 @@
+{
+  "subjects": [
+    {
+      "name": "Indian History",
+      "topics": [
+        {
+          "name": "Ancient History",
+          "subtopics": [
+            "Prehistoric Cultures in India",
+            "Indus Valley Civilization",
+            "Vedic Age",
+            "Mahajanapadas & Rise of Jainism and Buddhism",
+            "Mauryan Empire",
+            "Post-Mauryan Kingdoms",
+            "Gupta Age",
+            "Post-Gupta Period",
+            "Early South Indian Kingdoms"
+          ]
+        },
+        {
+          "name": "Medieval History",
+          "subtopics": [
+            "Early Medieval Period (750\u20131200 AD)",
+            "Delhi Sultanate",
+            "Vijayanagara and Bahmani Kingdoms",
+            "Mughal Empire",
+            "Marathas and Regional Kingdoms",
+            "Religious Movements: Bhakti & Sufi",
+            "Administrative and Cultural Developments"
+          ]
+        },
+        {
+          "name": "Modern History",
+          "subtopics": [
+            "Advent of Europeans",
+            "British Expansion in India",
+            "Socio-Religious Reform Movements",
+            "Revolt of 1857",
+            "Indian National Movement: Pre-Congress",
+            "INC Formation & Early Phase",
+            "Extremist Phase (1905\u20131919)",
+            "Gandhian Era (1919\u20131947)",
+            "Constitutional Developments",
+            "Partition & Independence"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Art & Culture",
+      "topics": [
+        {
+          "name": "Indian Culture",
+          "subtopics": [
+            "Architecture",
+            "Sculpture and Iconography",
+            "Paintings",
+            "Music, Dance, Theatre",
+            "Literature",
+            "Religion and Philosophy",
+            "UNESCO Heritage Sites",
+            "Fairs, Festivals and Cultural Institutions"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Geography",
+      "topics": [
+        {
+          "name": "Physical Geography",
+          "subtopics": [
+            "Geomorphology",
+            "Climatology",
+            "Oceanography",
+            "Biogeography"
+          ]
+        },
+        {
+          "name": "Indian Geography",
+          "subtopics": [
+            "Physiographic Divisions",
+            "Climate and Weather",
+            "Soil and Vegetation",
+            "Rivers and Water Resources",
+            "Agriculture",
+            "Minerals and Energy Resources",
+            "Transport and Infrastructure",
+            "Disaster Management"
+          ]
+        },
+        {
+          "name": "Human & Economic Geography",
+          "subtopics": [
+            "Population and Demographics",
+            "Urbanization and Migration",
+            "Industries",
+            "Trade and Transport",
+            "Regional Development"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Indian Polity & Governance",
+      "topics": [
+        {
+          "name": "Constitution",
+          "subtopics": [
+            "Historical Background",
+            "Preamble",
+            "Fundamental Rights and Duties",
+            "Directive Principles of State Policy",
+            "Amendment Procedures",
+            "Constitutional Bodies"
+          ]
+        },
+        {
+          "name": "Political System",
+          "subtopics": [
+            "Parliament",
+            "President and Vice-President",
+            "Prime Minister and Council of Ministers",
+            "Judiciary",
+            "Federalism",
+            "Emergency Provisions",
+            "Elections",
+            "Political Parties"
+          ]
+        },
+        {
+          "name": "Governance",
+          "subtopics": [
+            "Civil Services",
+            "e-Governance",
+            "Transparency and Accountability",
+            "RTI, Citizen Charters",
+            "NGOs and SHGs",
+            "Media's Role"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Indian Economy",
+      "topics": [
+        {
+          "name": "Basic Concepts",
+          "subtopics": [
+            "National Income",
+            "Inflation",
+            "Monetary Policy",
+            "Fiscal Policy",
+            "Banking System",
+            "Budget"
+          ]
+        },
+        {
+          "name": "Economic Development",
+          "subtopics": [
+            "Planning in India",
+            "Poverty and Unemployment",
+            "Inclusive Growth",
+            "Sustainable Development",
+            "Demographic Dividend"
+          ]
+        },
+        {
+          "name": "Sectors of Economy",
+          "subtopics": [
+            "Agriculture",
+            "Industry and Infrastructure",
+            "Services Sector",
+            "MSMEs"
+          ]
+        },
+        {
+          "name": "Government Initiatives",
+          "subtopics": [
+            "Flagship Schemes",
+            "NITI Aayog",
+            "GST and Taxation Reforms"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Environment & Ecology",
+      "topics": [
+        {
+          "name": "Environment",
+          "subtopics": [
+            "Ecosystems and Biodiversity",
+            "Pollution",
+            "Climate Change",
+            "Environmental Laws",
+            "Conservation Efforts",
+            "International Conventions"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Science & Technology",
+      "topics": [
+        {
+          "name": "Science & Tech",
+          "subtopics": [
+            "Space Technology",
+            "Defence Technology",
+            "Nuclear Technology",
+            "Biotechnology",
+            "IT and AI",
+            "Scientific Research in India"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "General Science",
+      "topics": [
+        {
+          "name": "Basics",
+          "subtopics": [
+            "Physics",
+            "Chemistry",
+            "Biology",
+            "Everyday Science"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ethics, Integrity & Aptitude",
+      "topics": [
+        {
+          "name": "Ethics",
+          "subtopics": [
+            "Ethics and Human Interface",
+            "Attitude and Emotional Intelligence",
+            "Moral Thinkers and Philosophers",
+            "Public Service Values",
+            "Probity in Governance",
+            "Case Studies"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Current Affairs",
+      "topics": [
+        {
+          "name": "Monthly/Yearly Updates",
+          "subtopics": [
+            "Government Policies",
+            "International Relations",
+            "Economic Developments",
+            "Environment and Climate",
+            "Science & Tech Updates",
+            "Reports and Indices",
+            "Social Justice",
+            "Awards and Sports"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CSAT",
+      "topics": [
+        {
+          "name": "Comprehension & Reasoning",
+          "subtopics": [
+            "Reading Comprehension",
+            "Logical Reasoning",
+            "Analytical Ability"
+          ]
+        },
+        {
+          "name": "Quantitative Aptitude",
+          "subtopics": [
+            "Basic Arithmetic",
+            "Percentages and Ratios",
+            "Time, Speed and Distance",
+            "Data Interpretation",
+            "Averages and Mixtures"
+          ]
+        }
+      ]
+    }
+  ]
+}
