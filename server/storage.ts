@@ -1,5 +1,5 @@
-import { users, topics, quizzes, questions, quizAttempts, userProgress, studyStreaks, chatMessages, studyPlans } from "@shared/schema";
-import type { User, InsertUser, Topic, InsertTopic, Quiz, InsertQuiz, Question, InsertQuestion, QuizAttempt, InsertQuizAttempt, UserProgress, InsertUserProgress, StudyStreak, InsertStudyStreak, ChatMessage, InsertChatMessage, StudyPlan, InsertStudyPlan } from "@shared/schema";
+import { users, subjects, topics, subtopics, quizzes, questions, quizAttempts, bookmarks, userProgress, studyStreaks, chatMessages, studyPlans } from "@shared/schema";
+import type { User, InsertUser, Subject, InsertSubject, Topic, InsertTopic, Subtopic, InsertSubtopic, Quiz, InsertQuiz, Question, InsertQuestion, QuizAttempt, InsertQuizAttempt, Bookmark, InsertBookmark, UserProgress, InsertUserProgress, StudyStreak, InsertStudyStreak, ChatMessage, InsertChatMessage, StudyPlan, InsertStudyPlan } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -12,29 +12,53 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
+  // Subjects
+  getAllSubjects(): Promise<Subject[]>;
+  getSubjectById(id: number): Promise<Subject | undefined>;
+  createSubject(subject: InsertSubject): Promise<Subject>;
+  
   // Topics
   getAllTopics(): Promise<Topic[]>;
   getTopicById(id: number): Promise<Topic | undefined>;
-  getTopicsByCategory(category: string): Promise<Topic[]>;
+  getTopicsBySubject(subjectId: number): Promise<Topic[]>;
   createTopic(topic: InsertTopic): Promise<Topic>;
+  updateTopicStatus(id: number, status: string): Promise<Topic>;
+  
+  // Subtopics
+  getAllSubtopics(): Promise<Subtopic[]>;
+  getSubtopicById(id: number): Promise<Subtopic | undefined>;
+  getSubtopicsByTopic(topicId: number): Promise<Subtopic[]>;
+  createSubtopic(subtopic: InsertSubtopic): Promise<Subtopic>;
+  updateSubtopicStatus(id: number, status: string): Promise<Subtopic>;
   
   // Quizzes
   createQuiz(quiz: InsertQuiz): Promise<Quiz>;
   getQuizById(id: number): Promise<Quiz | undefined>;
+  getQuizzesBySubject(subjectId: number): Promise<Quiz[]>;
   getQuizzesByTopic(topicId: number): Promise<Quiz[]>;
+  getQuizzesBySubtopic(subtopicId: number): Promise<Quiz[]>;
+  getComprehensiveQuizzesBySubject(subjectId: number): Promise<Quiz[]>;
   
   // Questions
   createQuestion(question: InsertQuestion): Promise<Question>;
   getQuestionsByQuiz(quizId: number): Promise<Question[]>;
+  getBookmarkedQuestions(userId: number): Promise<Question[]>;
   
   // Quiz Attempts
   createQuizAttempt(attempt: InsertQuizAttempt): Promise<QuizAttempt>;
   getQuizAttemptsByUser(userId: number): Promise<QuizAttempt[]>;
   getRecentQuizAttempts(userId: number, limit: number): Promise<QuizAttempt[]>;
   
+  // Bookmarks
+  createBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
+  getBookmarksByUser(userId: number): Promise<Bookmark[]>;
+  deleteBookmark(userId: number, questionId: number): Promise<void>;
+  
   // User Progress
+  getUserProgressBySubject(userId: number, subjectId: number): Promise<UserProgress | undefined>;
   getUserProgressByTopic(userId: number, topicId: number): Promise<UserProgress | undefined>;
-  updateUserProgress(userId: number, topicId: number, quizzesCompleted: number): Promise<UserProgress>;
+  getUserProgressBySubtopic(userId: number, subtopicId: number): Promise<UserProgress | undefined>;
+  updateUserProgress(userId: number, subjectId: number | null, topicId: number | null, subtopicId: number | null, data: Partial<InsertUserProgress>): Promise<UserProgress>;
   getUserProgressOverview(userId: number): Promise<UserProgress[]>;
   
   // Study Streaks

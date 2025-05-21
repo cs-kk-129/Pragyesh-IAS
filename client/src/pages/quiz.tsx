@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,7 +12,16 @@ import QuizCard from "@/components/quiz/quiz-card";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
-import { Loader2, BookOpen, CheckCircle, AlertCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Loader2, BookOpen, CheckCircle, AlertCircle, Timer, Flag, 
+  ArrowLeft, ArrowRight, BookmarkPlus, BarChart2, MoreHorizontal, 
+  Book, Target, HistoryIcon, Brain, ChevronLeft, ChevronRight,
+  Clock
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Quiz() {
