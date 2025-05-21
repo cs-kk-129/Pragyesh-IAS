@@ -87,13 +87,22 @@ export default function Topics() {
     }
   };
 
+  // Start a quiz at various hierarchy levels (subject, topic, or subtopic)
+  const handleStartQuiz = async (params: { subjectId?: number, topicId?: number, subtopicId?: number, difficulty?: string }) => {
+    try {
+      const res = await apiRequest("POST", "/api/quizzes/generate", params);
+      const data = await res.json();
+      navigate(`/quiz/${data.quiz.id}`);
+    } catch (error) {
+      console.error("Failed to generate quiz:", error);
+    }
+  };
+  
   // Start a unit quiz on the selected topic/subtopic
   const handleStartUnitQuiz = async (topicId: number, subtopicId?: number) => {
     try {
       const payload = subtopicId ? { subtopicId } : { topicId };
-      const res = await apiRequest("POST", "/api/quizzes/generate", payload);
-      const data = await res.json();
-      navigate(`/quiz/${data.quiz.id}`);
+      await handleStartQuiz(payload);
     } catch (error) {
       console.error("Failed to generate quiz:", error);
     }
@@ -142,12 +151,17 @@ export default function Topics() {
       className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => setSelectedSubject(subject.id)}
     >
-      <CardHeader className="pb-3">
-        <CardTitle>{subject.name}</CardTitle>
+      <CardHeader className="pb-3 relative">
+        <div className="absolute top-2 right-2">
+          <Badge variant="outline" className="bg-muted/30 px-2 py-1 text-xs">
+            UPSC
+          </Badge>
+        </div>
+        <CardTitle className="pr-16">{subject.name}</CardTitle>
         <CardDescription>UPSC Preparation</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{subject.description}</p>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{subject.description}</p>
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span>Progress</span>
@@ -156,7 +170,7 @@ export default function Topics() {
           <Progress value={30} className="h-2" />
         </div>
       </CardContent>
-      <CardFooter className="border-t bg-muted/50 pt-3">
+      <CardFooter className="border-t bg-muted/50 pt-3 flex flex-col gap-2">
         <div className="flex space-x-2 w-full">
           <Button 
             variant="outline" 
@@ -178,6 +192,28 @@ export default function Topics() {
             }}
           >
             <BookOpen className="h-4 w-4 mr-2" /> Comprehensive Quiz
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStartQuiz({ subjectId: subject.id, difficulty: 'easy' });
+            }}
+          >
+            <span className="text-xs">Easy Quiz</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStartQuiz({ subjectId: subject.id, difficulty: 'hard' });
+            }}
+          >
+            <span className="text-xs">Hard Quiz</span>
           </Button>
         </div>
       </CardFooter>
@@ -207,13 +243,25 @@ export default function Topics() {
                 {topic.status && getStatusBadge(topic.status)}
               </CardDescription>
             </div>
-            <Button 
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => handleStartUnitQuiz(topic.id)}
-            >
-              <BookOpen className="h-4 w-4 mr-2" /> Take Quiz
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => handleStartUnitQuiz(topic.id)}
+              >
+                <BookOpen className="h-4 w-4 mr-2" /> Take Quiz
+              </Button>
+              <Button 
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartQuiz({ topicId: topic.id, difficulty: 'hard' });
+                }}
+              >
+                <span className="text-xs">Hard Quiz</span>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -248,25 +296,58 @@ export default function Topics() {
                     {topic.subtopics.map((subtopic) => (
                       <div 
                         key={subtopic.id} 
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 shadow-sm transition-colors"
+                        className="flex flex-col p-3 border rounded-lg hover:bg-muted/50 shadow-sm transition-colors"
                       >
-                        <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center">
                             {getStatusIcon(subtopic.status || 'not_started')}
                             <span className="ml-2 font-medium">{subtopic.name}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {subtopic.description}
-                          </p>
+                          <Badge variant="outline" className="text-xs px-2">
+                            Subtopic
+                          </Badge>
                         </div>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => handleStartUnitQuiz(topic.id, subtopic.id)}
-                        >
-                          <span>Quiz</span>
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
+                        
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                          {subtopic.description}
+                        </p>
+                        
+                        <div className="flex justify-between mt-auto gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="default"
+                            className="flex-1"
+                            onClick={() => handleStartUnitQuiz(topic.id, subtopic.id)}
+                          >
+                            <span>Standard Quiz</span>
+                            <ArrowRight className="ml-1 h-4 w-4" />
+                          </Button>
+                          
+                          <div className="flex gap-1">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleStartQuiz({ 
+                                subtopicId: subtopic.id, 
+                                difficulty: 'easy'
+                              })}
+                              className="px-2"
+                            >
+                              <span className="text-xs">Easy</span>
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleStartQuiz({ 
+                                subtopicId: subtopic.id, 
+                                difficulty: 'hard'
+                              })}
+                              className="px-2"
+                            >
+                              <span className="text-xs">Hard</span>
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

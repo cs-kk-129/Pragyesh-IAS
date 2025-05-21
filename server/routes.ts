@@ -132,17 +132,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quiz routes
   app.post("/api/quizzes/generate", isAuthenticated, async (req, res) => {
     try {
-      const { topicId } = req.body;
-      if (!topicId) {
-        return res.status(400).json({ message: "Topic ID is required" });
+      const { subjectId, topicId, subtopicId, difficulty = 'medium' } = req.body;
+
+      if (!subjectId && !topicId && !subtopicId) {
+        return res.status(400).json({ message: "At least one of subjectId, topicId, or subtopicId must be provided" });
       }
 
-      const topic = await storage.getTopicById(parseInt(topicId));
-      if (!topic) {
-        return res.status(404).json({ message: "Topic not found" });
+      let quizTitle = "";
+      let quizType = "topic"; // Default
+      let targetTopic = null;
+      
+      // Generate quiz based on hierarchy level
+      if (subtopicId) {
+        // Subtopic level quiz - most specific
+        const subtopic = await storage.getSubtopicById(parseInt(subtopicId));
+        if (!subtopic) {
+          return res.status(404).json({ message: "Subtopic not found" });
+        }
+        
+        targetTopic = await storage.getTopicById(subtopic.topicId);
+        quizTitle = `Quiz on ${subtopic.name}`;
+        quizType = "subtopic";
+      } 
+      else if (topicId) {
+        // Topic level quiz
+        targetTopic = await storage.getTopicById(parseInt(topicId));
+        if (!targetTopic) {
+          return res.status(404).json({ message: "Topic not found" });
+        }
+        
+        quizTitle = `Comprehensive Quiz on ${targetTopic.name}`;
+        quizType = "topic";
+      }
+      else if (subjectId) {
+        // Subject level quiz - most broad
+        const subject = await storage.getSubjectById(parseInt(subjectId));
+        if (!subject) {
+          return res.status(404).json({ message: "Subject not found" });
+        }
+        
+        // For subject-level quizzes, pick a random topic from the subject
+        const topicsInSubject = await storage.getTopicsBySubject(subject.id);
+        if (!topicsInSubject || topicsInSubject.length === 0) {
+          return res.status(404).json({ message: "No topics found for this subject" });
+        }
+        
+        // Select a topic randomly for this quiz
+        targetTopic = topicsInSubject[Math.floor(Math.random() * topicsInSubject.length)];
+        quizTitle = `${subject.name} - General Knowledge Quiz`;
+        quizType = "subject";
       }
 
-      const quiz = await generateQuiz(topic);
+      if (!targetTopic) {
+        return res.status(404).json({ message: "Could not determine topic for quiz generation" });
+      }
+
+      // Add metadata to help with quiz generation
+      targetTopic.quizMetadata = {
+        title: quizTitle,
+        type: quizType,
+        difficulty,
+        subtopicId: subtopicId ? parseInt(subtopicId) : null,
+        subjectId: subjectId ? parseInt(subjectId) : targetTopic.subjectId
+      };
+
+      const quiz = await generateQuiz(targetTopic);
       res.json(quiz);
     } catch (error) {
       console.error("Error generating quiz:", error);
@@ -150,6 +204,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate comprehensive quiz for a subject
+  app.post("/api/quizzes/generate/comprehensive", isAuthenticated, async (req, res) => {
+    try {
+      const { subjectId } = req.body;
+      
+      if (!subjectId) {
+        return res.status(400).json({ message: "Subject ID is required" });
+      }
+      
+      const subject = await storage.getSubjectById(parseInt(subjectId));
+      if (!subject) {
+        return res.status(404).json({ message: "Subject not found" });
+      }
+      
+      // Get all topics for this subject
+      const topics = await storage.getTopicsBySubject(subject.id);
+      if (!topics || topics.length === 0) {
+        return res.status(404).json({ message: "No topics found for this subject" });
+      }
+      
+      // Select a topic to base the quiz on, but with broader context
+      const targetTopic = topics[Math.floor(Math.random() * topics.length)];
+      
+      // Add metadata to help with quiz generation
+      targetTopic.quizMetadata = {
+        title: `Comprehensive ${subject.name} Assessment`,
+        type: "comprehensive",
+        difficulty: "mixed",
+        subjectId: subject.id,
+        isComprehensive: true
+      };
+      
+      const quiz = await generateQuiz(targetTopic);
+      res.json(quiz);
+    } catch (error) {
+      console.error("Error generating comprehensive quiz:", error);
+      res.status(500).json({ message: "Failed to generate comprehensive quiz" });
+    }
+  });
+
+  // Get quiz by ID
   app.get("/api/quizzes/:id", isAuthenticated, async (req, res) => {
     try {
       const quiz = await storage.getQuizById(parseInt(req.params.id));
@@ -164,12 +259,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get quizzes by topic ID
   app.get("/api/quizzes/topic/:topicId", isAuthenticated, async (req, res) => {
     try {
       const quizzes = await storage.getQuizzesByTopic(parseInt(req.params.topicId));
       res.json(quizzes);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch quizzes" });
+    }
+  });
+  
+  // Get quizzes by subject ID
+  app.get("/api/quizzes/subject/:subjectId", isAuthenticated, async (req, res) => {
+    try {
+      const quizzes = await storage.getQuizzesBySubject(parseInt(req.params.subjectId));
+      res.json(quizzes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quizzes by subject" });
+    }
+  });
+  
+  // Get quizzes by subtopic ID
+  app.get("/api/quizzes/subtopic/:subtopicId", isAuthenticated, async (req, res) => {
+    try {
+      const quizzes = await storage.getQuizzesBySubtopic(parseInt(req.params.subtopicId));
+      res.json(quizzes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quizzes by subtopic" });
     }
   });
 
