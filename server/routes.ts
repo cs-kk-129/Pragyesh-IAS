@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { generateQuiz, generateStudyPlan, answerDoubt } from "./openai";
+import seed from "./seed-data";
 import { z } from "zod";
 import { insertChatMessageSchema, insertQuizAttemptSchema } from "@shared/schema";
 
@@ -17,9 +18,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
 
+  // Subjects routes
+  app.get("/api/subjects", async (req, res) => {
+    try {
+      const subjects = await storage.getAllSubjects();
+      res.json(subjects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subjects" });
+    }
+  });
+
+  app.get("/api/subjects/:id", async (req, res) => {
+    try {
+      const subject = await storage.getSubjectById(parseInt(req.params.id));
+      if (!subject) {
+        return res.status(404).json({ message: "Subject not found" });
+      }
+      res.json(subject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subject" });
+    }
+  });
+
   // Topics routes
   app.get("/api/topics", async (req, res) => {
     try {
+      if (req.query.subjectId) {
+        const topics = await storage.getTopicsBySubject(parseInt(req.query.subjectId as string));
+        return res.json(topics);
+      }
       const topics = await storage.getAllTopics();
       res.json(topics);
     } catch (error) {
@@ -36,6 +63,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(topic);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch topic" });
+    }
+  });
+  
+  app.put("/api/topics/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !['not_started', 'in_progress', 'completed'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const topic = await storage.updateTopicStatus(parseInt(req.params.id), status);
+      res.json(topic);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update topic status" });
+    }
+  });
+
+  // Subtopics routes
+  app.get("/api/subtopics", async (req, res) => {
+    try {
+      if (req.query.topicId) {
+        const subtopics = await storage.getSubtopicsByTopic(parseInt(req.query.topicId as string));
+        return res.json(subtopics);
+      }
+      const subtopics = await storage.getAllSubtopics();
+      res.json(subtopics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subtopics" });
+    }
+  });
+
+  app.get("/api/subtopics/:id", async (req, res) => {
+    try {
+      const subtopic = await storage.getSubtopicById(parseInt(req.params.id));
+      if (!subtopic) {
+        return res.status(404).json({ message: "Subtopic not found" });
+      }
+      res.json(subtopic);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subtopic" });
+    }
+  });
+  
+  app.put("/api/subtopics/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !['not_started', 'in_progress', 'completed'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const subtopic = await storage.updateSubtopicStatus(parseInt(req.params.id), status);
+      res.json(subtopic);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update subtopic status" });
     }
   });
 

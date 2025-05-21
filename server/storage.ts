@@ -1,9 +1,6 @@
-import { users, subjects, topics, subtopics, quizzes, questions, quizAttempts, bookmarks, userProgress, studyStreaks, chatMessages, studyPlans } from "@shared/schema";
 import type { User, InsertUser, Subject, InsertSubject, Topic, InsertTopic, Subtopic, InsertSubtopic, Quiz, InsertQuiz, Question, InsertQuestion, QuizAttempt, InsertQuizAttempt, Bookmark, InsertBookmark, UserProgress, InsertUserProgress, StudyStreak, InsertStudyStreak, ChatMessage, InsertChatMessage, StudyPlan, InsertStudyPlan } from "@shared/schema";
 import session from "express-session";
-import createMemoryStore from "memorystore";
-
-const MemoryStore = createMemoryStore(session);
+import { DatabaseStorage } from "./database-storage";
 
 export interface IStorage {
   // Users
@@ -357,4 +354,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
