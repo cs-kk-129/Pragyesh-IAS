@@ -412,5 +412,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Seed Database route - only used in development
+  app.post("/api/seed", async (req, res) => {
+    try {
+      await seed();
+      res.json({ message: "Database seeded successfully" });
+    } catch (error) {
+      console.error("Seed error:", error);
+      res.status(500).json({ message: "Failed to seed database" });
+    }
+  });
+
   return httpServer;
 }

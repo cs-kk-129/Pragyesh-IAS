@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -24,6 +24,8 @@ export default function Topics() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<number | null>(null);
+  const queryClient = useQueryClient();
   
   // Fetch all subjects
   const { data: subjects, isLoading: isLoadingSubjects } = useQuery<Subject[]>({
@@ -41,9 +43,29 @@ export default function Topics() {
     queryKey: ["/api/topics"],
     enabled: !selectedSubject,
   });
+  
+  // Fetch subtopics for the selected topic
+  const { data: subtopics, isLoading: isLoadingSubtopics } = useQuery<Subtopic[]>({
+    queryKey: ["/api/subtopics", selectedTopic],
+    enabled: !!selectedTopic,
+  });
+  
+  // If a topic is selected, attach its subtopics
+  useEffect(() => {
+    if (selectedTopic && subtopics && topics) {
+      const updatedTopics = topics.map(topic => {
+        if (topic.id === selectedTopic) {
+          return { ...topic, subtopics };
+        }
+        return topic;
+      });
+      
+      queryClient.setQueryData(["/api/topics", selectedSubject], updatedTopics);
+    }
+  }, [subtopics, selectedTopic, topics, queryClient, selectedSubject]);
 
   const currentTopics = selectedSubject ? topics : allTopics;
-  const isLoading = isLoadingSubjects || isLoadingTopics || isLoadingAllTopics;
+  const isLoading = isLoadingSubjects || isLoadingTopics || isLoadingAllTopics || isLoadingSubtopics;
 
   // Filter topics based on search query
   const filteredTopics = currentTopics
@@ -162,76 +184,114 @@ export default function Topics() {
     </Card>
   );
 
-  const renderTopicDetail = (topic: TopicWithStatus) => (
-    <Card key={topic.id} className="mb-6">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>{topic.name}</CardTitle>
-            <CardDescription>
-              {topic.status && getStatusBadge(topic.status)}
-            </CardDescription>
+  const renderTopicDetail = (topic: TopicWithStatus) => {
+    // When a topic is clicked, set it as the selected topic to load its subtopics
+    const handleTopicClick = () => {
+      if (selectedTopic === topic.id) {
+        // If already selected, unselect it
+        setSelectedTopic(null);
+      } else {
+        setSelectedTopic(topic.id);
+      }
+    };
+    
+    const isExpanded = selectedTopic === topic.id;
+    
+    return (
+      <Card key={topic.id} className="mb-6 transition-all">
+        <CardHeader className="pb-3">
+          <div className="flex justify-between items-center">
+            <div className="cursor-pointer" onClick={handleTopicClick}>
+              <CardTitle>{topic.name}</CardTitle>
+              <CardDescription>
+                {topic.status && getStatusBadge(topic.status)}
+              </CardDescription>
+            </div>
+            <Button 
+              size="sm"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => handleStartUnitQuiz(topic.id)}
+            >
+              <BookOpen className="h-4 w-4 mr-2" /> Take Quiz
+            </Button>
           </div>
-          <Button 
-            size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => handleStartUnitQuiz(topic.id)}
-          >
-            <BookOpen className="h-4 w-4 mr-2" /> Take Comprehensive Quiz
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{topic.description}</p>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-sm">
-            <span>Progress</span>
-            <span className="font-medium">{topic.progress || 0}%</span>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">{topic.description}</p>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span>Progress</span>
+              <span className="font-medium">{topic.progress || 0}%</span>
+            </div>
+            <Progress value={topic.progress || 0} className="h-2" />
           </div>
-          <Progress value={topic.progress || 0} className="h-2" />
-        </div>
-
-        <div className="mt-6">
-          <h3 className="font-medium mb-4">Subtopics</h3>
-          <div className="space-y-3">
-            {topic.subtopics && topic.subtopics.length > 0 ? (
-              topic.subtopics.map((subtopic) => (
-                <div 
-                  key={subtopic.id} 
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                >
-                  <div className="flex items-center">
-                    {getStatusIcon(subtopic.status || 'not_started')}
-                    <span className="ml-2 font-medium">{subtopic.name}</span>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => handleStartUnitQuiz(topic.id, subtopic.id)}
-                  >
-                    <span>Take Quiz</span>
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+          
+          {isExpanded && (
+            <div className="mt-6 animate-in fade-in duration-300">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium">Subtopics</h3>
+                <Badge variant="outline" className="whitespace-nowrap">
+                  {topic.subtopics?.length || 0} subtopics
+                </Badge>
+              </div>
+              
+              {isLoadingSubtopics && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No subtopics available</p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="border-t bg-muted/50 pt-3">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setSelectedSubject(null)}
-        >
-          Back to All Subjects
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+              )}
+              
+              <div className="space-y-3">
+                {!isLoadingSubtopics && topic.subtopics && topic.subtopics.length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-1 lg:grid-cols-2">
+                    {topic.subtopics.map((subtopic) => (
+                      <div 
+                        key={subtopic.id} 
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 shadow-sm transition-colors"
+                      >
+                        <div className="flex flex-col">
+                          <div className="flex items-center">
+                            {getStatusIcon(subtopic.status || 'not_started')}
+                            <span className="ml-2 font-medium">{subtopic.name}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {subtopic.description}
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => handleStartUnitQuiz(topic.id, subtopic.id)}
+                        >
+                          <span>Quiz</span>
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : !isLoadingSubtopics ? (
+                  <p className="text-sm text-muted-foreground">No subtopics available for this topic yet</p>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="border-t bg-muted/50 pt-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              setSelectedTopic(null);
+              setSelectedSubject(null);
+            }}
+          >
+            Back to All Subjects
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
