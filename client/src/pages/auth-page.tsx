@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { insertUserSchema } from "@shared/schema";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
+import { FaGoogle } from "react-icons/fa";
 
 // Extended schemas with validation
 const loginSchema = z.object({
@@ -49,6 +50,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -86,6 +89,23 @@ export default function AuthPage() {
     registerMutation.mutate(userData);
   };
 
+  const handleGoogleSignIn = () => {
+    // For now, we'll show a placeholder message
+    // This will be implemented with Firebase authentication
+    alert("Google Sign-in will be implemented with Firebase integration");
+  };
+
+  const handleForgotPassword = () => {
+    if (!forgotPasswordEmail) {
+      alert("Please enter your email address");
+      return;
+    }
+    // Placeholder for forgot password functionality
+    alert(`Password reset link will be sent to ${forgotPasswordEmail}`);
+    setShowForgotPassword(false);
+    setForgotPasswordEmail("");
+  };
+
   if (user) {
     return null; // Will redirect via the useEffect
   }
@@ -94,7 +114,14 @@ export default function AuthPage() {
     <div className="flex min-h-screen">
       <div className="hidden md:flex w-1/2 bg-gradient-to-r from-primary to-purple-600 p-12 flex-col justify-center">
         <div className="max-w-md mx-auto text-white">
-          <h1 className="text-4xl font-bold mb-6">UPSC Preparation Assistant</h1>
+          <div className="flex items-center mb-6">
+            <img 
+              src="/attached_assets/ChatGPT Image May 22, 2025 at 11_52_33 PM.png" 
+              alt="Pragyesh IAS Logo" 
+              className="h-16 w-16 mr-4"
+            />
+            <h1 className="text-4xl font-bold">Pragyesh IAS</h1>
+          </div>
           <p className="text-xl mb-8">
             Your comprehensive AI-powered platform for UPSC exam preparation
           </p>
