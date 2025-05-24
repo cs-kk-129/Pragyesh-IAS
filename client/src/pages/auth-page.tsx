@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { insertUserSchema } from "@shared/schema";
 import { Loader2, Mail } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
@@ -315,6 +316,38 @@ export default function AuthPage() {
                           "Login"
                         )}
                       </Button>
+                      
+                      <div className="text-center text-sm text-muted-foreground">
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="p-0 h-auto text-sm"
+                          onClick={() => setShowForgotPassword(true)}
+                        >
+                          Forgot your password?
+                        </Button>
+                      </div>
+                      
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">
+                            Or continue with
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleGoogleSignIn}
+                      >
+                        <FaGoogle className="mr-2 h-4 w-4" />
+                        Sign in with Google
+                      </Button>
                     </form>
                   </Form>
                 </CardContent>
@@ -450,6 +483,27 @@ export default function AuthPage() {
                           "Create Account"
                         )}
                       </Button>
+                      
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">
+                            Or continue with
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleGoogleSignIn}
+                      >
+                        <FaGoogle className="mr-2 h-4 w-4" />
+                        Sign up with Google
+                      </Button>
                     </form>
                   </Form>
                 </CardContent>
@@ -470,6 +524,38 @@ export default function AuthPage() {
           </Tabs>
         </motion.div>
       </div>
+      
+      {/* Forgot Password Dialog */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset Your Password</DialogTitle>
+            <DialogDescription>
+              Enter your email address and we'll send you a link to reset your password.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Mail className="h-4 w-4" />
+              <Input
+                placeholder="Enter your email"
+                type="email"
+                value={forgotPasswordEmail}
+                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowForgotPassword(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleForgotPassword}>
+              Send Reset Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
