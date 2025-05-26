@@ -71,7 +71,7 @@ export default function Topics() {
 
   // Fetch sections for selected subject
   const { data: sections, isLoading: isLoadingSections } = useQuery<Section[]>({
-    queryKey: ["/api/sections/subject", selectedSubject],
+    queryKey: [`/api/sections/subject/${selectedSubject}`],
     enabled: !!selectedSubject,
   });
 
