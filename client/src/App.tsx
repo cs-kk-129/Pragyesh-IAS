@@ -11,7 +11,7 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Topics from "@/pages/topics";
-import Quiz from "@/pages/quiz";
+import DailyQuiz from "@/pages/daily-quiz";
 import Chat from "@/pages/chat";
 import StudyPlan from "@/pages/study-plan";
 
@@ -20,8 +20,8 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/topics" component={Topics} />
-      <ProtectedRoute path="/quiz" component={Quiz} />
-      <ProtectedRoute path="/quiz/:id" component={Quiz} />
+      <ProtectedRoute path="/quiz" component={DailyQuiz} />
+      <ProtectedRoute path="/quiz/:id" component={DailyQuiz} />
       <ProtectedRoute path="/chat" component={Chat} />
       <ProtectedRoute path="/study-plan" component={StudyPlan} />
       <Route path="/auth" component={AuthPage} />

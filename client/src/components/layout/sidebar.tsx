@@ -51,7 +51,7 @@ export default function Sidebar() {
     },
     {
       icon: <GraduationCap className="h-5 w-5" />,
-      label: "Quiz",
+      label: "Daily Quiz",
       href: "/quiz",
     },
     {
