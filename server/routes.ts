@@ -56,9 +56,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/sections/subject/:subjectId", async (req, res) => {
     try {
+      const subjectId = parseInt(req.params.subjectId);
       const result = await db.execute(sql`
         SELECT * FROM sections 
-        WHERE subject_id = ${req.params.subjectId} 
+        WHERE subject_id = ${subjectId} 
         ORDER BY name
       `);
       res.json(result.rows);
