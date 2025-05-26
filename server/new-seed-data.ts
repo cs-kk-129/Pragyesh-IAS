@@ -438,6 +438,265 @@ async function seedComprehensiveUPSC() {
       );
     }
 
+    // Medieval Indian History subtopics
+    const medievalTopic = insertedTopics.find(t => t.name === "Medieval Indian History");
+    if (medievalTopic) {
+      subtopicsData.push(
+        {
+          topicId: medievalTopic.id,
+          name: "Early Medieval Dynasties (750–1200)",
+          description: "Rajput, Chalukya, Rashtrakuta, Pallava rule",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Early Muslim Invasions",
+          description: "Sindh invasions, Ghazni raids, Ghurid conquests",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Delhi Sultanate (1206–1526)",
+          description: "Slave, Khalji, Tughlaq, Sayyid, Lodi dynasties",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Vijayanagar and Bahmani Kingdoms",
+          description: "Southern Indian regional kingdoms and their contributions",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Rise of Mughals",
+          description: "Babur, Humayun, establishment of Mughal rule",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Mughal Administration & Culture",
+          description: "Society, Religion, Culture, Administration under Mughals",
+          status: "not_started"
+        },
+        {
+          topicId: medievalTopic.id,
+          name: "Marathas and Shivaji",
+          description: "Rise of Maratha power, Shivaji's administration",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Modern Indian History subtopics
+    const modernTopic = insertedTopics.find(t => t.name === "Modern Indian History");
+    if (modernTopic) {
+      subtopicsData.push(
+        {
+          topicId: modernTopic.id,
+          name: "Decline of Mughals & Rise of Regional States",
+          description: "Weakening of central authority, emergence of regional powers",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "Advent of Europeans",
+          description: "Portuguese, Dutch, French, British arrival and establishment",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "British Expansion in India",
+          description: "Wars (Plassey, Buxar, Mysore, Punjab), territorial expansion",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "Revolt of 1857",
+          description: "Causes, course, consequences, significance of the Great Revolt",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "Economic Policies of British",
+          description: "Drain of wealth, land revenue systems, deindustrialization",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "National Movements (1858–1905)",
+          description: "Moderate phase, early Congress, constitutional methods",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "Extremist Movement (1905–1919)",
+          description: "Swadeshi movement, revolutionary nationalism, Bal-Pal-Lal",
+          status: "not_started"
+        },
+        {
+          topicId: modernTopic.id,
+          name: "Gandhian Era (1919–1947)",
+          description: "Non-cooperation, Civil Disobedience, Quit India movements",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Human and Economic Geography subtopics
+    const humanGeoTopic = insertedTopics.find(t => t.name === "Human and Economic Geography");
+    if (humanGeoTopic) {
+      subtopicsData.push(
+        {
+          topicId: humanGeoTopic.id,
+          name: "Population and Settlements",
+          description: "Demographic features, density, migration, urbanization",
+          status: "not_started"
+        },
+        {
+          topicId: humanGeoTopic.id,
+          name: "Human Development",
+          description: "HDI indicators, literacy, sex ratio, family planning",
+          status: "not_started"
+        },
+        {
+          topicId: humanGeoTopic.id,
+          name: "Settlements and Urban Planning",
+          description: "Rural and urban settlements, Smart Cities missions",
+          status: "not_started"
+        },
+        {
+          topicId: humanGeoTopic.id,
+          name: "Resource Geography",
+          description: "Land, water, energy, forest resources and conservation",
+          status: "not_started"
+        },
+        {
+          topicId: humanGeoTopic.id,
+          name: "Economic Geography",
+          description: "Agriculture, industries, services, trade and transport",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Fundamental Rights, Duties and DPSPs subtopics
+    const rightsTopics = insertedTopics.find(t => t.name === "Fundamental Rights, Duties and DPSPs");
+    if (rightsTopics) {
+      subtopicsData.push(
+        {
+          topicId: rightsTopics.id,
+          name: "Fundamental Rights (Art. 12–35)",
+          description: "Right to equality, freedom, constitutional remedies",
+          status: "not_started"
+        },
+        {
+          topicId: rightsTopics.id,
+          name: "Directive Principles (Art. 36–51)",
+          description: "State policy guidelines, socio-economic objectives",
+          status: "not_started"
+        },
+        {
+          topicId: rightsTopics.id,
+          name: "Fundamental Duties (Art. 51A)",
+          description: "Citizens' constitutional duties and responsibilities",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Union Government subtopics
+    const unionGovTopic = insertedTopics.find(t => t.name === "Union Government");
+    if (unionGovTopic) {
+      subtopicsData.push(
+        {
+          topicId: unionGovTopic.id,
+          name: "President and Vice President",
+          description: "Election, powers, functions, impeachment process",
+          status: "not_started"
+        },
+        {
+          topicId: unionGovTopic.id,
+          name: "Prime Minister and Council of Ministers",
+          description: "Appointment, powers, collective responsibility",
+          status: "not_started"
+        },
+        {
+          topicId: unionGovTopic.id,
+          name: "Parliament: Structure and Powers",
+          description: "Lok Sabha, Rajya Sabha, legislative procedures",
+          status: "not_started"
+        },
+        {
+          topicId: unionGovTopic.id,
+          name: "Parliamentary Committees and Budget",
+          description: "Committee system, budget process, financial oversight",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Economic Planning and Development subtopics
+    const planningTopic = insertedTopics.find(t => t.name === "Economic Planning and Development");
+    if (planningTopic) {
+      subtopicsData.push(
+        {
+          topicId: planningTopic.id,
+          name: "Planning Commission to NITI Aayog",
+          description: "Evolution of planning machinery, institutional changes",
+          status: "not_started"
+        },
+        {
+          topicId: planningTopic.id,
+          name: "Five-Year Plans",
+          description: "Objectives, achievements, and outcomes of different plans",
+          status: "not_started"
+        },
+        {
+          topicId: planningTopic.id,
+          name: "Poverty and Unemployment",
+          description: "Measurement, trends, government schemes and policies",
+          status: "not_started"
+        },
+        {
+          topicId: planningTopic.id,
+          name: "Human Development Indicators",
+          description: "HDI, MPI, quality of life measurements",
+          status: "not_started"
+        }
+      );
+    }
+
+    // Agriculture and Allied Sectors subtopics
+    const agricultureTopic = insertedTopics.find(t => t.name === "Agriculture and Allied Sectors");
+    if (agricultureTopic) {
+      subtopicsData.push(
+        {
+          topicId: agricultureTopic.id,
+          name: "Land Reforms and Green Revolution",
+          description: "Land redistribution, HYV seeds, agricultural modernization",
+          status: "not_started"
+        },
+        {
+          topicId: agricultureTopic.id,
+          name: "Cropping Patterns and Major Crops",
+          description: "Kharif, Rabi, Zaid crops, regional crop distribution",
+          status: "not_started"
+        },
+        {
+          topicId: agricultureTopic.id,
+          name: "Agricultural Marketing and MSP",
+          description: "APMC, FPOs, minimum support price system",
+          status: "not_started"
+        },
+        {
+          topicId: agricultureTopic.id,
+          name: "Government Schemes",
+          description: "PM-KISAN, PMFBY, soil health card, crop insurance",
+          status: "not_started"
+        }
+      );
+    }
+
     const insertedSubtopics = await db.insert(subtopics).values(subtopicsData).returning();
     console.log(`Inserted ${insertedSubtopics.length} subtopics`);
 
