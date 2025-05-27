@@ -84,7 +84,9 @@ type User = {
 type GeneratedQuestion = {
   id: string;
   question: string;
+  questionHindi?: string;
   options?: string[];
+  optionsHindi?: string[];
   correctAnswer?: string;
   type: 'objective' | 'subjective';
   subject: string;
@@ -112,6 +114,13 @@ export default function AdminDashboard() {
   const [generatedQuestions, setGeneratedQuestions] = useState<GeneratedQuestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showMockTestDialog, setShowMockTestDialog] = useState(false);
+  const [mockTestDetails, setMockTestDetails] = useState({
+    title: "",
+    description: "",
+    duration: 60,
+    scheduledDate: "",
+  });
 
   // Mock data - in real app, this would come from API
   const mockUsers: User[] = [
@@ -183,14 +192,16 @@ export default function AdminDashboard() {
     setIsGenerating(true);
     try {
       // In real app, this would call ChatGPT API
-      // Simulating API call with mock data
+      // Simulating API call with mock data for bilingual questions
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const mockGeneratedQuestions: GeneratedQuestion[] = [
         {
           id: "1",
           question: "Which article of the Indian Constitution deals with the Right to Education?",
+          questionHindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?",
           options: ["Article 21", "Article 21A", "Article 19", "Article 32"],
+          optionsHindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"],
           correctAnswer: "Article 21A",
           type: "objective",
           subject: "Polity",
@@ -202,6 +213,7 @@ export default function AdminDashboard() {
         {
           id: "2",
           question: "Explain the significance of the 73rd Constitutional Amendment Act.",
+          questionHindi: "73वें संविधान संशोधन अधिनियम के महत्व की व्याख्या करें।",
           type: "subjective",
           subject: "Polity",
           topic: "Local Governance",
@@ -212,7 +224,9 @@ export default function AdminDashboard() {
         {
           id: "3",
           question: "The First War of Indian Independence took place in:",
+          questionHindi: "भारतीय स्वतंत्रता का प्रथम युद्ध कब हुआ था:",
           options: ["1857", "1856", "1858", "1859"],
+          optionsHindi: ["1857", "1856", "1858", "1859"],
           correctAnswer: "1857",
           type: "objective",
           subject: "History",
@@ -244,23 +258,37 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Create mock test data
-    const mockTestData = {
-      title: `Mock Test ${Date.now()}`, // Admin can customize this
+    // Open dialog to customize mock test details
+    setMockTestDetails({
+      title: `Mock Test ${new Date().toLocaleDateString()}`,
       description: "AI-generated comprehensive mock test",
-      duration: Math.max(30, selectedQuestions.length * 2), // 2 minutes per question, minimum 30 minutes
+      duration: Math.max(30, selectedQuestions.length * 2),
+      scheduledDate: new Date().toISOString().split('T')[0],
+    });
+    setShowMockTestDialog(true);
+  };
+
+  const handleConfirmMockTest = () => {
+    const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
+    const subjects = selectedQuestions.map(q => q.subject);
+    const uniqueSubjects = subjects.filter((subject, index) => subjects.indexOf(subject) === index);
+
+    const mockTestData = {
+      ...mockTestDetails,
       questions: selectedQuestions,
       difficulty: selectedQuestions.some(q => q.difficulty === 'hard') ? 'hard' : 
                  selectedQuestions.some(q => q.difficulty === 'medium') ? 'medium' : 'easy',
-      subjects: [...new Set(selectedQuestions.map(q => q.subject))],
+      subjects: uniqueSubjects,
     };
 
     console.log("Creating mock test with data:", mockTestData);
-    alert(`Mock test created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
+    alert(`Mock test "${mockTestDetails.title}" created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
     
-    // Reset the selection
+    // Reset everything
     setGeneratedQuestions([]);
     setQuestionPrompt("");
+    setShowMockTestDialog(false);
+    setMockTestDetails({ title: "", description: "", duration: 60, scheduledDate: "" });
   };
 
   const handleUserAccountTypeChange = (userId: number, newType: 'free' | 'paid' | 'admin') => {
