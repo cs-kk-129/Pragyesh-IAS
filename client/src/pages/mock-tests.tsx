@@ -75,7 +75,9 @@ type MockTest = {
 type Question = {
   id: number;
   question: string;
+  questionHindi?: string;
   options: string[];
+  optionsHindi?: string[];
   correctAnswer: number;
   marks: number;
   subject: string;
@@ -100,6 +102,8 @@ export default function MockTests() {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isTestCompleted, setIsTestCompleted] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
   // Mock data for tests - in real app, this would come from API
   const mockTests: MockTest[] = [
@@ -142,12 +146,14 @@ export default function MockTests() {
     },
   ];
 
-  // Mock questions - in real app, this would come from API
+  // Mock questions with bilingual support - in real app, this would come from API
   const mockQuestions: Question[] = [
     {
       id: 1,
       question: "Which article of the Indian Constitution deals with the Right to Education?",
+      questionHindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?",
       options: ["Article 21", "Article 21A", "Article 19", "Article 32"],
+      optionsHindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"],
       correctAnswer: 1,
       marks: 2,
       subject: "Polity",
@@ -156,7 +162,9 @@ export default function MockTests() {
     {
       id: 2,
       question: "The First War of Indian Independence took place in:",
+      questionHindi: "भारतीय स्वतंत्रता का प्रथम युद्ध कब हुआ था:",
       options: ["1857", "1856", "1858", "1859"],
+      optionsHindi: ["1857", "1856", "1858", "1859"],
       correctAnswer: 0,
       marks: 2,
       subject: "History",
@@ -165,7 +173,9 @@ export default function MockTests() {
     {
       id: 3,
       question: "Which of the following is the longest river in India?",
+      questionHindi: "निम्नलिखित में से कौन सी भारत की सबसे लंबी नदी है?",
       options: ["Yamuna", "Brahmaputra", "Ganga", "Godavari"],
+      optionsHindi: ["यमुना", "ब्रह्मपुत्र", "गंगा", "गोदावरी"],
       correctAnswer: 2,
       marks: 2,
       subject: "Geography",
