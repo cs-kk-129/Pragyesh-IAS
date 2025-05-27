@@ -91,10 +91,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         body: JSON.stringify({
           model: "gpt-4o",
-          messages: [{ role: "user", content: enhancedPrompt }],
+          messages: [{ 
+            role: "user", 
+            content: enhancedPrompt + `\n\nGenerate questions with timestamp: ${Date.now()}` 
+          }],
           response_format: { type: "json_object" },
-          temperature: 0.9,
+          temperature: 1.0,
           max_tokens: 4000,
+          seed: Date.now(), // Ensure different questions each time
         }),
       });
 
