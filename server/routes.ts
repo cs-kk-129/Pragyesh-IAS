@@ -99,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         questions,
         totalQuestions: questions.length,
         difficulty: 'medium',
-        subjects: [...new Set(questions.map((q: any) => q.subject))],
+        subjects: Array.from(new Set(questions.map((q: any) => q.subject))),
         isActive: true,
         isAttempted: false,
         status: 'not_started',

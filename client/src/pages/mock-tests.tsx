@@ -126,6 +126,17 @@ export default function MockTests() {
     }
   }, [mockTests, selectedTest]);
 
+  // Update selectedTestData when selectedTest changes
+  useEffect(() => {
+    if (selectedTest && mockTests.length > 0) {
+      const testId = parseInt(selectedTest.replace('test-', ''));
+      const test = mockTests.find(t => t.id === testId);
+      if (test) {
+        setSelectedTestData(test);
+      }
+    }
+  }, [selectedTest, mockTests]);
+
   // Get questions from selected test
   const getCurrentTestQuestions = (): Question[] => {
     if (!selectedTestData?.questions) {
