@@ -8,6 +8,7 @@ import {
   BarChart,
   GraduationCap,
   Settings,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,6 +57,11 @@ export default function Sidebar() {
       icon: <GraduationCap className="h-5 w-5" />,
       label: "Daily Quiz",
       href: "/quiz",
+    },
+    {
+      icon: <FileText className="h-5 w-5" />,
+      label: "Mock Tests",
+      href: "/mock-tests",
     },
     {
       icon: <MessageSquare className="h-5 w-5" />,

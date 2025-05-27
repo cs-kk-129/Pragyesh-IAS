@@ -239,8 +239,28 @@ export default function AdminDashboard() {
 
   const handleCreateMockTest = () => {
     const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
-    console.log("Creating mock test with selected questions:", selectedQuestions);
-    // In real app, send to backend to create question paper
+    if (selectedQuestions.length === 0) {
+      alert("Please select at least one question to create a mock test.");
+      return;
+    }
+
+    // Create mock test data
+    const mockTestData = {
+      title: `Mock Test ${Date.now()}`, // Admin can customize this
+      description: "AI-generated comprehensive mock test",
+      duration: Math.max(30, selectedQuestions.length * 2), // 2 minutes per question, minimum 30 minutes
+      questions: selectedQuestions,
+      difficulty: selectedQuestions.some(q => q.difficulty === 'hard') ? 'hard' : 
+                 selectedQuestions.some(q => q.difficulty === 'medium') ? 'medium' : 'easy',
+      subjects: [...new Set(selectedQuestions.map(q => q.subject))],
+    };
+
+    console.log("Creating mock test with data:", mockTestData);
+    alert(`Mock test created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
+    
+    // Reset the selection
+    setGeneratedQuestions([]);
+    setQuestionPrompt("");
   };
 
   const handleUserAccountTypeChange = (userId: number, newType: 'free' | 'paid' | 'admin') => {

@@ -1,0 +1,21 @@
+A new tab needs to be created on the student’s website.
+Name it as Mock Tests.
+Mock tests are only objective in nature (Multiple Choice Questions) and so provide a functionality where the student is able to view the question paper when clicked on the respective mock test and he should be able to mark his answers in the multiple choice and his responses should be sent to the admin for further evaluation and report generation and analysis.
+
+Each mock test will be created by the admin using the question generation tab in the Admin dashboard and upon selecting and finalising the list of questions and clicking Generate mock test, that respective question paper will be visible to the students of the respective tier and stream to attempt. 
+
+The layout of the tab is as follows:
+Scrollable vertical tabs to the left; Each tab corresponds to a different Mock test. Name the tabs initially as Day 1, Day 2 and so on but provide a functionality to the admin to fully edit the name of the tab if the admin chooses to.
+
+Once clicked on a tab, there should be a dialogue box which shows some basic details regarding the respective mock test and a button which upon clicking should start the test.
+
+In the test interface, 
+Only one question can be viewed at a time. The student can choose to answer and move on to the next question or can navigate to other questions without attempting or can mark It for review to revisit later on.
+Add a previous and next buttons for navigating the previous and next questions and also a Question Navigator bar (in order to go to the required question) and add all the required key features, such as:
+Timer (maximum time for the test to be provided by the admin)
+Indicators for the questions in the navigator bar (such as, answered, Not answered, marked for review etc) and any more you can think of.
+
+The test will automatically end once the timer ends and the user can end the test and submit the responses before the stipulated time if he chooses to (Give a warning dialogue box if the student clicks Complete test button to prevent accidental touches). 
+Once the test is complete, create a pop-up saying Submitted successfully
+
+And provide a functionality to view the results and reports and analysis of the student in that particular mock test there itself in the same tab after the completion of the test and the user can view his respective reports and analysis of his test once the admin finishes evaluation
