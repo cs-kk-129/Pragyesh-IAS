@@ -259,27 +259,47 @@ export default function AdminDashboard() {
     setShowMockTestDialog(true);
   };
 
-  const handleConfirmMockTest = () => {
-    const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
-    const subjects = selectedQuestions.map(q => q.subject);
-    const uniqueSubjects = subjects.filter((subject, index) => subjects.indexOf(subject) === index);
+  const handleConfirmMockTest = async () => {
+    try {
+      const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
+      const subjects = selectedQuestions.map(q => q.subject);
+      const uniqueSubjects = subjects.filter((subject, index) => subjects.indexOf(subject) === index);
 
-    const mockTestData = {
-      ...mockTestDetails,
-      questions: selectedQuestions,
-      difficulty: selectedQuestions.some(q => q.difficulty === 'hard') ? 'hard' : 
-                 selectedQuestions.some(q => q.difficulty === 'medium') ? 'medium' : 'easy',
-      subjects: uniqueSubjects,
-    };
+      const mockTestData = {
+        ...mockTestDetails,
+        questions: selectedQuestions,
+        difficulty: selectedQuestions.some(q => q.difficulty === 'hard') ? 'hard' : 
+                   selectedQuestions.some(q => q.difficulty === 'medium') ? 'medium' : 'easy',
+        subjects: uniqueSubjects,
+      };
 
-    console.log("Creating mock test with data:", mockTestData);
-    alert(`Mock test "${mockTestDetails.title}" created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
+      console.log("Creating mock test with data:", mockTestData);
+      
+      // Call API to save the mock test
+      const response = await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mockTestData),
+      });
 
-    // Reset everything
-    setGeneratedQuestions([]);
-    setQuestionPrompt("");
-    setShowMockTestDialog(false);
-    setMockTestDetails({ title: "", description: "", duration: 60, scheduledDate: "" });
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Mock test "${mockTestDetails.title}" created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
+        
+        // Reset everything
+        setGeneratedQuestions([]);
+        setQuestionPrompt("");
+        setShowMockTestDialog(false);
+        setMockTestDetails({ title: "", description: "", duration: 60, scheduledDate: "" });
+      } else {
+        throw new Error('Failed to create mock test');
+      }
+    } catch (error) {
+      console.error('Error creating mock test:', error);
+      alert('Failed to create mock test. Please try again.');
+    }
   };
 
   const handleUserAccountTypeChange = (userId: number, newType: 'free' | 'paid' | 'admin') => {
