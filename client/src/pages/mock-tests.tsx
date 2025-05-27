@@ -931,26 +931,26 @@ export default function MockTests() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="space-y-4">
+            <RadioGroup
+              value={selectedLanguage}
+              onValueChange={(value) => setSelectedLanguage(value as 'english' | 'hindi')}
+              className="space-y-4"
+            >
               <div 
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedLanguage === 'english' ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary/50'
                 }`}
-                onClick={() => setSelectedLanguage('english')}
               >
                 <div className="flex items-center space-x-3">
-                  <RadioGroupItem 
-                    value="english" 
-                    id="english" 
-                    checked={selectedLanguage === 'english'}
-                    onChange={() => setSelectedLanguage('english')}
-                  />
-                  <div>
-                    <h4 className="font-medium">English</h4>
-                    <p className="text-sm text-muted-foreground">
-                      All questions and options will be displayed in English
-                    </p>
-                  </div>
+                  <RadioGroupItem value="english" id="english" />
+                  <Label htmlFor="english" className="cursor-pointer flex-1">
+                    <div>
+                      <h4 className="font-medium">English</h4>
+                      <p className="text-sm text-muted-foreground">
+                        All questions and options will be displayed in English
+                      </p>
+                    </div>
+                  </Label>
                 </div>
               </div>
 
@@ -958,24 +958,20 @@ export default function MockTests() {
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedLanguage === 'hindi' ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary/50'
                 }`}
-                onClick={() => setSelectedLanguage('hindi')}
               >
                 <div className="flex items-center space-x-3">
-                  <RadioGroupItem 
-                    value="hindi" 
-                    id="hindi" 
-                    checked={selectedLanguage === 'hindi'}
-                    onChange={() => setSelectedLanguage('hindi')}
-                  />
-                  <div>
-                    <h4 className="font-medium">हिन्दी (Hindi)</h4>
-                    <p className="text-sm text-muted-foreground">
-                      सभी प्रश्न और विकल्प हिन्दी में प्रदर्शित होंगे
-                    </p>
-                  </div>
+                  <RadioGroupItem value="hindi" id="hindi" />
+                  <Label htmlFor="hindi" className="cursor-pointer flex-1">
+                    <div>
+                      <h4 className="font-medium">हिन्दी (Hindi)</h4>
+                      <p className="text-sm text-muted-foreground">
+                        सभी प्रश्न और विकल्प हिन्दी में प्रदर्शित होंगे
+                      </p>
+                    </div>
+                  </Label>
                 </div>
               </div>
-            </div>
+            </RadioGroup>
           </div>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setShowLanguageDialog(false)}>
