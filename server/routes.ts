@@ -11,6 +11,35 @@ const isAuthenticated = (req: any, res: any, next: any) => {
   res.status(401).json({ message: "Unauthorized" });
 };
 
+// Global mock tests storage (module level to persist)
+const mockTests: any[] = [];
+
+// Initialize with sample data
+mockTests.push({
+  id: 1,
+  title: "Sample UPSC Mock Test",
+  description: "Comprehensive test covering multiple subjects with AI-generated questions",
+  duration: 120,
+  totalQuestions: 1,
+  difficulty: 'medium',
+  subjects: ["Polity", "History", "Geography"],
+  isActive: true,
+  isAttempted: false,
+  status: 'not_started',
+  scheduledDate: new Date().toISOString(),
+  questions: [
+    {
+      question: { english: "Which article of the Indian Constitution deals with the Right to Education?", hindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?" },
+      options: { english: ["Article 21", "Article 21A", "Article 19", "Article 32"], hindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"] },
+      correctAnswer: { english: "Article 21A", hindi: "अनुच्छेद 21A" },
+      subject: "Polity",
+      topic: "Fundamental Rights",
+      marks: 2
+    }
+  ],
+  createdAt: new Date().toISOString()
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
@@ -83,34 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Global mock tests storage (in real app, this would be in database)
-  const mockTests: any[] = [];
 
-  // Add some sample mock tests for demonstration
-  mockTests.push({
-    id: 1,
-    title: "Sample UPSC Mock Test",
-    description: "Comprehensive test covering multiple subjects with AI-generated questions",
-    duration: 120,
-    totalQuestions: 10,
-    difficulty: 'medium',
-    subjects: ["Polity", "History", "Geography"],
-    isActive: true,
-    isAttempted: false,
-    status: 'not_started',
-    scheduledDate: new Date().toISOString(),
-    questions: [
-      {
-        question: { english: "Which article of the Indian Constitution deals with the Right to Education?", hindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?" },
-        options: { english: ["Article 21", "Article 21A", "Article 19", "Article 32"], hindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"] },
-        correctAnswer: { english: "Article 21A", hindi: "अनुच्छेद 21A" },
-        subject: "Polity",
-        topic: "Fundamental Rights",
-        marks: 2
-      }
-    ],
-    createdAt: new Date().toISOString()
-  });
 
   // Mock test creation endpoint
   app.post("/api/mock-tests", async (req, res) => {
