@@ -81,6 +81,11 @@ export const quizzes = pgTable("quizzes", {
   subtopicId: integer("subtopic_id"),
   difficulty: text("difficulty").default("medium"), // easy, medium, hard
   timeLimit: integer("time_limit"), // in minutes
+  // Mock test specific fields
+  testDate: timestamp("test_date"),
+  description: text("description"),
+  instructions: text("instructions"),
+  language: text("language").default("both"), // english, hindi, both
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -92,6 +97,10 @@ export const insertQuizSchema = createInsertSchema(quizzes).pick({
   subtopicId: true,
   difficulty: true,
   timeLimit: true,
+  testDate: true,
+  description: true,
+  instructions: true,
+  language: true,
 });
 
 // Quiz questions model

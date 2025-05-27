@@ -7,28 +7,45 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "your-api-key-here" 
 });
 
-// Generate a quiz based on a topic
+// Generate a bilingual quiz based on a topic
 export async function generateQuiz(topic: Topic): Promise<{ quiz: Quiz; questions: Question[] }> {
   try {
     const prompt = `
       Generate a UPSC exam quiz on the topic: ${topic.name} - ${topic.description}. 
       The quiz should include 5 multiple-choice questions with 4 options each.
       
+      IMPORTANT: Provide each question in BOTH English and Hindi languages.
+      
       For each question, provide:
-      1. The question text
-      2. Four options (labeled A, B, C, D)
-      3. The correct answer
-      4. A brief explanation of why the answer is correct
+      1. The question text in both English and Hindi
+      2. Four options (labeled A, B, C, D) in both languages
+      3. The correct answer in both languages
+      4. A brief explanation in both languages
       
       Format your response as a valid JSON object with the following structure:
       {
-        "title": "Quiz title related to the topic",
+        "title": {
+          "english": "Quiz title in English",
+          "hindi": "Quiz title in Hindi"
+        },
         "questions": [
           {
-            "question": "Question text",
-            "options": ["Option A", "Option B", "Option C", "Option D"],
-            "correctAnswer": "The correct option text",
-            "explanation": "Explanation of the correct answer"
+            "question": {
+              "english": "Question text in English",
+              "hindi": "Question text in Hindi"
+            },
+            "options": {
+              "english": ["Option A", "Option B", "Option C", "Option D"],
+              "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
+            },
+            "correctAnswer": {
+              "english": "The correct option text in English",
+              "hindi": "The correct option text in Hindi"
+            },
+            "explanation": {
+              "english": "Explanation in English",
+              "hindi": "Explanation in Hindi"
+            }
           },
           ...
         ]
@@ -47,7 +64,8 @@ export async function generateQuiz(topic: Topic): Promise<{ quiz: Quiz; question
     // Create the quiz in the database
     const quiz = await storage.createQuiz({
       topicId: topic.id,
-      title: result.title,
+      title: JSON.stringify(result.title), // Store bilingual title as JSON
+      quizType: "topic",
     });
 
     // Create the questions in the database
@@ -55,10 +73,10 @@ export async function generateQuiz(topic: Topic): Promise<{ quiz: Quiz; question
     for (const q of result.questions) {
       const question = await storage.createQuestion({
         quizId: quiz.id,
-        question: q.question,
-        options: q.options,
-        correctAnswer: q.correctAnswer,
-        explanation: q.explanation,
+        question: JSON.stringify(q.question), // Store bilingual question as JSON
+        options: JSON.stringify(q.options), // Store bilingual options as JSON
+        correctAnswer: JSON.stringify(q.correctAnswer), // Store bilingual correct answer as JSON
+        explanation: JSON.stringify(q.explanation), // Store bilingual explanation as JSON
       });
       questions.push(question);
     }
