@@ -193,55 +193,44 @@ export default function AdminDashboard() {
 
     setIsGenerating(true);
     try {
-      // In real app, this would call ChatGPT API
-      // Simulating API call with mock data for bilingual questions
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          prompt: questionPrompt,
+          questionType: 'objective',
+          generateBilingual: true 
+        }),
+      });
 
-      const mockGeneratedQuestions: GeneratedQuestion[] = [
-        {
-          id: "1",
-          question: "Which article of the Indian Constitution deals with the Right to Education?",
-          questionHindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?",
-          options: ["Article 21", "Article 21A", "Article 19", "Article 32"],
-          optionsHindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"],
-          correctAnswer: "Article 21A",
-          type: "objective",
-          subject: "Polity",
-          topic: "Fundamental Rights",
-          difficulty: "medium",
-          marks: 2,
-          isSelected: false,
-        },
-        {
-          id: "2",
-          question: "Explain the significance of the 73rd Constitutional Amendment Act.",
-          questionHindi: "73वें संविधान संशोधन अधिनियम के महत्व की व्याख्या करें।",
-          type: "subjective",
-          subject: "Polity",
-          topic: "Local Governance",
-          difficulty: "hard",
-          marks: 10,
-          isSelected: false,
-        },
-        {
-          id: "3",
-          question: "The First War of Indian Independence took place in:",
-          questionHindi: "भारतीय स्वतंत्रता का प्रथम युद्ध कब हुआ था:",
-          options: ["1857", "1856", "1858", "1859"],
-          optionsHindi: ["1857", "1856", "1858", "1859"],
-          correctAnswer: "1857",
-          type: "objective",
-          subject: "History",
-          topic: "Modern History",
-          difficulty: "easy",
-          marks: 2,
-          isSelected: false,
-        },
-      ];
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
 
-      setGeneratedQuestions(mockGeneratedQuestions);
+      const data = await response.json();
+      
+      // Transform API response to match our GeneratedQuestion type
+      const transformedQuestions = data.questions.map((q: any, index: number) => ({
+        id: `generated-${Date.now()}-${index}`,
+        question: q.question?.english || q.question,
+        questionHindi: q.question?.hindi || q.questionHindi,
+        options: q.options?.english || q.options,
+        optionsHindi: q.options?.hindi || q.optionsHindi,
+        correctAnswer: q.correctAnswer?.english || q.correctAnswer,
+        type: "objective",
+        subject: q.subject || "General Knowledge",
+        topic: q.topic || "Mixed Topics",
+        difficulty: q.difficulty || "medium",
+        marks: 2,
+        isSelected: false,
+      }));
+
+      setGeneratedQuestions(transformedQuestions);
     } catch (error) {
       console.error("Error generating questions:", error);
+      alert("Failed to generate questions. Please try again with a different prompt.");
     } finally {
       setIsGenerating(false);
     }

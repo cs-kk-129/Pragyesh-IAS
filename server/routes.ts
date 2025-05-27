@@ -14,6 +14,102 @@ const isAuthenticated = (req: any, res: any, next: any) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
+  // Question generation endpoint for admin panel
+  app.post("/api/generate-questions", async (req, res) => {
+    try {
+      const { prompt, questionType = 'objective' } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required" });
+      }
+
+      const enhancedPrompt = `
+        ${prompt}
+        
+        IMPORTANT: Generate ONLY objective multiple choice questions with 4 options each.
+        Provide each question in BOTH English and Hindi languages.
+        Generate exactly 5 questions.
+        
+        Format as JSON:
+        {
+          "questions": [
+            {
+              "question": {
+                "english": "Question in English",
+                "hindi": "Question in Hindi"
+              },
+              "options": {
+                "english": ["Option A", "Option B", "Option C", "Option D"],
+                "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
+              },
+              "correctAnswer": {
+                "english": "Correct option in English",
+                "hindi": "Correct option in Hindi"
+              },
+              "subject": "Subject name",
+              "topic": "Topic name",
+              "difficulty": "medium"
+            }
+          ]
+        }
+      `;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: enhancedPrompt }],
+          response_format: { type: "json_object" },
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Question generation error:", error);
+      res.status(500).json({ error: "Failed to generate questions" });
+    }
+  });
+
+  // Mock test creation endpoint
+  app.post("/api/mock-tests", async (req, res) => {
+    try {
+      const { title, description, duration, scheduledDate, questions } = req.body;
+      
+      const mockTest = {
+        id: Date.now(),
+        title,
+        description,
+        duration,
+        scheduledDate,
+        questions,
+        totalQuestions: questions.length,
+        difficulty: 'medium',
+        subjects: [...new Set(questions.map((q: any) => q.subject))],
+        isActive: true,
+        isAttempted: false,
+        status: 'not_started',
+        createdAt: new Date().toISOString()
+      };
+      
+      res.status(201).json({ success: true, mockTest });
+    } catch (error) {
+      console.error("Mock test creation error:", error);
+      res.status(500).json({ error: "Failed to create mock test" });
+    }
+  });
+
   // Subjects routes
   app.get("/api/subjects", async (req, res) => {
     try {
