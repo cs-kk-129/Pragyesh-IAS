@@ -69,6 +69,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 type User = {
   id: number;
@@ -188,13 +190,13 @@ export default function AdminDashboard() {
 
   const handleGenerateQuestions = async () => {
     if (!questionPrompt.trim()) return;
-    
+
     setIsGenerating(true);
     try {
       // In real app, this would call ChatGPT API
       // Simulating API call with mock data for bilingual questions
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const mockGeneratedQuestions: GeneratedQuestion[] = [
         {
           id: "1",
@@ -236,7 +238,7 @@ export default function AdminDashboard() {
           isSelected: false,
         },
       ];
-      
+
       setGeneratedQuestions(mockGeneratedQuestions);
     } catch (error) {
       console.error("Error generating questions:", error);
@@ -283,7 +285,7 @@ export default function AdminDashboard() {
 
     console.log("Creating mock test with data:", mockTestData);
     alert(`Mock test "${mockTestDetails.title}" created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
-    
+
     // Reset everything
     setGeneratedQuestions([]);
     setQuestionPrompt("");
@@ -314,10 +316,10 @@ export default function AdminDashboard() {
       paid: { color: "bg-green-100 text-green-800", icon: Crown },
       admin: { color: "bg-blue-100 text-blue-800", icon: Settings },
     };
-    
+
     const variant = variants[type as keyof typeof variants] || variants.free;
     const Icon = variant.icon;
-    
+
     return (
       <Badge className={variant.color}>
         <Icon className="w-3 h-3 mr-1" />
@@ -332,9 +334,9 @@ export default function AdminDashboard() {
       evaluating: { color: "bg-blue-100 text-blue-800", text: "Evaluating" },
       completed: { color: "bg-green-100 text-green-800", text: "Completed" },
     };
-    
+
     const variant = variants[status as keyof typeof variants] || variants.pending;
-    
+
     return (
       <Badge className={variant.color}>
         {variant.text}
@@ -348,7 +350,7 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <MobileNav />
-        
+
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header Section */}
@@ -371,7 +373,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground">+12% from last month</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Paid Students</CardTitle>
@@ -382,7 +384,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground">+8% from last month</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Pending Evaluations</CardTitle>
@@ -393,7 +395,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground">Requires attention</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Active Mock Tests</CardTitle>
@@ -555,7 +557,7 @@ export default function AdminDashboard() {
                             </div>
                           </CardContent>
                         </Card>
-                        
+
                         <Card>
                           <CardHeader>
                             <CardTitle className="text-lg">Performance Summary</CardTitle>
@@ -614,7 +616,7 @@ export default function AdminDashboard() {
                           className="mt-2"
                         />
                       </div>
-                      
+
                       <Button
                         onClick={handleGenerateQuestions}
                         disabled={isGenerating || !questionPrompt.trim()}
@@ -651,7 +653,7 @@ export default function AdminDashboard() {
                             </Button>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {generatedQuestions.map((question) => (
                             <Card key={question.id} className={question.isSelected ? "ring-2 ring-primary" : ""}>
@@ -674,9 +676,9 @@ export default function AdminDashboard() {
                                         </span>
                                       </div>
                                     </div>
-                                    
+
                                     <p className="font-medium">{question.question}</p>
-                                    
+
                                     {question.options && (
                                       <div className="grid grid-cols-2 gap-2 mt-2">
                                         {question.options.map((option, index) => (
@@ -766,14 +768,14 @@ export default function AdminDashboard() {
                                     Evaluate with AI
                                   </Button>
                                 )}
-                                
+
                                 {evaluation.answerFileUrl && (
                                   <Button variant="outline" size="sm">
                                     <Download className="h-4 w-4 mr-1" />
                                     Download
                                   </Button>
                                 )}
-                                
+
                                 {evaluation.status === "completed" && (
                                   <Button variant="outline" size="sm">
                                     <Eye className="h-4 w-4 mr-1" />
@@ -805,7 +807,7 @@ export default function AdminDashboard() {
                           <li>Score calculation and weak area identification</li>
                         </ol>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium mb-2">Subjective Questions</h4>
                         <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
@@ -835,7 +837,7 @@ export default function AdminDashboard() {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Revenue Analytics</CardTitle>
@@ -863,7 +865,7 @@ export default function AdminDashboard() {
               Edit the mock test details that will be displayed to students in the Mock Tests section.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="test-title">Test Title</Label>
@@ -874,7 +876,7 @@ export default function AdminDashboard() {
                 placeholder="Enter mock test title..."
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="test-description">Test Description</Label>
               <Textarea
@@ -885,7 +887,7 @@ export default function AdminDashboard() {
                 rows={3}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="test-duration">Duration (minutes)</Label>
@@ -898,18 +900,17 @@ export default function AdminDashboard() {
                   max="300"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="test-date">Scheduled Date</Label>
                 <Input
                   id="test-date"
-                  type="date"
-                  value={mockTestDetails.scheduledDate}
+                  type="date"                  value={mockTestDetails.scheduledDate}
                   onChange={(e) => setMockTestDetails(prev => ({ ...prev, scheduledDate: e.target.value }))}
                 />
               </div>
             </div>
-            
+
             <div className="bg-muted/50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">Test Summary</h4>
               <div className="space-y-1 text-sm text-muted-foreground">
@@ -919,7 +920,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setShowMockTestDialog(false)}>
               Cancel
