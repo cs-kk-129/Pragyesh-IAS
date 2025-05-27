@@ -117,7 +117,7 @@ export default function AuthPage() {
         <div className="max-w-md mx-auto text-white">
           <div className="flex items-center mb-6">
             <img 
-              src="/attached_assets/ChatGPT Image May 22, 2025 at 11_52_33 PM.png" 
+              src="/src/assets/pragyesh-logo.png" 
               alt="Pragyesh IAS Logo" 
               className="h-16 w-16 mr-4"
             />
@@ -348,6 +348,21 @@ export default function AuthPage() {
                         <FaGoogle className="mr-2 h-4 w-4" />
                         Sign in with Google
                       </Button>
+                      
+                      <div className="mt-4">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="w-full"
+                          onClick={() => {
+                            loginForm.setValue("username", "csadmin");
+                            loginForm.setValue("password", "Admin@999");
+                          }}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Admin Login
+                        </Button>
+                      </div>
                     </form>
                   </Form>
                 </CardContent>

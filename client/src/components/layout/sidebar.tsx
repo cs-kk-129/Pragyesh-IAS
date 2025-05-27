@@ -75,7 +75,7 @@ export default function Sidebar() {
   ];
 
   // Add admin dashboard for admin users
-  if (user?.username === 'admin' || user?.email?.includes('admin')) {
+  if (user?.username === 'csadmin' || user?.email?.includes('admin')) {
     menu.push({
       icon: <Settings className="h-5 w-5" />,
       label: "Admin Panel",
@@ -88,9 +88,10 @@ export default function Sidebar() {
       <div className="h-full py-4 flex flex-col">
         <div className="flex h-14 items-center border-b px-6">
           <Link href="/">
-            <div className="flex items-center cursor-pointer">
-              <span className="font-bold text-2xl text-primary">UPSC</span>
-              <span className="ml-1 font-bold text-2xl">Prep</span>
+            <div className="flex items-center cursor-pointer space-x-2">
+              <img src="/src/assets/pragyesh-logo.png" alt="Pragyesh IAS" className="h-8 w-8" />
+              <span className="font-bold text-xl text-primary">Pragyesh</span>
+              <span className="ml-1 font-bold text-xl">IAS</span>
             </div>
           </Link>
         </div>

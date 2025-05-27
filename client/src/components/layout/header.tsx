@@ -39,9 +39,10 @@ export default function Header() {
         </div>
         <div className="hidden md:flex">
           <Link to="/">
-            <div className="flex items-center">
-              <span className="font-bold text-2xl text-primary">UPSC</span>
-              <span className="ml-1 font-bold text-2xl">Prep</span>
+            <div className="flex items-center space-x-2">
+              <img src="/src/assets/pragyesh-logo.png" alt="Pragyesh IAS" className="h-8 w-8" />
+              <span className="font-bold text-2xl text-primary">Pragyesh</span>
+              <span className="ml-1 font-bold text-2xl">IAS</span>
             </div>
           </Link>
         </div>
