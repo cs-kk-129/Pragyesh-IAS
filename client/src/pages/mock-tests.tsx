@@ -243,10 +243,17 @@ export default function MockTests() {
 
   const handleStartTest = (test: MockTest) => {
     setSelectedTestData(test);
-    setIsTestStarted(true);
-    setTimeLeft(test.duration * 60); // Convert minutes to seconds
-    setCurrentQuestionIndex(0);
+    setShowLanguageDialog(true);
     setShowTestDialog(false);
+  };
+
+  const handleLanguageSelection = () => {
+    if (selectedTestData) {
+      setIsTestStarted(true);
+      setTimeLeft(selectedTestData.duration * 60); // Convert minutes to seconds
+      setCurrentQuestionIndex(0);
+      setShowLanguageDialog(false);
+    }
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -442,13 +449,35 @@ export default function MockTests() {
                 {/* Question Content */}
                 <Card>
                   <CardContent className="pt-6">
-                    <h3 className="text-lg font-medium mb-6">{currentQuestion?.question}</h3>
+                    {/* Language toggle */}
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-muted-foreground">Language:</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedLanguage(selectedLanguage === 'english' ? 'hindi' : 'english')}
+                        >
+                          {selectedLanguage === 'english' ? 'हिन्दी' : 'English'}
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-lg font-medium mb-6">
+                      {selectedLanguage === 'english' 
+                        ? currentQuestion?.question 
+                        : currentQuestion?.questionHindi || currentQuestion?.question
+                      }
+                    </h3>
                     
                     <RadioGroup
                       value={currentState?.selectedAnswer?.toString()}
                       onValueChange={(value) => handleAnswerSelect(parseInt(value))}
                     >
-                      {currentQuestion?.options.map((option, index) => (
+                      {(selectedLanguage === 'english' 
+                        ? currentQuestion?.options 
+                        : currentQuestion?.optionsHindi || currentQuestion?.options
+                      )?.map((option, index) => (
                         <div key={index} className="flex items-center space-x-3 p-3 rounded border hover:bg-muted/50">
                           <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                           <Label 
@@ -859,6 +888,74 @@ export default function MockTests() {
           </div>
         </main>
       </div>
+
+      {/* Language Selection Dialog */}
+      <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Select Test Language</DialogTitle>
+            <DialogDescription>
+              Choose your preferred language for the mock test. You can switch languages during the test if needed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div 
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  selectedLanguage === 'english' ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary/50'
+                }`}
+                onClick={() => setSelectedLanguage('english')}
+              >
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem 
+                    value="english" 
+                    id="english" 
+                    checked={selectedLanguage === 'english'}
+                    onChange={() => setSelectedLanguage('english')}
+                  />
+                  <div>
+                    <h4 className="font-medium">English</h4>
+                    <p className="text-sm text-muted-foreground">
+                      All questions and options will be displayed in English
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div 
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  selectedLanguage === 'hindi' ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary/50'
+                }`}
+                onClick={() => setSelectedLanguage('hindi')}
+              >
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem 
+                    value="hindi" 
+                    id="hindi" 
+                    checked={selectedLanguage === 'hindi'}
+                    onChange={() => setSelectedLanguage('hindi')}
+                  />
+                  <div>
+                    <h4 className="font-medium">हिन्दी (Hindi)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      सभी प्रश्न और विकल्प हिन्दी में प्रदर्शित होंगे
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowLanguageDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleLanguageSelection}>
+              <Play className="mr-2 h-4 w-4" />
+              Start Test
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
