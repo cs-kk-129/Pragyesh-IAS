@@ -153,7 +153,7 @@ export default function MockTests() {
     },
   ];
 
-  // Mock questions with bilingual support - in real app, this would come from API
+  // Mock questions with bilingual support - these demonstrate the bilingual feature
   const mockQuestions: Question[] = [
     {
       id: 1,
@@ -187,6 +187,38 @@ export default function MockTests() {
       marks: 2,
       subject: "Geography",
       topic: "Physical Geography",
+    },
+    {
+      id: 4,
+      question: "The Indus Valley Civilization was discovered in:",
+      questionHindi: "सिंधु घाटी सभ्यता की खोज कब हुई थी:",
+      options: ["1920", "1921", "1922", "1923"],
+      optionsHindi: ["1920", "1921", "1922", "1923"],
+      correctAnswer: 1,
+      marks: 2,
+      subject: "History",
+      topic: "Ancient History",
+    },
+    {
+      id: 5,
+      question: "Which of the following is a Fundamental Duty in the Indian Constitution?",
+      questionHindi: "निम्नलिखित में से कौन सा भारतीय संविधान में मौलिक कर्तव्य है?",
+      options: [
+        "To protect and improve the environment",
+        "To vote in elections", 
+        "To pay taxes",
+        "To serve in the military"
+      ],
+      optionsHindi: [
+        "पर्यावरण की रक्षा और सुधार करना",
+        "चुनावों में मतदान करना",
+        "कर का भुगतान करना", 
+        "सेना में सेवा करना"
+      ],
+      correctAnswer: 0,
+      marks: 2,
+      subject: "Polity",
+      topic: "Fundamental Duties",
     },
   ];
 
