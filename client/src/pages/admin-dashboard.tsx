@@ -853,6 +853,83 @@ export default function AdminDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Mock Test Customization Dialog */}
+      <Dialog open={showMockTestDialog} onOpenChange={setShowMockTestDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Customize Mock Test Details</DialogTitle>
+            <DialogDescription>
+              Edit the mock test details that will be displayed to students in the Mock Tests section.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="test-title">Test Title</Label>
+              <Input
+                id="test-title"
+                value={mockTestDetails.title}
+                onChange={(e) => setMockTestDetails(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter mock test title..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="test-description">Test Description</Label>
+              <Textarea
+                id="test-description"
+                value={mockTestDetails.description}
+                onChange={(e) => setMockTestDetails(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe what this mock test covers..."
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="test-duration">Duration (minutes)</Label>
+                <Input
+                  id="test-duration"
+                  type="number"
+                  value={mockTestDetails.duration}
+                  onChange={(e) => setMockTestDetails(prev => ({ ...prev, duration: parseInt(e.target.value) || 60 }))}
+                  min="15"
+                  max="300"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="test-date">Scheduled Date</Label>
+                <Input
+                  id="test-date"
+                  type="date"
+                  value={mockTestDetails.scheduledDate}
+                  onChange={(e) => setMockTestDetails(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Test Summary</h4>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <div>Questions: {generatedQuestions.filter(q => q.isSelected).length}</div>
+                <div>Estimated Time: {mockTestDetails.duration} minutes</div>
+                <div>Subjects: {[...new Set(generatedQuestions.filter(q => q.isSelected).map(q => q.subject))].join(", ")}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowMockTestDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmMockTest}>
+              Create Mock Test
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
