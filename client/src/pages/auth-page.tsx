@@ -359,8 +359,7 @@ export default function AuthPage() {
                             loginForm.setValue("password", "Admin@999");
                           }}
                         >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Admin Login
+                          🔧 Admin Login
                         </Button>
                       </div>
                     </form>
