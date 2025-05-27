@@ -60,6 +60,8 @@ type Topic = {
 export default function Topics() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
   const queryClient = useQueryClient();
@@ -79,6 +81,89 @@ export default function Topics() {
   const { data: allTopics, isLoading: isLoadingTopics } = useQuery<Topic[]>({
     queryKey: ["/api/topics"],
   });
+
+  // Fetch all sections for search functionality
+  const { data: allSections } = useQuery<Section[]>({
+    queryKey: ["/api/sections"],
+  });
+
+  // Enhanced search functionality across subjects, sections, and topics
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length > 0) {
+      const results: any[] = [];
+      
+      // Search subjects
+      subjects?.forEach(subject => {
+        if (subject.name.toLowerCase().includes(query.toLowerCase())) {
+          results.push({
+            type: 'subject',
+            id: subject.id,
+            name: subject.name,
+            description: subject.description,
+          });
+        }
+      });
+
+      // Search sections
+      allSections?.forEach(section => {
+        if (section.name.toLowerCase().includes(query.toLowerCase())) {
+          const subject = subjects?.find(s => s.id === section.subject_id);
+          results.push({
+            type: 'section',
+            id: section.id,
+            name: section.name,
+            parent: subject?.name,
+            subject_id: section.subject_id,
+          });
+        }
+      });
+
+      // Search topics
+      allTopics?.forEach(topic => {
+        if (topic.name.toLowerCase().includes(query.toLowerCase())) {
+          const section = allSections?.find(s => s.id === topic.section_id);
+          const subject = subjects?.find(s => s.id === section?.subject_id);
+          results.push({
+            type: 'topic',
+            id: topic.id,
+            name: topic.name,
+            parent: `${subject?.name} > ${section?.name}`,
+            section_id: topic.section_id,
+            subject_id: section?.subject_id,
+          });
+        }
+      });
+
+      setSearchResults(results.slice(0, 8)); // Limit to 8 results
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
+  };
+
+  const handleSearchSelect = (result: any) => {
+    if (result.type === 'subject') {
+      setSelectedSubject(result.id);
+    } else if (result.type === 'section' || result.type === 'topic') {
+      setSelectedSubject(result.subject_id);
+      if (result.type === 'section') {
+        setExpandedSections(prev => {
+          const newSet = new Set(prev);
+          newSet.add(result.id);
+          return newSet;
+        });
+      } else {
+        setExpandedSections(prev => {
+          const newSet = new Set(prev);
+          newSet.add(result.section_id);
+          return newSet;
+        });
+      }
+    }
+    setSearchQuery("");
+    setShowSearchResults(false);
+  };
 
   const handleStartQuiz = async (params: { subjectId?: number; sectionId?: number; topicId?: number; difficulty?: string }) => {
     try {
@@ -300,15 +385,48 @@ export default function Topics() {
               </p>
             </div>
 
-            {/* Search */}
+            {/* Enhanced Search with Predictions */}
             <div className="relative max-w-md mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search subjects..."
+                placeholder="Search subjects, sections, or topics..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => searchQuery && setShowSearchResults(true)}
                 className="pl-10"
               />
+              
+              {/* Search Results Dropdown */}
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                  {searchResults.map((result, index) => (
+                    <div
+                      key={`${result.type}-${result.id}`}
+                      className="p-3 hover:bg-muted cursor-pointer border-b last:border-b-0"
+                      onClick={() => handleSearchSelect(result)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            {result.type === 'subject' && <BookOpen className="h-4 w-4 text-blue-500" />}
+                            {result.type === 'section' && <FileText className="h-4 w-4 text-green-500" />}
+                            {result.type === 'topic' && <ArrowRight className="h-4 w-4 text-orange-500" />}
+                            <span className="font-medium">{result.name}</span>
+                          </div>
+                          {result.parent && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              in {result.parent}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {result.type}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Loading State */}
