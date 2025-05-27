@@ -77,6 +77,8 @@ type MockTest = {
   isAttempted: boolean;
   score?: number;
   status: 'not_started' | 'in_progress' | 'completed' | 'evaluated';
+  questions?: any[]; // Questions created by admin
+  scheduledDate?: string;
 };
 
 type Question = {
@@ -99,7 +101,7 @@ type QuestionState = {
 };
 
 export default function MockTests() {
-  const [selectedTest, setSelectedTest] = useState<string>("test-1");
+  const [selectedTest, setSelectedTest] = useState<string>("");
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [isTestStarted, setIsTestStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -112,115 +114,39 @@ export default function MockTests() {
   const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
-  // Mock data for tests - in real app, this would come from API
-  const mockTests: MockTest[] = [
-    {
-      id: 1,
-      title: "Day 1",
-      description: "Comprehensive test covering Polity, History, and Geography fundamentals",
-      duration: 120,
-      totalQuestions: 50,
-      difficulty: 'medium',
-      subjects: ["Polity", "History", "Geography"],
-      isActive: true,
-      isAttempted: false,
-      status: 'not_started',
-    },
-    {
-      id: 2,
-      title: "Day 2",
-      description: "Advanced test focusing on Current Affairs and Economics",
-      duration: 90,
-      totalQuestions: 40,
-      difficulty: 'hard',
-      subjects: ["Current Affairs", "Economics"],
-      isActive: true,
-      isAttempted: true,
-      score: 85,
-      status: 'evaluated',
-    },
-    {
-      id: 3,
-      title: "Day 3",
-      description: "Science and Technology mock test with Environmental Studies",
-      duration: 60,
-      totalQuestions: 30,
-      difficulty: 'easy',
-      subjects: ["Science & Technology", "Environment"],
-      isActive: true,
-      isAttempted: false,
-      status: 'not_started',
-    },
-  ];
+  // Fetch mock tests created by admin from API
+  const { data: mockTests = [], isLoading: isLoadingTests } = useQuery<MockTest[]>({
+    queryKey: ["/api/mock-tests"],
+  });
 
-  // Mock questions with bilingual support - these demonstrate the bilingual feature
-  const mockQuestions: Question[] = [
-    {
-      id: 1,
-      question: "Which article of the Indian Constitution deals with the Right to Education?",
-      questionHindi: "भारतीय संविधान का कौन सा अनुच्छेद शिक्षा के अधिकार से संबंधित है?",
-      options: ["Article 21", "Article 21A", "Article 19", "Article 32"],
-      optionsHindi: ["अनुच्छेद 21", "अनुच्छेद 21A", "अनुच्छेद 19", "अनुच्छेद 32"],
-      correctAnswer: 1,
-      marks: 2,
-      subject: "Polity",
-      topic: "Fundamental Rights",
-    },
-    {
-      id: 2,
-      question: "The First War of Indian Independence took place in:",
-      questionHindi: "भारतीय स्वतंत्रता का प्रथम युद्ध कब हुआ था:",
-      options: ["1857", "1856", "1858", "1859"],
-      optionsHindi: ["1857", "1856", "1858", "1859"],
-      correctAnswer: 0,
-      marks: 2,
-      subject: "History",
-      topic: "Modern History",
-    },
-    {
-      id: 3,
-      question: "Which of the following is the longest river in India?",
-      questionHindi: "निम्नलिखित में से कौन सी भारत की सबसे लंबी नदी है?",
-      options: ["Yamuna", "Brahmaputra", "Ganga", "Godavari"],
-      optionsHindi: ["यमुना", "ब्रह्मपुत्र", "गंगा", "गोदावरी"],
-      correctAnswer: 2,
-      marks: 2,
-      subject: "Geography",
-      topic: "Physical Geography",
-    },
-    {
-      id: 4,
-      question: "The Indus Valley Civilization was discovered in:",
-      questionHindi: "सिंधु घाटी सभ्यता की खोज कब हुई थी:",
-      options: ["1920", "1921", "1922", "1923"],
-      optionsHindi: ["1920", "1921", "1922", "1923"],
-      correctAnswer: 1,
-      marks: 2,
-      subject: "History",
-      topic: "Ancient History",
-    },
-    {
-      id: 5,
-      question: "Which of the following is a Fundamental Duty in the Indian Constitution?",
-      questionHindi: "निम्नलिखित में से कौन सा भारतीय संविधान में मौलिक कर्तव्य है?",
-      options: [
-        "To protect and improve the environment",
-        "To vote in elections", 
-        "To pay taxes",
-        "To serve in the military"
-      ],
-      optionsHindi: [
-        "पर्यावरण की रक्षा और सुधार करना",
-        "चुनावों में मतदान करना",
-        "कर का भुगतान करना", 
-        "सेना में सेवा करना"
-      ],
-      correctAnswer: 0,
-      marks: 2,
-      subject: "Polity",
-      topic: "Fundamental Duties",
-    },
-  ];
+  // Initialize selectedTest when mockTests load
+  useEffect(() => {
+    if (mockTests.length > 0 && !selectedTest) {
+      setSelectedTest(`test-${mockTests[0].id}`);
+    }
+  }, [mockTests, selectedTest]);
+
+  // Get questions from selected test
+  const getCurrentTestQuestions = (): Question[] => {
+    if (!selectedTestData?.questions) {
+      return [];
+    }
+    
+    // Transform admin questions to match Question interface
+    return selectedTestData.questions.map((q: any, index: number) => ({
+      id: index + 1,
+      question: q.question?.english || q.question || "",
+      questionHindi: q.question?.hindi || q.questionHindi || "",
+      options: q.options?.english || q.options || [],
+      optionsHindi: q.options?.hindi || q.optionsHindi || [],
+      correctAnswer: (q.options?.english || q.options || []).indexOf(q.correctAnswer?.english || q.correctAnswer) || 0,
+      marks: q.marks || 2,
+      subject: q.subject || "General",
+      topic: q.topic || "Mixed",
+    }));
+  };
+
+  const mockQuestions = getCurrentTestQuestions();
 
   // Initialize question states when test starts
   useEffect(() => {

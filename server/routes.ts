@@ -82,6 +82,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Global mock tests storage (in real app, this would be in database)
+  const mockTests: any[] = [];
+
   // Mock test creation endpoint
   app.post("/api/mock-tests", async (req, res) => {
     try {
@@ -103,10 +106,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date().toISOString()
       };
       
+      // Store the mock test
+      mockTests.push(mockTest);
+      
       res.status(201).json({ success: true, mockTest });
     } catch (error) {
       console.error("Mock test creation error:", error);
       res.status(500).json({ error: "Failed to create mock test" });
+    }
+  });
+
+  // Get all mock tests for students
+  app.get("/api/mock-tests", async (req, res) => {
+    try {
+      res.json(mockTests);
+    } catch (error) {
+      console.error("Error fetching mock tests:", error);
+      res.status(500).json({ error: "Failed to fetch mock tests" });
     }
   });
 
