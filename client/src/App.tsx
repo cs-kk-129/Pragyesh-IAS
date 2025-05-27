@@ -14,6 +14,7 @@ import Topics from "@/pages/topics";
 import DailyQuiz from "@/pages/daily-quiz";
 import Chat from "@/pages/chat";
 import StudyPlan from "@/pages/study-plan";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <ProtectedRoute path="/quiz/:id" component={DailyQuiz} />
       <ProtectedRoute path="/chat" component={Chat} />
       <ProtectedRoute path="/study-plan" component={StudyPlan} />
+      <ProtectedRoute path="/admin" component={AdminDashboard} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

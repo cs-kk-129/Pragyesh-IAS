@@ -7,9 +7,11 @@ import {
   Calendar,
   BarChart,
   GraduationCap,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/hooks/use-auth";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -37,6 +39,7 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const menu = [
     {
@@ -70,6 +73,15 @@ export default function Sidebar() {
       href: "/progress",
     },
   ];
+
+  // Add admin dashboard for admin users
+  if (user?.username === 'admin' || user?.email?.includes('admin')) {
+    menu.push({
+      icon: <Settings className="h-5 w-5" />,
+      label: "Admin Panel",
+      href: "/admin",
+    });
+  }
 
   return (
     <aside className="hidden md:block border-r bg-background h-screen sticky top-0 w-[250px] transition-all">
