@@ -11,11 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
+import { Bell, LogOut, Menu, Settings, User, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function Header() {
   const { user, logoutMutation } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   // Wait until component is mounted to avoid hydration issues
   useEffect(() => {
@@ -26,6 +28,10 @@ export default function Header() {
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
@@ -47,6 +53,10 @@ export default function Header() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Notifications</span>

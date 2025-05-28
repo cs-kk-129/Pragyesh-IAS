@@ -16,6 +16,40 @@ import Chat from "@/pages/chat";
 import StudyPlan from "@/pages/study-plan";
 import AdminDashboard from "@/pages/admin-dashboard";
 import MockTests from "@/pages/mock-tests";
+import WelcomeDialog from "@/components/welcome-dialog";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
+
+function AppWithWelcome() {
+  const { user } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    // Show welcome dialog for students (not admin) on first visit
+    if (user && user.role !== 'admin') {
+      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+      }
+    }
+  }, [user]);
+
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem('hasSeenWelcome', 'true');
+  };
+
+  return (
+    <>
+      <Router />
+      <WelcomeDialog 
+        isOpen={showWelcome} 
+        onClose={handleCloseWelcome}
+        userName={user?.username}
+      />
+    </>
+  );
+}
 
 function Router() {
   return (
