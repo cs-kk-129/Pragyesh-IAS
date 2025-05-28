@@ -26,7 +26,7 @@ function AppWithWelcome() {
 
   useEffect(() => {
     // Show welcome dialog for students (not admin) on first visit
-    if (user && user.role !== 'admin') {
+    if (user && user.username !== 'csadmin') {
       const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
       if (!hasSeenWelcome) {
         setShowWelcome(true);
@@ -75,7 +75,7 @@ function App() {
         <ThemeProvider attribute="class" defaultTheme="light">
           <TooltipProvider>
             <Toaster />
-            <Router />
+            <AppWithWelcome />
           </TooltipProvider>
         </ThemeProvider>
       </AuthProvider>
