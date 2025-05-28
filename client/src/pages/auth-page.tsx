@@ -29,6 +29,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { insertUserSchema } from "@shared/schema";
 import { Loader2, Mail } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
+import { signInWithGoogle, handleGoogleRedirect } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 // Extended schemas with validation
 const loginSchema = z.object({
@@ -53,8 +55,10 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -90,11 +94,59 @@ export default function AuthPage() {
     registerMutation.mutate(userData);
   };
 
-  const handleGoogleSignIn = () => {
-    // For now, we'll show a placeholder message
-    // This will be implemented with Firebase authentication
-    alert("Google Sign-in will be implemented with Firebase integration");
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await signInWithGoogle();
+      toast({
+        title: "Redirecting to Google",
+        description: "Please complete the sign-in process",
+      });
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast({
+        title: "Sign-in failed",
+        description: "Failed to initiate Google sign-in. Please try again.",
+        variant: "destructive",
+      });
+      setIsGoogleLoading(false);
+    }
   };
+
+  // Handle Google redirect result on page load
+  useEffect(() => {
+    const handleRedirect = async () => {
+      try {
+        const result = await handleGoogleRedirect();
+        if (result?.user) {
+          // Create or login user with Google credentials
+          const googleUser = {
+            username: result.user.email?.split('@')[0] || result.user.displayName || 'google_user',
+            email: result.user.email || '',
+            name: result.user.displayName || '',
+            password: 'google_auth_' + result.user.uid, // Special password for Google users
+          };
+          
+          // Try to register the user (if new) or login (if existing)
+          registerMutation.mutate(googleUser, {
+            onError: () => {
+              // If registration fails, try login
+              loginMutation.mutate({
+                username: googleUser.username,
+                password: googleUser.password,
+              });
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error handling Google redirect:", error);
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    };
+
+    handleRedirect();
+  }, []);
 
   const handleForgotPassword = () => {
     if (!forgotPasswordEmail) {
