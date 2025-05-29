@@ -29,7 +29,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { insertUserSchema } from "@shared/schema";
 import { Loader2, Mail } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
-import { signInWithGoogle, handleGoogleRedirect } from "@/lib/firebase";
+import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 // Extended schemas with validation
@@ -97,11 +97,33 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     try {
       setIsGoogleLoading(true);
-      await signInWithGoogle();
-      toast({
-        title: "Redirecting to Google",
-        description: "Please complete the sign-in process",
-      });
+      const result = await signInWithGoogle();
+      
+      if (result?.user) {
+        // Create or login user with Google credentials
+        const googleUser = {
+          username: result.user.email?.split('@')[0] || result.user.displayName || 'google_user',
+          email: result.user.email || '',
+          name: result.user.displayName || '',
+          password: 'google_auth_' + result.user.uid, // Special password for Google users
+        };
+        
+        // Try to register the user (if new) or login (if existing)
+        registerMutation.mutate(googleUser, {
+          onError: () => {
+            // If registration fails, try login
+            loginMutation.mutate({
+              username: googleUser.username,
+              password: googleUser.password,
+            });
+          }
+        });
+
+        toast({
+          title: "Success",
+          description: "Google sign-in successful",
+        });
+      }
     } catch (error) {
       console.error("Google sign-in error:", error);
       toast({
@@ -109,44 +131,10 @@ export default function AuthPage() {
         description: "Failed to initiate Google sign-in. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsGoogleLoading(false);
     }
   };
-
-  // Handle Google redirect result on page load
-  useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const result = await handleGoogleRedirect();
-        if (result?.user) {
-          // Create or login user with Google credentials
-          const googleUser = {
-            username: result.user.email?.split('@')[0] || result.user.displayName || 'google_user',
-            email: result.user.email || '',
-            name: result.user.displayName || '',
-            password: 'google_auth_' + result.user.uid, // Special password for Google users
-          };
-          
-          // Try to register the user (if new) or login (if existing)
-          registerMutation.mutate(googleUser, {
-            onError: () => {
-              // If registration fails, try login
-              loginMutation.mutate({
-                username: googleUser.username,
-                password: googleUser.password,
-              });
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Error handling Google redirect:", error);
-      } finally {
-        setIsGoogleLoading(false);
-      }
-    };
-
-    handleRedirect();
-  }, []);
 
   const handleForgotPassword = async () => {
     if (!forgotPasswordEmail) {
@@ -428,9 +416,14 @@ export default function AuthPage() {
                         variant="outline"
                         className="w-full"
                         onClick={handleGoogleSignIn}
+                        disabled={isGoogleLoading}
                       >
-                        <FaGoogle className="mr-2 h-4 w-4" />
-                        Sign in with Google
+                        {isGoogleLoading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <FaGoogle className="mr-2 h-4 w-4" />
+                        )}
+                        {isGoogleLoading ? "Signing in..." : "Sign in with Google"}
                       </Button>
                       
                       <div className="mt-4">
