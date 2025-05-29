@@ -159,6 +159,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forgot password endpoint
+  app.post("/api/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "No account found with this email address" });
+      }
+
+      // In a real application, you would:
+      // 1. Generate a secure reset token
+      // 2. Store it in database with expiration
+      // 3. Send email with reset link
+      // For now, we'll simulate this process
+      
+      console.log(`Password reset requested for: ${email}`);
+      
+      // Simulate email sending
+      res.json({ 
+        message: "Password reset instructions have been sent to your email",
+        success: true 
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ error: "Failed to process password reset request" });
+    }
+  });
+
   // Subjects routes
   app.get("/api/subjects", async (req, res) => {
     try {

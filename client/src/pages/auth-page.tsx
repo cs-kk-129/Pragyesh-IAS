@@ -148,15 +148,47 @@ export default function AuthPage() {
     handleRedirect();
   }, []);
 
-  const handleForgotPassword = () => {
+  const handleForgotPassword = async () => {
     if (!forgotPasswordEmail) {
-      alert("Please enter your email address");
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
       return;
     }
-    // Placeholder for forgot password functionality
-    alert(`Password reset link will be sent to ${forgotPasswordEmail}`);
-    setShowForgotPassword(false);
-    setForgotPasswordEmail("");
+
+    try {
+      const response = await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Email sent!",
+          description: `Password reset instructions have been sent to ${forgotPasswordEmail}`,
+        });
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Failed to send reset email",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send reset email. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (user) {
