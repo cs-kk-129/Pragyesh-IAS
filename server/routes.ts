@@ -52,12 +52,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Prompt is required" });
       }
 
+      // Extract number of questions from prompt if specified
+      const numberMatch = prompt.match(/(\d+)\s*questions?/i);
+      const requestedCount = numberMatch ? parseInt(numberMatch[1]) : null;
+      
+      // Limit to reasonable number for API constraints
+      const questionCount = requestedCount && requestedCount <= 50 ? requestedCount : 10;
+
       const enhancedPrompt = `
         ${prompt}
         
         IMPORTANT: Generate ONLY objective multiple choice questions with 4 options each.
         Provide each question in BOTH English and Hindi languages.
-        Generate exactly 5 questions.
+        Generate exactly ${questionCount} questions as requested.
         
         Format as JSON:
         {
