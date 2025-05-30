@@ -53,12 +53,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Prompt is required" });
       }
 
-      // Extract number of questions from prompt if specified
-      const numberMatch = prompt.match(/(\d+)\s*questions?/i);
-      const requestedCount = numberMatch ? parseInt(numberMatch[1]) : null;
+      // Extract number of questions from prompt - look for various patterns
+      const patterns = [
+        /generate\s+(\d+)\s*questions?/i,
+        /create\s+(\d+)\s*questions?/i,
+        /make\s+(\d+)\s*questions?/i,
+        /(\d+)\s*questions?/i
+      ];
+      
+      let requestedCount = null;
+      for (const pattern of patterns) {
+        const match = prompt.match(pattern);
+        if (match) {
+          requestedCount = parseInt(match[1]);
+          break;
+        }
+      }
       
       // Limit to reasonable number for API constraints
       const questionCount = requestedCount && requestedCount <= 50 ? requestedCount : 10;
+      
+      console.log(`Question generation: Requested ${requestedCount}, Using ${questionCount}`);
 
       const enhancedPrompt = `
         ${prompt}
