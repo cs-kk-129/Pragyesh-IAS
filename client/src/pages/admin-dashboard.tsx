@@ -1072,6 +1072,158 @@ Follow these UPSC formatting guidelines:
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Topic Selection Dialog */}
+      <Dialog open={showTopicSelector} onOpenChange={setShowTopicSelector}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Target className="h-6 w-6" />
+              <span>Select Topics for Question Generation</span>
+            </DialogTitle>
+            <DialogDescription>
+              Choose subjects and topics with UPSC-standard distribution. Select question count for each topic.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Summary Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Question Distribution Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
+                    <div className="text-sm text-muted-foreground">Total Questions</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{Object.keys(selectedTopics).length}</div>
+                    <div className="text-sm text-muted-foreground">Selected Topics</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{Array.from(new Set(Object.values(selectedTopics).map(t => t.subject))).length}</div>
+                    <div className="text-sm text-muted-foreground">Subjects Covered</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {totalQuestions > 0 ? Math.round((totalQuestions / 100) * 100) : 0}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">UPSC Standard</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Subject Selection */}
+            <div className="space-y-6">
+              {Object.entries(upscSubjects).map(([subject, subjectData]) => (
+                <Card key={subject}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{subject}</span>
+                      <Badge variant="outline">{subjectData.percentage}% Recommended</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subjectData.topics.map((topic) => {
+                        const key = `${subject}-${topic}`;
+                        const currentCount = selectedTopics[key]?.questionCount || 0;
+                        
+                        return (
+                          <div key={topic} className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={currentCount > 0}
+                                onCheckedChange={(checked) => {
+                                  if (!checked) {
+                                    handleTopicSelection(subject, topic, 0);
+                                  } else {
+                                    handleTopicSelection(subject, topic, 5);
+                                  }
+                                }}
+                              />
+                              <label className="text-sm font-medium">{topic}</label>
+                            </div>
+                            
+                            {currentCount > 0 && (
+                              <div className="space-y-2">
+                                <label className="text-xs text-muted-foreground">Questions</label>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max="50"
+                                  value={currentCount}
+                                  onChange={(e) => {
+                                    const count = parseInt(e.target.value) || 0;
+                                    handleTopicSelection(subject, topic, count);
+                                  }}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Selected Topics Summary */}
+            {Object.keys(selectedTopics).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Selected Topics Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(selectedTopics).map(([key, data]) => {
+                      const [subject, topic] = key.split('-');
+                      return (
+                        <div key={key} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                          <span className="text-sm">
+                            <span className="font-medium">{subject}</span> - {topic}
+                          </span>
+                          <Badge variant="secondary">{data.questionCount} questions</Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowTopicSelector(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                handleGenerateFromTopics();
+                setShowTopicSelector(false);
+              }}
+              disabled={Object.keys(selectedTopics).length === 0 || isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate {totalQuestions} Questions
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
