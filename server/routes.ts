@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { sql } from 'drizzle-orm';
 import { db } from './db';
+import { storage } from './storage';
 
 const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.isAuthenticated()) {
@@ -104,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }],
           response_format: { type: "json_object" },
           temperature: 1.0,
-          max_tokens: 4000,
+          max_tokens: Math.min(16000, questionCount * 800), // Scale tokens based on question count
           seed: Date.now(), // Ensure different questions each time
         }),
       });
@@ -199,6 +200,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to process password reset request" });
     }
   });
+
+  // Mock test evaluation endpoint
+  app.post("/api/mock-tests/:id/evaluate", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { answers, timeSpent, questionTimings } = req.body;
+      
+      // Find the mock test
+      const mockTest = mockTests.find(test => test.id == id);
+      if (!mockTest) {
+        return res.status(404).json({ error: "Mock test not found" });
+      }
+
+      // Calculate evaluation metrics
+      const evaluation = calculateDetailedEvaluation(mockTest, answers, timeSpent, questionTimings);
+      
+      res.json(evaluation);
+    } catch (error) {
+      console.error("Mock test evaluation error:", error);
+      res.status(500).json({ error: "Failed to evaluate mock test" });
+    }
+  });
+
+  // Function to calculate detailed evaluation
+  function calculateDetailedEvaluation(mockTest: any, answers: any[], timeSpent: number, questionTimings: any[]) {
+    const questions = mockTest.questions;
+    let correct = 0;
+    let incorrect = 0;
+    let unattempted = 0;
+    let criticalThinkingCorrect = 0;
+    let criticalThinkingTotal = 0;
+    let conceptClarityCorrect = 0;
+    let conceptClarityTotal = 0;
+    let timeScores = { superfast: 0, onTime: 0, slow: 0, onTimeIncorrect: 0 };
+
+    const questionAnalysis = questions.map((question: any, index: number) => {
+      const userAnswer = answers[index];
+      const correctAnswer = question.correctAnswer?.english || question.correctAnswer;
+      const isCorrect = userAnswer?.answer === correctAnswer;
+      const isAttempted = userAnswer?.answer !== undefined;
+      const questionTime = questionTimings[index] || 0;
+      
+      // Expected time per question (2 minutes average)
+      const expectedTime = 120;
+      let timeCategory = 'onTime';
+      
+      if (questionTime < expectedTime * 0.5) {
+        timeCategory = 'superfast';
+        timeScores.superfast++;
+      } else if (questionTime > expectedTime * 1.5) {
+        timeCategory = 'slow';
+        timeScores.slow++;
+      } else {
+        timeCategory = 'onTime';
+        if (isCorrect) {
+          timeScores.onTime++;
+        } else {
+          timeScores.onTimeIncorrect++;
+        }
+      }
+
+      if (isAttempted) {
+        if (isCorrect) {
+          correct++;
+          
+          // Check for critical thinking questions (assertion-reason type)
+          if (question.question?.english?.includes('Assertion') || 
+              question.question?.english?.includes('Statement') ||
+              question.topic?.toLowerCase().includes('analysis')) {
+            criticalThinkingCorrect++;
+            criticalThinkingTotal++;
+          } else {
+            criticalThinkingTotal++;
+          }
+          
+          // Check for concept clarity questions
+          if (question.question?.english?.includes('principle') || 
+              question.question?.english?.includes('concept') ||
+              question.difficulty === 'hard') {
+            conceptClarityCorrect++;
+            conceptClarityTotal++;
+          } else {
+            conceptClarityTotal++;
+          }
+        } else {
+          incorrect++;
+          if (question.question?.english?.includes('Assertion') || 
+              question.question?.english?.includes('Statement') ||
+              question.topic?.toLowerCase().includes('analysis')) {
+            criticalThinkingTotal++;
+          }
+          if (question.question?.english?.includes('principle') || 
+              question.question?.english?.includes('concept') ||
+              question.difficulty === 'hard') {
+            conceptClarityTotal++;
+          }
+        }
+      } else {
+        unattempted++;
+      }
+
+      return {
+        questionIndex: index,
+        question: question.question?.english || question.question,
+        userAnswer: userAnswer?.answer,
+        correctAnswer,
+        isCorrect,
+        isAttempted,
+        timeSpent: questionTime,
+        timeCategory,
+        subject: question.subject,
+        topic: question.topic,
+        difficulty: question.difficulty || 'medium'
+      };
+    });
+
+    // Calculate scores
+    const totalQuestions = questions.length;
+    const attempted = correct + incorrect;
+    
+    const criticalThinkingScore = criticalThinkingTotal > 0 ? 
+      Math.round((criticalThinkingCorrect / criticalThinkingTotal) * 100) : 0;
+    
+    const knowledgeRetentionScore = totalQuestions > 0 ? 
+      Math.round(((correct - incorrect) / totalQuestions) * 100) : 0;
+    
+    const conceptClarityScore = conceptClarityTotal > 0 ? 
+      Math.round((conceptClarityCorrect / conceptClarityTotal) * 100) : 0;
+    
+    const timeManagementScore = attempted > 0 ? 
+      Math.round(((timeScores.superfast + timeScores.onTime) / attempted) * 100) : 0;
+
+    const overallScore = Math.round((correct / totalQuestions) * 100);
+    const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+
+    // Subject-wise analysis
+    const subjectAnalysis = questions.reduce((acc: any, question: any, index: number) => {
+      const subject = question.subject || 'General';
+      if (!acc[subject]) {
+        acc[subject] = { correct: 0, total: 0, attempted: 0 };
+      }
+      acc[subject].total++;
+      const userAnswer = answers[index];
+      if (userAnswer?.answer !== undefined) {
+        acc[subject].attempted++;
+        if (userAnswer.answer === (question.correctAnswer?.english || question.correctAnswer)) {
+          acc[subject].correct++;
+        }
+      }
+      return acc;
+    }, {});
+
+    return {
+      summary: {
+        totalQuestions,
+        correct,
+        incorrect,
+        unattempted,
+        attempted,
+        overallScore,
+        accuracy,
+        timeSpent
+      },
+      advancedScores: {
+        criticalThinkingScore,
+        knowledgeRetentionScore,
+        conceptClarityScore,
+        timeManagementScore
+      },
+      subjectAnalysis,
+      questionAnalysis,
+      timeAnalysis: timeScores,
+      recommendations: generateRecommendations(criticalThinkingScore, knowledgeRetentionScore, conceptClarityScore, timeManagementScore)
+    };
+  }
+
+  function generateRecommendations(critical: number, retention: number, clarity: number, timeManagement: number) {
+    const recommendations = [];
+    
+    if (critical < 60) {
+      recommendations.push("Focus on assertion-reason and analytical questions to improve critical thinking");
+    }
+    if (retention < 70) {
+      recommendations.push("Strengthen knowledge retention through regular revision and practice");
+    }
+    if (clarity < 65) {
+      recommendations.push("Work on understanding fundamental concepts and principles");
+    }
+    if (timeManagement < 75) {
+      recommendations.push("Practice time management with timed mock tests");
+    }
+    
+    return recommendations.length > 0 ? recommendations : ["Great performance! Continue with consistent practice"];
+  }
 
   // Subjects routes
   app.get("/api/subjects", async (req, res) => {
