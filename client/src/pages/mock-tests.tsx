@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
@@ -58,12 +59,17 @@ import {
   Circle,
   Bookmark,
   Send,
-  Trophy,
+  X,
+  XCircle,
+  AlertCircle,
   Target,
+  Brain,
+  BookMarked,
+  Timer,
   TrendingUp,
+  BarChart3,
   AlertTriangle,
 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 type MockTest = {
   id: number;

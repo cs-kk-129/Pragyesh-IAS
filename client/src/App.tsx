@@ -15,7 +15,7 @@ import DailyQuiz from "@/pages/daily-quiz";
 import Chat from "@/pages/chat";
 import StudyPlan from "@/pages/study-plan";
 import AdminDashboard from "@/pages/admin-dashboard";
-import MockTests from "@/pages/mock-tests";
+import MockTestsEnhanced from "@/pages/mock-tests-enhanced";
 import WelcomeDialog from "@/components/welcome-dialog";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
