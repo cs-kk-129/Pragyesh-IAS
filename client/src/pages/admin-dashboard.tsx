@@ -291,10 +291,17 @@ Follow these UPSC formatting guidelines:
         if (response.ok) {
           const data = await response.json();
           allQuestions.push(...data.questions.map((q: any) => ({
-            ...q,
+            id: Math.random().toString(),
+            question: q.question?.english || q.question,
+            questionHindi: q.question?.hindi || q.questionHindi,
+            options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
+            optionsHindi: q.options?.hindi || q.optionsHindi,
+            correctAnswer: q.correctAnswer?.english || q.correctAnswer,
+            type: "objective",
             subject,
             topic,
-            id: Math.random().toString(),
+            difficulty: q.difficulty || "medium",
+            marks: 2,
             isSelected: false
           })));
         }
@@ -339,7 +346,7 @@ Follow these UPSC formatting guidelines:
         id: `generated-${Date.now()}-${index}`,
         question: q.question?.english || q.question,
         questionHindi: q.question?.hindi || q.questionHindi,
-        options: q.options?.english || q.options,
+        options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
         optionsHindi: q.options?.hindi || q.optionsHindi,
         correctAnswer: q.correctAnswer?.english || q.correctAnswer,
         type: "objective",
@@ -824,18 +831,24 @@ Follow these UPSC formatting guidelines:
 
                                     {question.options && (
                                       <div className="grid grid-cols-2 gap-2 mt-2">
-                                        {question.options.map((option, index) => (
+                                        {(Array.isArray(question.options) ? question.options : 
+                                          (typeof question.options === 'string' ? JSON.parse(question.options).english || JSON.parse(question.options) : 
+                                           question.options.english || [])).map((option, index) => (
                                           <div
                                             key={index}
                                             className={`p-2 rounded border ${
-                                              option === question.correctAnswer
+                                              option === (typeof question.correctAnswer === 'string' && question.correctAnswer.startsWith('{') ? 
+                                                JSON.parse(question.correctAnswer).english : 
+                                                question.correctAnswer?.english || question.correctAnswer)
                                                 ? "bg-green-50 border-green-200"
                                                 : "bg-gray-50"
                                             }`}
                                           >
                                             <span className="text-sm">
                                               {String.fromCharCode(65 + index)}. {option}
-                                              {option === question.correctAnswer && (
+                                              {option === (typeof question.correctAnswer === 'string' && question.correctAnswer.startsWith('{') ? 
+                                                JSON.parse(question.correctAnswer).english : 
+                                                question.correctAnswer?.english || question.correctAnswer) && (
                                                 <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
                                               )}
                                             </span>
