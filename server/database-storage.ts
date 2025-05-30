@@ -22,9 +22,16 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
+    // Configure session store with better error handling for Neon
     this.sessionStore = new PostgresSessionStore({ 
       pool, 
-      createTableIfMissing: true 
+      createTableIfMissing: true,
+      errorLog: (err: any) => {
+        // Suppress control plane errors that are common with Neon
+        if (!err.message?.includes('Control plane request failed')) {
+          console.error('Session store error:', err);
+        }
+      }
     });
   }
 
