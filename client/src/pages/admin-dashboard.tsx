@@ -117,6 +117,46 @@ export default function AdminDashboard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showMockTestDialog, setShowMockTestDialog] = useState(false);
+  const [showTopicSelector, setShowTopicSelector] = useState(false);
+  const [selectedTopics, setSelectedTopics] = useState<Record<string, {topicId: number, questionCount: number, subject: string}>>({});
+  const [totalQuestions, setTotalQuestions] = useState(0);
+
+  // UPSC Subject and Topic structure with recommended distribution
+  const upscSubjects = {
+    "History": {
+      percentage: 15,
+      topics: ["Ancient India", "Medieval India", "Modern India", "Freedom Movement", "Post-Independence India"]
+    },
+    "Art and Culture": {
+      percentage: 5,
+      topics: ["Indian Art Forms", "Literature", "Music and Dance", "Festivals", "Cultural Heritage"]
+    },
+    "Geography": {
+      percentage: 10,
+      topics: ["Physical Geography", "Human Geography", "Indian Geography", "World Geography", "Economic Geography"]
+    },
+    "Indian Polity": {
+      percentage: 15,
+      topics: ["Constitution", "Fundamental Rights", "Governance", "Parliament", "Judiciary", "Federalism"]
+    },
+    "Economics": {
+      percentage: 15,
+      topics: ["Economic Development", "Planning", "Banking", "Public Finance", "International Trade"]
+    },
+    "Environment": {
+      percentage: 10,
+      topics: ["Ecology", "Biodiversity", "Climate Change", "Conservation", "Pollution"]
+    },
+    "Science & Technology": {
+      percentage: 10,
+      topics: ["Space Technology", "Defense Technology", "Biotechnology", "IT & Communication", "Energy"]
+    },
+    "Current Affairs": {
+      percentage: 20,
+      topics: ["National Affairs", "International Affairs", "Economy", "Science & Tech", "Sports", "Awards"]
+    }
+  };
+
   const [mockTestDetails, setMockTestDetails] = useState({
     title: "",
     description: "",
@@ -187,6 +227,87 @@ export default function AdminDashboard() {
       evaluationReport: "Strong performance in polity and history. Needs improvement in geography.",
     },
   ];
+
+  // Handlers for topic-based question generation
+  const handleTopicSelection = (subject: string, topic: string, questionCount: number) => {
+    const key = `${subject}-${topic}`;
+    setSelectedTopics(prev => {
+      if (questionCount === 0) {
+        const { [key]: removed, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [key]: { topicId: Math.random(), questionCount, subject }
+      };
+    });
+    
+    // Update total question count
+    const newTotal = Object.values({
+      ...selectedTopics,
+      [key]: questionCount > 0 ? { topicId: Math.random(), questionCount, subject } : undefined
+    }).filter(Boolean).reduce((sum, item) => sum + (item?.questionCount || 0), 0);
+    setTotalQuestions(newTotal);
+  };
+
+  const handleGenerateFromTopics = async () => {
+    if (Object.keys(selectedTopics).length === 0) return;
+
+    setIsGenerating(true);
+    try {
+      // Generate questions for each selected topic
+      const allQuestions: any[] = [];
+      
+      for (const [key, topicData] of Object.entries(selectedTopics)) {
+        const [subject, topic] = key.split('-');
+        
+        // Create UPSC-standard prompt with specific formatting
+        const prompt = `Generate ${topicData.questionCount} UPSC-standard questions on ${topic} from ${subject}.
+
+Follow these UPSC formatting guidelines:
+- Question Types: 50% factual, 30% analytical, 20% assertion-reason
+- Difficulty: 50% Moderate, 30% Tough, 20% Tricky/trap-based
+- Format: Numbered questions (Q1, Q2...) with four options (A-D)
+- Include correct answer and 3-5 line explanation
+- Questions in both English and Hindi
+- Maintain UPSC exam standards for depth and accuracy`;
+
+        const response = await fetch('/api/generate-questions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            prompt,
+            questionType: 'objective',
+            generateBilingual: true,
+            subject,
+            topic
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          allQuestions.push(...data.questions.map((q: any) => ({
+            ...q,
+            subject,
+            topic,
+            id: Math.random().toString(),
+            isSelected: false
+          })));
+        }
+      }
+
+      // Shuffle questions randomly as requested
+      const shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5);
+      setGeneratedQuestions(shuffledQuestions);
+      
+    } catch (error) {
+      console.error('Error generating questions:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleGenerateQuestions = async () => {
     if (!questionPrompt.trim()) return;
@@ -626,23 +747,34 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <Button
-                        onClick={handleGenerateQuestions}
-                        disabled={isGenerating || !questionPrompt.trim()}
-                        className="w-full"
-                      >
-                        {isGenerating ? (
-                          <>
-                            <Brain className="mr-2 h-4 w-4 animate-spin" />
-                            Generating Questions...
-                          </>
-                        ) : (
-                          <>
-                            <Brain className="mr-2 h-4 w-4" />
-                            Generate Questions with AI
-                          </>
-                        )}
-                      </Button>
+                      <div className="flex space-x-4">
+                        <Button
+                          onClick={handleGenerateQuestions}
+                          disabled={isGenerating || !questionPrompt.trim()}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          {isGenerating ? (
+                            <>
+                              <Brain className="mr-2 h-4 w-4 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Brain className="mr-2 h-4 w-4" />
+                              Generate from Prompt
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button
+                          onClick={() => setShowTopicSelector(true)}
+                          className="flex-1"
+                        >
+                          <Target className="mr-2 h-4 w-4" />
+                          Select Topics & Generate
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Generated Questions */}
