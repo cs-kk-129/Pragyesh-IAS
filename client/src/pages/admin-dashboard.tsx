@@ -67,6 +67,8 @@ import {
   Target,
   BookOpen,
   MessageSquare,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
