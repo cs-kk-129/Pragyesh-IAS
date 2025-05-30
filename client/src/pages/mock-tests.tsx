@@ -69,6 +69,7 @@ import {
   TrendingUp,
   BarChart3,
   AlertTriangle,
+  Trophy,
 } from "lucide-react";
 
 type MockTest = {
