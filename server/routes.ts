@@ -14,6 +14,16 @@ const isAuthenticated = (req: any, res: any, next: any) => {
 
 // Global mock tests storage (module level to persist)
 const mockTests: any[] = [];
+const mockTestAttempts = new Map();
+const announcements = [
+  {
+    id: 1,
+    title: "New Study Materials Added",
+    message: "Comprehensive study materials for Geography and Modern History have been added to the platform.",
+    createdAt: new Date().toISOString(),
+    priority: "medium"
+  }
+];
 
 // Initialize with sample data
 mockTests.push({
