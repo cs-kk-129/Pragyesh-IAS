@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
+import ManualQuestionInput from "@/components/admin/manual-question-input";
 import {
   Card,
   CardContent,
@@ -549,14 +550,18 @@ Follow these UPSC formatting guidelines:
 
             {/* Main Admin Tabs */}
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="users" className="flex items-center space-x-2">
                   <Users className="h-4 w-4" />
                   <span>User Management</span>
                 </TabsTrigger>
                 <TabsTrigger value="questions" className="flex items-center space-x-2">
                   <Brain className="h-4 w-4" />
-                  <span>Question Generation</span>
+                  <span>AI Questions</span>
+                </TabsTrigger>
+                <TabsTrigger value="manual-questions" className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Manual Input</span>
                 </TabsTrigger>
                 <TabsTrigger value="evaluations" className="flex items-center space-x-2">
                   <ClipboardCheck className="h-4 w-4" />
@@ -866,6 +871,11 @@ Follow these UPSC formatting guidelines:
                     )}
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Manual Question Input Tab */}
+              <TabsContent value="manual-questions" className="space-y-6">
+                <ManualQuestionInput />
               </TabsContent>
 
               {/* Evaluations Tab */}

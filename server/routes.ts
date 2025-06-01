@@ -420,6 +420,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return recommendations.length > 0 ? recommendations : ["Great performance! Continue with consistent practice"];
   }
 
+  // Get announcements endpoint
+  app.get("/api/announcements", (req, res) => {
+    try {
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ message: "Failed to fetch announcements" });
+    }
+  });
+
+  // Create announcement endpoint (Admin only)
+  app.post("/api/admin/announcements", (req, res) => {
+    try {
+      const { title, message, priority } = req.body;
+      const announcement = {
+        id: announcements.length + 1,
+        title,
+        message,
+        createdAt: new Date().toISOString(),
+        priority: priority || "medium"
+      };
+      announcements.push(announcement);
+      res.json(announcement);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      res.status(500).json({ message: "Failed to create announcement" });
+    }
+  });
+
+  // Admin manual question input endpoint
+  app.post("/api/admin/questions/manual", (req, res) => {
+    try {
+      const { questions, subjectId, topicId } = req.body;
+      
+      // Process and store manual questions
+      const processedQuestions = questions.map((q: any, index: number) => ({
+        id: Date.now() + index,
+        ...q,
+        subjectId,
+        topicId,
+        createdAt: new Date().toISOString(),
+        createdBy: 1 // placeholder admin ID
+      }));
+
+      res.json({ 
+        message: "Questions added successfully", 
+        count: processedQuestions.length,
+        questions: processedQuestions 
+      });
+    } catch (error) {
+      console.error("Error adding manual questions:", error);
+      res.status(500).json({ message: "Failed to add questions" });
+    }
+  });
+
   // Subjects routes
   app.get("/api/subjects", async (req, res) => {
     try {
