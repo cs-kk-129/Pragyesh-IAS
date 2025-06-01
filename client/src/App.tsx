@@ -27,7 +27,8 @@ function AppWithWelcome() {
   useEffect(() => {
     // Show welcome dialog for students (not admin) on first visit
     if (user && user.username !== 'csadmin') {
-      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+      const welcomeKey = `hasSeenWelcome_${user.id}`;
+      const hasSeenWelcome = localStorage.getItem(welcomeKey);
       if (!hasSeenWelcome) {
         setShowWelcome(true);
       }
@@ -36,7 +37,10 @@ function AppWithWelcome() {
 
   const handleCloseWelcome = () => {
     setShowWelcome(false);
-    localStorage.setItem('hasSeenWelcome', 'true');
+    if (user) {
+      const welcomeKey = `hasSeenWelcome_${user.id}`;
+      localStorage.setItem(welcomeKey, 'true');
+    }
   };
 
   return (

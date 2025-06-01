@@ -1,0 +1,22 @@
+There are a few changes and modifications to be done.
+- Firstly, the banner is not popping up after logging in and entering the website which I asked you to create earlier.
+- Also, add micro animations wherever applicable (such as in the opening banner, buttons, toggles, tabs, etc)
+- The header needs to be to updated and modified.
+    - The logo and the name are appearing twice in the header. Fix it and place the logo and header in the top left. Also, update the logo with the logo I attached here (File name: Logo_Transparent_v1)
+    - Make the notification icon functional. Upon clicking, it should open up down showing the notifications related to mock tests (such as reminding to attempt the mock test), Announcements from the admin if any (Also create a section in the admin page where the admin can type in and input announcements or messages), reminders for preparation (such as to finish the respective day’s learning according to the study plan they created), and also to check their detailed reports and analytics once the admin approves and uploads their evaluation report
+    - The user icon should open down like a drop down menu and it should have the following sections and features. Please add them accordingly.
+        - Profile section should display the user details like 
+            - Name
+            - Registered email
+            - Registered mobile number
+            - student tier (Free / Paid) ; If the student is a free tier student, create a button to enable the student to upgrade
+        - Settings Tab
+            - Functionality to change or update the password
+            - Support Page for the users to contact the admin regarding any queries
+- The detailed report analysis which I asked to create is not showing up. And instead of displaying it on the user page after completion of the mock test, make the analysis report available to the admin in the evaluation tab in the admin page as a downloadable pdf version. 
+    - Make the report with a clean looking UI with elegant and colourful charts (use subtle and complimentary colours) and subject wise breakdown stating the strong and weak areas (use the topic and difficulty tags assigned to the questions). Refer to the attachment I attached here for reference (File name: Sample_Report). Follow this format to name the report: First Name + Last Name + name of the Mock Test provided + Date.
+    - Also, give the functionality to create and edit the contents of the report. Derive all the metrics that are mentioned above and provide an option to the admin to choose what and what not to include in the report. Make all the calculated and derived metrics for the report available to the admin
+    - Create and provide a sample of the detailed report pdf made available to download in the agent chat window here (just for this instance for testing purposes.)
+- And after attempting and submitting the mock test in the student page, once logged out and after logging in, it doesn’t show that the student has already attempted the mock test. It allows the student to attempt the test again despite the student already attempting the mock test. Fix it please
+    - Also, after the starts the test, it isn’t going into fullscreen mode as asked.
+- In the generate questions tab in the admin page, create another functionality beside the existing fields where user can manually copy the questions he want to include in the test into the text field, or can upload a document containing the questions (allow the document in any of the following formats; Plain text files, PDF, Word documents, Google Doc links etc.) Give the list of options and once the admin chooses the format, provide the option to upload the doc or copy the text respectively.

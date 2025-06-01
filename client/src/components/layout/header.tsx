@@ -11,12 +11,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, Menu, Settings, User, Moon, Sun } from "lucide-react";
+import { Bell, LogOut, Menu, Settings, User, Moon, Sun, CreditCard, HelpCircle, Shield, Phone, Mail, Calendar, Trophy, AlertCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function Header() {
   const { user, logoutMutation } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'mocktest',
+      title: 'Mock Test Reminder',
+      message: 'You have a pending mock test - "UPSC Prelims Practice"',
+      time: '2 hours ago',
+      read: false
+    },
+    {
+      id: 2,
+      type: 'announcement',
+      title: 'Admin Announcement',
+      message: 'New study materials have been added to Geography section',
+      time: '1 day ago',
+      read: false
+    },
+    {
+      id: 3,
+      type: 'study',
+      title: 'Study Plan Reminder',
+      message: 'Complete today\'s topics: Modern History and Polity',
+      time: '3 hours ago',
+      read: true
+    }
+  ]);
   const { theme, setTheme } = useTheme();
 
   // Wait until component is mounted to avoid hydration issues
@@ -43,12 +69,15 @@ export default function Header() {
             <span className="sr-only">Toggle menu</span>
           </Button>
         </div>
-        <div className="hidden md:flex">
+        <div className="flex">
           <Link to="/">
-            <div className="flex items-center space-x-2">
-              <img src="/src/assets/pragyesh-logo.png" alt="Pragyesh IAS" className="h-8 w-8" />
-              <span className="font-bold text-2xl text-primary">Pragyesh</span>
-              <span className="ml-1 font-bold text-2xl">IAS</span>
+            <div className="flex items-center space-x-3 group transition-all duration-300 hover:scale-105">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
+                P
+              </div>
+              <span className="font-bold text-2xl bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">
+                Pragyesh IAS
+              </span>
             </div>
           </Link>
         </div>
