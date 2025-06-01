@@ -17,6 +17,7 @@ import StudyPlan from "@/pages/study-plan";
 import AdminDashboard from "@/pages/admin-dashboard";
 import MockTests from "@/pages/mock-tests";
 import WelcomeDialog from "@/components/welcome-dialog";
+import WelcomeBanner from "@/components/welcome-banner";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 

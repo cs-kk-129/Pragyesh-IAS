@@ -72,7 +72,17 @@ export default function Header() {
         <div className="flex">
           <Link to="/">
             <div className="flex items-center space-x-3 group transition-all duration-300 hover:scale-105">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
+              <img 
+                src="/attached_assets/Logo_Transparent_v1.png" 
+                alt="Pragyesh IAS Logo" 
+                className="h-10 w-10 transition-transform duration-300 group-hover:rotate-12"
+                onError={(e) => {
+                  // Fallback to text logo if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hidden items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
                 P
               </div>
               <span className="font-bold text-2xl bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">
