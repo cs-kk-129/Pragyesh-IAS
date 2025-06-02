@@ -192,6 +192,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get admin evaluations - real mock test attempts
+  app.get("/api/admin/evaluations", async (req, res) => {
+    try {
+      // Get all quiz attempts (mock test submissions)
+      const attempts = await storage.getQuizAttemptsByUser ? 
+        await storage.getAllQuizAttempts?.() || [] : [];
+      
+      // Transform to evaluation format
+      const evaluations = await Promise.all(attempts.map(async (attempt: any) => {
+        const user = await storage.getUser(attempt.userId);
+        const quiz = await storage.getQuizById ? 
+          await storage.getQuizById(attempt.quizId) : null;
+        
+        return {
+          id: attempt.id,
+          studentName: user?.username || 'Unknown',
+          quizTitle: quiz?.title || 'Mock Test',
+          submissionType: 'objective',
+          submittedAt: attempt.completedAt || attempt.startedAt,
+          status: 'completed',
+          score: attempt.score,
+          timeSpent: attempt.timeSpent,
+          createdAt: attempt.startedAt,
+          userId: attempt.userId,
+          quizId: attempt.quizId
+        };
+      }));
+      
+      res.json({
+        evaluations: evaluations.sort((a, b) => 
+          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        )
+      });
+    } catch (error) {
+      console.error("Error fetching evaluations:", error);
+      res.status(500).json({ error: "Failed to fetch evaluations" });
+    }
+  });
+
   // Forgot password endpoint
   app.post("/api/forgot-password", async (req, res) => {
     try {
