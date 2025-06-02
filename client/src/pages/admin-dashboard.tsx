@@ -201,35 +201,14 @@ export default function AdminDashboard() {
     },
   ];
 
-  const mockEvaluations: EvaluationSubmission[] = [
-    {
-      id: 1,
-      studentName: "CSK",
-      quizTitle: "Day 1 Mock Test",
-      submissionType: "objective",
-      submittedAt: "2025-05-27 10:30 AM",
-      status: "pending",
-    },
-    {
-      id: 2,
-      studentName: "Student1",
-      quizTitle: "Day 2 Subjective Test",
-      submissionType: "subjective",
-      submittedAt: "2025-05-26 02:15 PM",
-      status: "evaluating",
-      answerFileUrl: "/uploads/student1_day2.pdf",
-    },
-    {
-      id: 3,
-      studentName: "CSK",
-      quizTitle: "Day 3 Mock Test",
-      submissionType: "objective",
-      submittedAt: "2025-05-25 09:45 AM",
-      status: "completed",
-      score: 85,
-      evaluationReport: "Strong performance in polity and history. Needs improvement in geography.",
-    },
-  ];
+  // Fetch real-time evaluations data
+  const { data: evaluationsData, isLoading: evaluationsLoading } = useQuery({
+    queryKey: ["/api/admin/evaluations"],
+    queryFn: () => fetch('/api/admin/evaluations').then(res => res.json()),
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const realEvaluations = evaluationsData?.evaluations || [];
 
   // Handlers for topic-based question generation
   const handleTopicSelection = (subject: string, topic: string, questionCount: number) => {
@@ -904,54 +883,67 @@ Follow these UPSC formatting guidelines:
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {mockEvaluations.map((evaluation) => (
-                          <TableRow key={evaluation.id}>
-                            <TableCell className="font-medium">
-                              {evaluation.studentName}
+                        {evaluationsLoading ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                              <p className="mt-2 text-muted-foreground">Loading evaluations...</p>
                             </TableCell>
-                            <TableCell>{evaluation.quizTitle}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {evaluation.submissionType}
-                              </Badge>
+                          </TableRow>
+                        ) : realEvaluations.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8">
+                              <p className="text-muted-foreground">No mock test evaluations found</p>
                             </TableCell>
-                            <TableCell>{evaluation.submittedAt}</TableCell>
-                            <TableCell>
-                              {getStatusBadge(evaluation.status)}
-                            </TableCell>
-                            <TableCell>
-                              {evaluation.score ? `${evaluation.score}%` : "-"}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-2">
-                                {evaluation.status === "pending" && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleEvaluateSubmission(evaluation.id)}
-                                  >
-                                    <Brain className="h-4 w-4 mr-1" />
-                                    Evaluate with AI
-                                  </Button>
-                                )}
+                          </TableRow>
+                        ) : (
+                          realEvaluations.map((evaluation: any) => (
+                            <TableRow key={evaluation.id}>
+                              <TableCell className="font-medium">
+                                {evaluation.studentName || evaluation.username}
+                              </TableCell>
+                              <TableCell>{evaluation.quizTitle || evaluation.title}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline">
+                                  objective
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(evaluation.submittedAt || evaluation.createdAt).toLocaleString()}</TableCell>
+                              <TableCell>
+                                {getStatusBadge(evaluation.status || "completed")}
+                              </TableCell>
+                              <TableCell>
+                                {evaluation.score ? `${evaluation.score}%` : "-"}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-2">
+                                  {evaluation.status === "pending" && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEvaluateSubmission(evaluation.id)}
+                                    >
+                                      <Brain className="h-4 w-4 mr-1" />
+                                      Evaluate with AI
+                                    </Button>
+                                  )}
 
-                                {evaluation.answerFileUrl && (
-                                  <Button variant="outline" size="sm">
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Download
-                                  </Button>
-                                )}
+                                  {evaluation.answerFileUrl && (
+                                    <Button variant="outline" size="sm">
+                                      <Download className="h-4 w-4 mr-1" />
+                                      Download
+                                    </Button>
+                                  )}
 
-                                {evaluation.status === "completed" && (
                                   <Button variant="outline" size="sm">
                                     <Eye className="h-4 w-4 mr-1" />
                                     View Report
                                   </Button>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
                       </TableBody>
                     </Table>
                   </CardContent>
