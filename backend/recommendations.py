@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import os
 from typing import List
 from models.schemas import EvaluationResult
@@ -8,13 +8,15 @@ class RecommendationEngine:
         # Check if OpenAI API key is available
         self.api_key = os.getenv("OPENAI_API_KEY")
         if self.api_key:
-            openai.api_key = self.api_key
+            self.client = OpenAI(api_key=self.api_key)
+        else:
+            self.client = None
         
     async def generate_recommendations(self, evaluation: EvaluationResult) -> List[str]:
         """
         Generate personalized study recommendations using OpenAI GPT-4
         """
-        if not self.api_key:
+        if not self.client:
             return self._generate_fallback_recommendations(evaluation)
         
         try:
@@ -22,8 +24,8 @@ class RecommendationEngine:
             prompt = self._create_recommendation_prompt(evaluation)
             
             # Call OpenAI API
-            response = await openai.ChatCompletion.acreate(
-                model="gpt-4",
+            response = self.client.chat.completions.create(
+                model="gpt-4o",  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
                 messages=[
                     {
                         "role": "system",
