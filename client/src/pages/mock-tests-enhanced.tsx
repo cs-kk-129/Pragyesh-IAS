@@ -638,31 +638,121 @@ export default function MockTestsEnhanced() {
               </CardContent>
             </Card>
 
-            {/* Recommendations */}
+            {/* AI Recommendations */}
             <Card>
               <CardHeader>
-                <CardTitle>Recommendations</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>AI-Powered Recommendations</span>
+                  {evaluationData.pdfReportAvailable && (
+                    <Badge variant="secondary" className="ml-auto">
+                      Enhanced Analysis
+                    </Badge>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
-                  {evaluationData.recommendations.map((recommendation, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <TrendingUp className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
-                      <span className="text-sm">{recommendation}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="space-y-4">
+                  {/* Strengths */}
+                  {evaluationData.strengths && evaluationData.strengths.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-green-700 mb-2">Your Strengths</h4>
+                      <ul className="space-y-1">
+                        {evaluationData.strengths.map((strength, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Check className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+                            <span className="text-sm">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Areas for Improvement */}
+                  {evaluationData.weaknesses && evaluationData.weaknesses.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-orange-700 mb-2">Areas for Improvement</h4>
+                      <ul className="space-y-1">
+                        {evaluationData.weaknesses.map((weakness, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <AlertTriangle className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0" />
+                            <span className="text-sm">{weakness}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Personalized Recommendations */}
+                  {evaluationData.recommendations && evaluationData.recommendations.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-blue-700 mb-2">Personalized Study Plan</h4>
+                      <ul className="space-y-2">
+                        {evaluationData.recommendations.map((recommendation, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <TrendingUp className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                            <span className="text-sm">{recommendation}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
+
+            {/* Topic Analysis */}
+            {evaluationData.topicAnalysis && evaluationData.topicAnalysis.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Topic-wise Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {evaluationData.topicAnalysis
+                      .filter(topic => topic.needsImprovement)
+                      .slice(0, 5)
+                      .map((topic, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                          <div>
+                            <span className="font-medium">{topic.topic}</span>
+                            <p className="text-sm text-muted-foreground">{topic.subject}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-medium text-red-600">
+                              {topic.accuracy}% accuracy
+                            </span>
+                            <p className="text-xs text-muted-foreground">Needs focus</p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowEvaluation(false)}>
-              Close
-            </Button>
-            <Button onClick={() => window.location.reload()}>
-              Take Another Test
-            </Button>
+          <div className="flex justify-between items-center">
+            <div>
+              {evaluationData.pdfReportAvailable && evaluationData.reportDownloadUrl && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.open(evaluationData.reportDownloadUrl, '_blank')}
+                  className="mr-2"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Detailed Report (PDF)
+                </Button>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => setShowEvaluation(false)}>
+                Close
+              </Button>
+              <Button onClick={() => window.location.reload()}>
+                Take Another Test
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mock test evaluation endpoint
+  // Mock test evaluation endpoint with FastAPI backend integration
   app.post("/api/mock-tests/:id/evaluate", async (req, res) => {
     try {
       const { id } = req.params;
@@ -238,13 +238,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Mock test not found" });
       }
 
-      // Calculate evaluation metrics
+      // Transform data for FastAPI backend
+      const submissionData = {
+        user_id: (req as any).user?.id || 1,
+        test_id: parseInt(id),
+        test_title: mockTest.title,
+        answers: answers.map((answer: any, index: number) => ({
+          question_id: index + 1,
+          selected_option: answer.answer || null,
+          time_spent: questionTimings[index] || 90,
+          is_marked_for_review: false
+        })),
+        questions_metadata: mockTest.questions.map((question: any, index: number) => ({
+          question_id: index + 1,
+          correct_answer: question.correctAnswer?.english || question.correctAnswer,
+          question_type: question.type || "multiple_choice",
+          subject: question.subject || "general_studies",
+          topic: question.topic || "General Knowledge",
+          difficulty_level: question.difficulty || "medium",
+          marks: 2,
+          is_critical_thinking: question.type === "assertion_reason" || 
+                               (question.question?.english && question.question.english.includes('Assertion')),
+          is_concept_clarity: question.difficulty === "hard" || 
+                             (question.question?.english && question.question.english.includes('principle'))
+        })),
+        total_time_spent: timeSpent,
+        submission_timestamp: new Date().toISOString()
+      };
+
+      // Try to call FastAPI backend for advanced evaluation
+      try {
+        const fetch = (await import('node-fetch')).default;
+        const evaluationResponse = await fetch('http://localhost:8001/submit-responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submissionData),
+          timeout: 10000
+        });
+
+        if (evaluationResponse.ok) {
+          const evaluationResult = await evaluationResponse.json();
+          
+          // Transform response to match frontend expectations
+          const transformedResult = {
+            totalQuestions: evaluationResult.evaluation.metrics.total_questions,
+            correctAnswers: evaluationResult.evaluation.metrics.correct_count,
+            incorrectAnswers: evaluationResult.evaluation.metrics.incorrect_count,
+            unattempted: evaluationResult.evaluation.metrics.unattempted_count,
+            accuracy: evaluationResult.evaluation.metrics.accuracy_percentage,
+            overallScore: evaluationResult.evaluation.metrics.overall_score,
+            criticalThinkingScore: evaluationResult.evaluation.metrics.critical_thinking_score,
+            knowledgeRetentionScore: evaluationResult.evaluation.metrics.knowledge_retention_score,
+            conceptClarityScore: evaluationResult.evaluation.metrics.concept_clarity_score,
+            timeManagementScore: evaluationResult.evaluation.metrics.time_management_score,
+            subjectAnalysis: evaluationResult.evaluation.subject_analysis.map((subject: any) => ({
+              subject: subject.subject,
+              totalQuestions: subject.total_questions,
+              correct: subject.correct,
+              incorrect: subject.incorrect,
+              accuracy: subject.accuracy,
+              timeSpent: subject.time_spent
+            })),
+            topicAnalysis: evaluationResult.evaluation.topic_analysis.map((topic: any) => ({
+              topic: topic.topic,
+              subject: topic.subject,
+              accuracy: topic.accuracy,
+              needsImprovement: topic.needs_improvement
+            })),
+            timeAnalysis: {
+              averageTimePerQuestion: evaluationResult.evaluation.time_analysis.average_time_per_question,
+              rushedQuestions: evaluationResult.evaluation.time_analysis.rushed_questions.length,
+              overthoughtQuestions: evaluationResult.evaluation.time_analysis.overthought_questions.length
+            },
+            strengths: evaluationResult.evaluation.strengths,
+            weaknesses: evaluationResult.evaluation.weaknesses,
+            recommendations: evaluationResult.evaluation.recommendations,
+            reportDownloadUrl: `/api/reports/${evaluationResult.evaluation.user_id}/${evaluationResult.evaluation.test_id}`,
+            evaluationId: evaluationResult.evaluation.evaluation_id,
+            pdfReportAvailable: true
+          };
+
+          console.log("Advanced evaluation completed with PDF report generation");
+          res.json(transformedResult);
+          return;
+        }
+      } catch (backendError) {
+        console.log("FastAPI backend unavailable, using standard evaluation");
+      }
+
+      // Fallback to standard evaluation
       const evaluation = calculateDetailedEvaluation(mockTest, answers, timeSpent, questionTimings);
-      
+      evaluation.pdfReportAvailable = false;
       res.json(evaluation);
+      
     } catch (error) {
       console.error("Mock test evaluation error:", error);
       res.status(500).json({ error: "Failed to evaluate mock test" });
+    }
+  });
+
+  // PDF report download endpoint
+  app.get("/api/reports/:userId/:testId", async (req, res) => {
+    try {
+      const { userId, testId } = req.params;
+      
+      // Proxy request to FastAPI backend
+      const fetch = (await import('node-fetch')).default;
+      const reportResponse = await fetch(`http://localhost:8001/report/${userId}/${testId}`);
+      
+      if (reportResponse.ok) {
+        const buffer = await reportResponse.buffer();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="UPSC_Report_User${userId}_Test${testId}.pdf"`);
+        res.send(buffer);
+      } else {
+        res.status(404).json({ error: "Report not found" });
+      }
+    } catch (error) {
+      console.error("Report download error:", error);
+      res.status(500).json({ error: "Failed to download report" });
     }
   });
 
