@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save quiz attempt to database
       try {
-        const userId = (req as any).user?.id || 1;
+        const userId = (req as any).user?.id || req.body.userId || 1;
         const quizAttempt = {
           userId: userId,
           quizId: parseInt(id),
@@ -443,10 +443,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
 
-        await storage.createQuizAttempt(quizAttempt);
-        console.log("Quiz attempt saved to database");
+        console.log("Saving quiz attempt:", { userId, quizId: parseInt(id), score: Math.round(evaluation.summary.overallScore) });
+        const savedAttempt = await storage.createQuizAttempt(quizAttempt);
+        console.log("Quiz attempt saved successfully:", savedAttempt.id);
       } catch (dbError) {
         console.error("Failed to save quiz attempt:", dbError);
+        console.error("Quiz attempt data:", JSON.stringify({
+          userId: (req as any).user?.id || req.body.userId || 1,
+          quizId: parseInt(id),
+          score: Math.round(evaluation.summary.overallScore)
+        }));
       }
 
       // Also save to in-memory storage for admin evaluations
@@ -900,12 +906,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin evaluations endpoint - shows real mock test submissions
   app.get("/api/admin/evaluations", async (req, res) => {
     try {
-      // Get all mock test attempts from in-memory storage
-      const attempts = mockTestStorage.getAllAttempts();
+      // Get all quiz attempts from database
+      const dbAttempts = await storage.getAllQuizAttempts();
       
-      // Transform to evaluation format for admin dashboard
-      const evaluations = attempts.map(attempt => ({
-        id: attempt.id,
+      // Get in-memory attempts as fallback
+      const memoryAttempts = mockTestStorage.getAllAttempts();
+      
+      // Transform database attempts to evaluation format
+      const dbEvaluations = await Promise.all(dbAttempts.map(async (attempt) => {
+        let user = null;
+        let mockTest = null;
+        
+        try {
+          user = await storage.getUser(attempt.userId);
+          mockTest = mockTests.find(test => test.id === attempt.quizId);
+        } catch (err) {
+          console.error("Error getting user/test details:", err);
+        }
+        
+        return {
+          id: attempt.id,
+          studentName: user?.username || `User ${attempt.userId}`,
+          quizTitle: mockTest?.title || `Mock Test ${attempt.quizId}`,
+          submissionType: 'objective',
+          submittedAt: attempt.completedAt?.toISOString() || new Date().toISOString(),
+          status: 'completed',
+          score: attempt.score,
+          timeSpent: attempt.timeTaken || 0,
+          createdAt: attempt.completedAt?.toISOString() || new Date().toISOString(),
+          userId: attempt.userId,
+          quizId: attempt.quizId,
+          totalQuestions: attempt.totalQuestions,
+          accuracy: attempt.accuracy || 0
+        };
+      }));
+      
+      // Transform memory attempts to evaluation format
+      const memoryEvaluations = memoryAttempts.map(attempt => ({
+        id: `mem_${attempt.id}`,
         studentName: attempt.userName,
         quizTitle: attempt.quizTitle,
         submissionType: 'objective',
@@ -920,7 +958,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accuracy: attempt.accuracy
       }));
       
-      res.json({ evaluations });
+      // Combine and sort by submission time
+      const allEvaluations = [...dbEvaluations, ...memoryEvaluations]
+        .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+      
+      console.log(`Retrieved ${allEvaluations.length} evaluations (${dbEvaluations.length} from database, ${memoryEvaluations.length} from memory)`);
+      res.json({ evaluations: allEvaluations });
     } catch (error) {
       console.error("Error fetching evaluations:", error);
       res.json({ evaluations: [] });
