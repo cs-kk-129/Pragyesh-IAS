@@ -365,13 +365,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const quizAttempt = {
               userId: userId,
               quizId: parseInt(id),
-              score: transformedResult.overallScore,
+              score: Math.round(transformedResult.overallScore),
               totalQuestions: transformedResult.totalQuestions,
-              accuracy: transformedResult.accuracy,
-              timeTaken: timeSpent,
-              answeredQuestions: answers,
-              startedAt: new Date(Date.now() - timeSpent * 1000),
-              completedAt: new Date()
+              accuracy: Math.round(transformedResult.accuracy),
+              timeTaken: Math.round(timeSpent),
+              answeredQuestions: answers.map((answer: any, index: number) => ({
+                questionId: index + 1,
+                userAnswer: answer.answer || '',
+                isCorrect: answer.isCorrect || false,
+                timeSpent: questionTimings[index] || 90
+              }))
             };
             
             await storage.createQuizAttempt(quizAttempt);
@@ -398,13 +401,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const quizAttempt = {
           userId: userId,
           quizId: parseInt(id),
-          score: evaluation.summary.overallScore,
+          score: Math.round(evaluation.summary.overallScore),
           totalQuestions: evaluation.summary.totalQuestions,
-          accuracy: evaluation.summary.accuracy,
-          timeTaken: timeSpent,
-          answeredQuestions: answers,
-          startedAt: new Date(Date.now() - timeSpent * 1000),
-          completedAt: new Date()
+          accuracy: Math.round(evaluation.summary.accuracy),
+          timeTaken: Math.round(timeSpent),
+          answeredQuestions: answers.map((answer: any, index: number) => ({
+            questionId: index + 1,
+            userAnswer: answer.answer || '',
+            isCorrect: answer.isCorrect || false,
+            timeSpent: questionTimings[index] || 90
+          }))
         };
         
         await storage.createQuizAttempt(quizAttempt);

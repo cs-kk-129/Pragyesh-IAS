@@ -207,7 +207,7 @@ export class DatabaseStorage implements IStorage {
   async getAllQuizAttempts(): Promise<QuizAttempt[]> {
     return await db.select()
       .from(quizAttempts)
-      .orderBy(desc(quizAttempts.startedAt));
+      .orderBy(desc(quizAttempts.completedAt));
   }
 
   // BOOKMARKS
