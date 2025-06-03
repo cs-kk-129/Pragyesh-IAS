@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mock test evaluation endpoint with FastAPI backend integration
-  app.post("/api/mock-tests/:id/evaluate", async (req, res) => {
+  app.post("/api/mock-tests/:id/evaluate", isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
       const { answers, timeSpent, questionTimings } = req.body;
@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save quiz attempt to database
       try {
-        const userId = (req as any).user?.id || req.body.userId || 1;
+        const userId = (req as any).user.id;
         const quizAttempt = {
           userId: userId,
           quizId: parseInt(id),
@@ -457,19 +457,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Also save to in-memory storage for admin evaluations
       try {
-        const user = await storage.getUser(req.body.userId);
-        const mockTest = mockTests.find(test => test.id == req.body.testId);
+        const user = (req as any).user;
+        const mockTest = mockTests.find(test => test.id == parseInt(id));
         
         mockTestStorage.saveAttempt({
-          userId: req.body.userId,
-          quizId: req.body.testId,
+          userId: userId,
+          quizId: parseInt(id),
           score: evaluation.summary.overallScore,
           totalQuestions: evaluation.summary.totalQuestions,
           accuracy: evaluation.summary.accuracy,
           timeTaken: Math.round(timeSpent),
           answers: answers,
           userName: user?.username || 'Unknown Student',
-          quizTitle: mockTest?.title || `Mock Test ${req.body.testId}`
+          quizTitle: mockTest?.title || `Mock Test ${id}`
         });
       } catch (storageError) {
         console.error("Failed to save to mock test storage:", storageError);
