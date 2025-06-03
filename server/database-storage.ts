@@ -15,14 +15,15 @@ import connectPg from "connect-pg-simple";
 import { db, pool } from "./db";
 import { eq, and, desc, isNull, lte, gte } from "drizzle-orm";
 import { IStorage } from "./storage";
+import * as schema from "@shared/schema";
 
 const PostgresSessionStore = connectPg(session);
 
 export class DatabaseStorage implements IStorage {
+  // Session store
   sessionStore: session.Store;
 
   constructor() {
-    // Configure session store with better error handling for Neon
     this.sessionStore = new PostgresSessionStore({ 
       pool, 
       createTableIfMissing: true,
@@ -33,6 +34,105 @@ export class DatabaseStorage implements IStorage {
         }
       }
     });
+  }
+
+  // Mock Test Methods
+  async createMockTest(mockTestData: any): Promise<any> {
+    try {
+      // Create the quiz (mock test) in the database
+      const quiz = await this.createQuiz({
+        title: mockTestData.title,
+        quizType: 'mock_test',
+        difficulty: mockTestData.difficulty,
+        timeLimit: mockTestData.duration,
+        testDate: mockTestData.scheduledDate ? new Date(mockTestData.scheduledDate) : undefined,
+        description: mockTestData.description,
+        instructions: 'Read all questions carefully before answering. Test will auto-submit when time expires.',
+        language: 'both'
+      });
+
+      // Create questions for the mock test
+      const createdQuestions = [];
+      for (const question of mockTestData.questions) {
+        const createdQuestion = await this.createQuestion({
+          quizId: quiz.id,
+          question: question.question?.english || question.question || '',
+          options: question.options?.english || question.options || [],
+          correctAnswer: question.correctAnswer?.english || question.correctAnswer || '',
+          explanation: question.explanation || 'Explanation will be provided after evaluation.',
+          difficulty: question.difficulty || 'medium',
+          tags: [question.subject, question.topic].filter(Boolean)
+        });
+        createdQuestions.push(createdQuestion);
+      }
+
+      return {
+        ...quiz,
+        questions: createdQuestions,
+        totalQuestions: createdQuestions.length,
+        subjects: mockTestData.subjects || []
+      };
+    } catch (error) {
+      console.error('Error creating mock test in database:', error);
+      throw error;
+    }
+  }
+
+  async getAllMockTests(): Promise<any[]> {
+    try {
+      // Get all quiz records where quizType is 'mock_test'
+      const quizzes = await db.select()
+        .from(schema.quizzes)
+        .where(eq(schema.quizzes.quizType, 'mock_test'))
+        .orderBy(desc(schema.quizzes.createdAt));
+
+      const mockTests = [];
+      for (const quiz of quizzes) {
+        // Get questions for each quiz
+        const questions = await this.getQuestionsByQuiz(quiz.id);
+
+        // Transform to match the expected format
+        const transformedQuestions = questions.map((q: any) => ({
+          question: {
+            english: q.question,
+            hindi: q.question // For now, using same text for both languages
+          },
+          options: {
+            english: q.options,
+            hindi: q.options // For now, using same options for both languages
+          },
+          correctAnswer: {
+            english: q.correctAnswer,
+            hindi: q.correctAnswer
+          },
+          subject: q.tags?.[0] || 'General',
+          topic: q.tags?.[1] || 'Mixed',
+          difficulty: q.difficulty,
+          marks: 2
+        }));
+
+        mockTests.push({
+          id: quiz.id,
+          title: quiz.title,
+          description: quiz.description || '',
+          duration: quiz.timeLimit || 120,
+          totalQuestions: questions.length,
+          difficulty: quiz.difficulty || 'medium',
+          subjects: Array.from(new Set(questions.map((q: any) => q.tags?.[0] || 'General').filter(Boolean))),
+          questions: transformedQuestions,
+          isActive: true,
+          isAttempted: false,
+          status: 'not_started',
+          scheduledDate: quiz.testDate?.toISOString().split('T')[0],
+          createdAt: quiz.createdAt?.toISOString()
+        });
+      }
+
+      return mockTests;
+    } catch (error) {
+      console.error('Error retrieving mock tests from database:', error);
+      throw error;
+    }
   }
 
   // USERS
@@ -149,7 +249,7 @@ export class DatabaseStorage implements IStorage {
   async getQuizzesBySubtopic(subtopicId: number): Promise<Quiz[]> {
     return await db.select().from(quizzes).where(eq(quizzes.subtopicId, subtopicId));
   }
-  
+
   async getComprehensiveQuizzesBySubject(subjectId: number): Promise<Quiz[]> {
     return await db.select()
       .from(quizzes)
@@ -173,11 +273,11 @@ export class DatabaseStorage implements IStorage {
     const bookmarkedIds = await db.select({ id: bookmarks.questionId })
       .from(bookmarks)
       .where(eq(bookmarks.userId, userId));
-    
+
     if (bookmarkedIds.length === 0) {
       return [];
     }
-    
+
     const ids = bookmarkedIds.map(b => b.id);
     return await db.select()
       .from(questions)
@@ -328,7 +428,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateStudyStreak(userId: number, currentStreak: number, maxStreak: number): Promise<StudyStreak> {
     const existingStreak = await this.getStudyStreak(userId);
-    
+
     if (existingStreak) {
       const [updatedStreak] = await db.update(studyStreaks)
         .set({ 
@@ -363,7 +463,7 @@ export class DatabaseStorage implements IStorage {
       .from(chatMessages)
       .where(eq(chatMessages.userId, userId))
       .orderBy(desc(chatMessages.createdAt));
-    
+
     return messages.slice(0, limit);
   }
 
@@ -392,7 +492,7 @@ export class DatabaseStorage implements IStorage {
         gte(studyPlans.endDate, now)
       ))
       .orderBy(desc(studyPlans.createdAt));
-    
+
     return plan;
   }
 }

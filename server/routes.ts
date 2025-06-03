@@ -163,8 +163,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { title, description, duration, scheduledDate, questions } = req.body;
 
+      const mockTestData = {
+        title,
+        description,
+        duration,
+        scheduledDate,
+        questions,
+        difficulty: 'medium',
+        subjects: Array.from(new Set(questions.map((q: any) => q.subject)))
+      };
+
+      // Store the mock test in database
+      const createdMockTest = await storage.createMockTest(mockTestData);
+
+      // Also store in memory for backward compatibility
       const mockTest = {
-        id: Date.now(),
+        id: createdMockTest.id,
         title,
         description,
         duration,
@@ -178,11 +192,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'not_started',
         createdAt: new Date().toISOString()
       };
-
-      // Store the mock test
       mockTests.push(mockTest);
 
-      res.status(201).json({ success: true, mockTest });
+      console.log(`Mock test "${title}" created successfully with ${questions.length} questions in database`);
+      res.status(201).json({ success: true, mockTest: createdMockTest });
     } catch (error) {
       console.error("Mock test creation error:", error);
       res.status(500).json({ error: "Failed to create mock test" });
@@ -192,35 +205,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all mock tests for students
   app.get("/api/mock-tests", async (req, res) => {
     try {
-      // Get all mock test quizzes from database
-      const quizzes = await db.select()
-        .from(schema.quizzes)
-        .where(eq(schema.quizzes.quizType, 'mock_test'))
-        .orderBy(desc(schema.quizzes.createdAt));
+      // Get mock tests from database storage
+      const dbMockTests = await storage.getAllMockTests();
+      
+      // Combine with any in-memory mock tests for backward compatibility
+      const allMockTests = [...dbMockTests, ...mockTests];
+      
+      // Remove duplicates based on ID
+      const uniqueMockTests = allMockTests.filter((test, index, arr) => 
+        arr.findIndex(t => t.id === test.id) === index
+      );
 
-      const mockTests = [];
-      for (const quiz of quizzes) {
-        // Get questions for each quiz
-        const questions = await storage.getQuestionsByQuiz(quiz.id);
-
-        mockTests.push({
-          id: quiz.id,
-          title: quiz.title,
-          description: quiz.description || '',
-          duration: quiz.timeLimit || 120,
-          totalQuestions: questions.length,
-          difficulty: quiz.difficulty || 'medium',
-          subjects: Array.from(new Set(questions.map(q => q.tags?.[0] || 'General').filter(Boolean))),
-          questions: questions,
-          isActive: true,
-          isAttempted: false,
-          status: 'not_started',
-          scheduledDate: quiz.testDate?.toISOString().split('T')[0],
-          createdAt: quiz.createdAt?.toISOString()
-        });
-      }
-
-      res.json(mockTests);
+      console.log(`Retrieved ${uniqueMockTests.length} mock tests (${dbMockTests.length} from database, ${mockTests.length} from memory)`);
+      res.json(uniqueMockTests);
     } catch (error) {
       console.error("Mock test retrieval error:", error);
       res.status(500).json({ error: "Failed to retrieve mock tests" });
@@ -306,8 +303,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { answers, timeSpent, questionTimings } = req.body;
 
-      // Find the mock test
-      const mockTest = mockTests.find(test => test.id == id);
+      // Find the mock test from database first, then fall back to memory
+      let mockTest = null;
+      try {
+        const dbMockTests = await storage.getAllMockTests();
+        mockTest = dbMockTests.find(test => test.id == id);
+      } catch (dbError) {
+        console.log("Database lookup failed, checking memory");
+      }
+      
+      if (!mockTest) {
+        mockTest = mockTests.find(test => test.id == id);
+      }
+      
       if (!mockTest) {
         return res.status(404).json({ error: "Mock test not found" });
       }

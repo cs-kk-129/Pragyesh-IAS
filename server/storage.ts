@@ -71,6 +71,10 @@ export interface IStorage {
   createStudyPlan(plan: InsertStudyPlan): Promise<StudyPlan>;
   getStudyPlansByUser(userId: number): Promise<StudyPlan[]>;
   getActiveStudyPlan(userId: number): Promise<StudyPlan | undefined>;
+
+  // Mock Tests
+  createMockTest(mockTestData: any): Promise<any>;
+  getAllMockTests(): Promise<any[]>;
   
   // Session store
   sessionStore: session.SessionStore;
@@ -352,6 +356,19 @@ export class MemStorage implements IStorage {
         new Date(plan.startDate) <= now && 
         new Date(plan.endDate) >= now
       );
+  }
+
+  // Mock Test methods (placeholder for MemStorage)
+  async createMockTest(mockTestData: any): Promise<any> {
+    // For MemStorage, this would store in memory
+    // In practice, DatabaseStorage should be used
+    throw new Error('Mock test creation not implemented in MemStorage');
+  }
+
+  async getAllMockTests(): Promise<any[]> {
+    // For MemStorage, this would return from memory
+    // In practice, DatabaseStorage should be used
+    return [];
   }
 }
 
