@@ -462,6 +462,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Failed to save quiz attempt:", dbError);
       }
 
+      // Also save to in-memory storage for admin evaluations
+      try {
+        const user = await storage.getUser(req.body.userId);
+        const mockTest = mockTests.find(test => test.id == req.body.testId);
+        
+        mockTestStorage.saveAttempt({
+          userId: req.body.userId,
+          quizId: req.body.testId,
+          score: evaluation.summary.overallScore,
+          totalQuestions: evaluation.summary.totalQuestions,
+          accuracy: evaluation.summary.accuracy,
+          timeTaken: Math.round(timeSpent),
+          answers: answers,
+          userName: user?.username || 'Unknown Student',
+          quizTitle: mockTest?.title || `Mock Test ${req.body.testId}`
+        });
+      } catch (storageError) {
+        console.error("Failed to save to mock test storage:", storageError);
+      }
+
       res.json(evaluation);
 
     } catch (error) {
@@ -887,6 +907,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(404).json({ message: "No active study plan found" });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active study plan" });
+    }
+  });
+
+  // Admin evaluations endpoint - shows real mock test submissions
+  app.get("/api/admin/evaluations", async (req, res) => {
+    try {
+      // Get all mock test attempts from in-memory storage
+      const attempts = mockTestStorage.getAllAttempts();
+      
+      // Transform to evaluation format for admin dashboard
+      const evaluations = attempts.map(attempt => ({
+        id: attempt.id,
+        studentName: attempt.userName,
+        quizTitle: attempt.quizTitle,
+        submissionType: 'objective',
+        submittedAt: attempt.submittedAt,
+        status: 'completed',
+        score: attempt.score,
+        timeSpent: attempt.timeTaken,
+        createdAt: attempt.submittedAt,
+        userId: attempt.userId,
+        quizId: attempt.quizId,
+        totalQuestions: attempt.totalQuestions,
+        accuracy: attempt.accuracy
+      }));
+      
+      res.json({ evaluations });
+    } catch (error) {
+      console.error("Error fetching evaluations:", error);
+      res.json({ evaluations: [] });
     }
   });
 
