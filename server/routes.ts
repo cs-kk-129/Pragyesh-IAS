@@ -4,11 +4,11 @@ import { setupAuth } from "./auth";
 import { sql } from 'drizzle-orm';
 import { db } from './db';
 import { storage } from './storage';
-import { apiRequest, queryClient } from "@shared/types";
+import { mockTestStorage } from "./mock-test-storage";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 import { IStorage } from "./storage";
-import { generateQuestions } from "./openai";
+import { generateQuiz, answerDoubt } from "./openai";
 import * as schema from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
