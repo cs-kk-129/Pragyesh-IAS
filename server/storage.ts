@@ -45,6 +45,7 @@ export interface IStorage {
   createQuizAttempt(attempt: InsertQuizAttempt): Promise<QuizAttempt>;
   getQuizAttemptsByUser(userId: number): Promise<QuizAttempt[]>;
   getRecentQuizAttempts(userId: number, limit: number): Promise<QuizAttempt[]>;
+  getAllQuizAttempts(): Promise<QuizAttempt[]>;
   
   // Bookmarks
   createBookmark(bookmark: InsertBookmark): Promise<Bookmark>;

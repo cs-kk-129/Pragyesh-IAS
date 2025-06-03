@@ -196,25 +196,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/evaluations", async (req, res) => {
     try {
       // Get all quiz attempts (mock test submissions)
-      const attempts = await storage.getQuizAttemptsByUser ? 
-        await storage.getAllQuizAttempts?.() || [] : [];
+      const attempts = await storage.getAllQuizAttempts();
       
       // Transform to evaluation format
       const evaluations = await Promise.all(attempts.map(async (attempt: any) => {
         const user = await storage.getUser(attempt.userId);
-        const quiz = await storage.getQuizById ? 
-          await storage.getQuizById(attempt.quizId) : null;
+        
+        // Find mock test by ID
+        const mockTest = mockTests.find(test => test.id == attempt.quizId);
         
         return {
           id: attempt.id,
-          studentName: user?.username || 'Unknown',
-          quizTitle: quiz?.title || 'Mock Test',
+          studentName: user?.username || 'Unknown Student',
+          quizTitle: mockTest?.title || `Mock Test ${attempt.quizId}`,
           submissionType: 'objective',
-          submittedAt: attempt.completedAt || attempt.startedAt,
+          submittedAt: attempt.completedAt || new Date().toISOString(),
           status: 'completed',
           score: attempt.score,
-          timeSpent: attempt.timeSpent,
-          createdAt: attempt.startedAt,
+          timeSpent: attempt.timeTaken,
+          createdAt: attempt.completedAt || new Date().toISOString(),
           userId: attempt.userId,
           quizId: attempt.quizId
         };
@@ -359,6 +359,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             pdfReportAvailable: true
           };
 
+          // Save quiz attempt to database for advanced evaluation too
+          try {
+            const userId = (req as any).user?.id || 1;
+            const quizAttempt = {
+              userId: userId,
+              quizId: parseInt(id),
+              score: transformedResult.overallScore,
+              totalQuestions: transformedResult.totalQuestions,
+              accuracy: transformedResult.accuracy,
+              timeTaken: timeSpent,
+              answeredQuestions: answers,
+              startedAt: new Date(Date.now() - timeSpent * 1000),
+              completedAt: new Date()
+            };
+            
+            await storage.createQuizAttempt(quizAttempt);
+            console.log("Advanced evaluation quiz attempt saved to database");
+          } catch (dbError) {
+            console.error("Failed to save advanced evaluation quiz attempt:", dbError);
+          }
+
           console.log("Advanced evaluation completed with PDF report generation");
           res.json(transformedResult);
           return;
@@ -369,7 +390,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fallback to standard evaluation
       const evaluation = calculateDetailedEvaluation(mockTest, answers, timeSpent, questionTimings);
-      evaluation.pdfReportAvailable = false;
+      (evaluation as any).pdfReportAvailable = false;
+      
+      // Save quiz attempt to database
+      try {
+        const userId = (req as any).user?.id || 1;
+        const quizAttempt = {
+          userId: userId,
+          quizId: parseInt(id),
+          score: evaluation.summary.overallScore,
+          totalQuestions: evaluation.summary.totalQuestions,
+          accuracy: evaluation.summary.accuracy,
+          timeTaken: timeSpent,
+          answeredQuestions: answers,
+          startedAt: new Date(Date.now() - timeSpent * 1000),
+          completedAt: new Date()
+        };
+        
+        await storage.createQuizAttempt(quizAttempt);
+        console.log("Quiz attempt saved to database");
+      } catch (dbError) {
+        console.error("Failed to save quiz attempt:", dbError);
+      }
+      
       res.json(evaluation);
       
     } catch (error) {

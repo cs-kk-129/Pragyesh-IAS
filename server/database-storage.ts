@@ -204,6 +204,12 @@ export class DatabaseStorage implements IStorage {
     return attempts.slice(0, limit);
   }
 
+  async getAllQuizAttempts(): Promise<QuizAttempt[]> {
+    return await db.select()
+      .from(quizAttempts)
+      .orderBy(desc(quizAttempts.startedAt));
+  }
+
   // BOOKMARKS
   async createBookmark(bookmark: InsertBookmark): Promise<Bookmark> {
     const [newBookmark] = await db.insert(bookmarks).values(bookmark).returning();
