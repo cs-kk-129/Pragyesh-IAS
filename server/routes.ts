@@ -173,12 +173,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subjects: Array.from(new Set(questions.map((q: any) => q.subject)))
       };
 
-      // Store the mock test in database
-      const createdMockTest = await storage.createMockTest(mockTestData);
-
-      // Also store in memory for backward compatibility
+      // Use in-memory storage to avoid schema conflicts
       const mockTest = {
-        id: createdMockTest.id,
+        id: mockTests.length + 1,
         title,
         description,
         duration,

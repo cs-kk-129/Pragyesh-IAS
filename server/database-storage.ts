@@ -45,9 +45,6 @@ export class DatabaseStorage implements IStorage {
         quizType: 'mock_test',
         difficulty: mockTestData.difficulty,
         timeLimit: mockTestData.duration,
-        testDate: mockTestData.scheduledDate ? new Date(mockTestData.scheduledDate) : undefined,
-        description: mockTestData.description,
-        instructions: 'Read all questions carefully before answering. Test will auto-submit when time expires.',
         language: 'both'
       });
 
