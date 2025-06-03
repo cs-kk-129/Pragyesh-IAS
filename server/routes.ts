@@ -191,8 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       mockTests.push(mockTest);
 
-      console.log(`Mock test "${title}" created successfully with ${questions.length} questions in database`);
-      res.status(201).json({ success: true, mockTest: createdMockTest });
+      console.log(`Mock test "${title}" created successfully with ${questions.length} questions`);
+      res.status(201).json({ success: true, mockTest });
     } catch (error) {
       console.error("Mock test creation error:", error);
       res.status(500).json({ error: "Failed to create mock test" });
