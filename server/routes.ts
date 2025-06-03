@@ -4,6 +4,13 @@ import { setupAuth } from "./auth";
 import { sql } from 'drizzle-orm';
 import { db } from './db';
 import { storage } from './storage';
+import { apiRequest, queryClient } from "@shared/types";
+import { z } from "zod";
+import { insertUserSchema } from "@shared/schema";
+import { IStorage } from "./storage";
+import { generateQuestions } from "./openai";
+import * as schema from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.isAuthenticated()) {
@@ -58,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-questions", async (req, res) => {
     try {
       const { prompt, questionType = 'objective' } = req.body;
-      
+
       if (!prompt) {
         return res.status(400).json({ error: "Prompt is required" });
       }
@@ -70,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         /make\s+(\d+)\s*questions?/i,
         /(\d+)\s*questions?/i
       ];
-      
+
       let requestedCount = null;
       for (const pattern of patterns) {
         const match = prompt.match(pattern);
@@ -79,19 +86,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
         }
       }
-      
+
       // Limit to reasonable number for API constraints
       const questionCount = requestedCount && requestedCount <= 50 ? requestedCount : 10;
-      
+
       console.log(`Question generation: Requested ${requestedCount}, Using ${questionCount}`);
 
       const enhancedPrompt = `
         ${prompt}
-        
+
         IMPORTANT: Generate ONLY objective multiple choice questions with 4 options each.
         Provide each question in BOTH English and Hindi languages.
         Generate exactly ${questionCount} questions as requested.
-        
+
         Format as JSON:
         {
           "questions": [
@@ -141,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = await response.json();
       const result = JSON.parse(data.choices[0].message.content);
-      
+
       res.json(result);
     } catch (error) {
       console.error("Question generation error:", error);
@@ -155,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/mock-tests", async (req, res) => {
     try {
       const { title, description, duration, scheduledDate, questions } = req.body;
-      
+
       const mockTest = {
         id: Date.now(),
         title,
@@ -171,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'not_started',
         createdAt: new Date().toISOString()
       };
-      
+
       // Store the mock test
       mockTests.push(mockTest);
-      
+
       res.status(201).json({ success: true, mockTest });
     } catch (error) {
       console.error("Mock test creation error:", error);
@@ -185,10 +192,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all mock tests for students
   app.get("/api/mock-tests", async (req, res) => {
     try {
+      // Get all mock test quizzes from database
+      const quizzes = await db.select()
+        .from(schema.quizzes)
+        .where(eq(schema.quizzes.quizType, 'mock_test'))
+        .orderBy(desc(schema.quizzes.createdAt));
+
+      const mockTests = [];
+      for (const quiz of quizzes) {
+        // Get questions for each quiz
+        const questions = await storage.getQuestionsByQuiz(quiz.id);
+
+        mockTests.push({
+          id: quiz.id,
+          title: quiz.title,
+          description: quiz.description || '',
+          duration: quiz.timeLimit || 120,
+          totalQuestions: questions.length,
+          difficulty: quiz.difficulty || 'medium',
+          subjects: Array.from(new Set(questions.map(q => q.tags?.[0] || 'General').filter(Boolean))),
+          questions: questions,
+          isActive: true,
+          isAttempted: false,
+          status: 'not_started',
+          scheduledDate: quiz.testDate?.toISOString().split('T')[0],
+          createdAt: quiz.createdAt?.toISOString()
+        });
+      }
+
       res.json(mockTests);
     } catch (error) {
-      console.error("Error fetching mock tests:", error);
-      res.status(500).json({ error: "Failed to fetch mock tests" });
+      console.error("Mock test retrieval error:", error);
+      res.status(500).json({ error: "Failed to retrieve mock tests" });
     }
   });
 
@@ -197,14 +232,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get all quiz attempts (mock test submissions)
       const attempts = await storage.getAllQuizAttempts();
-      
+
       // Transform to evaluation format
       const evaluations = await Promise.all(attempts.map(async (attempt: any) => {
         const user = await storage.getUser(attempt.userId);
-        
+
         // Find mock test by ID
         const mockTest = mockTests.find(test => test.id == attempt.quizId);
-        
+
         return {
           id: attempt.id,
           studentName: user?.username || 'Unknown Student',
@@ -219,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           quizId: attempt.quizId
         };
       }));
-      
+
       res.json({
         evaluations: evaluations.sort((a, b) => 
           new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
@@ -235,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/forgot-password", async (req, res) => {
     try {
       const { email } = req.body;
-      
+
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
       }
@@ -251,9 +286,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 2. Store it in database with expiration
       // 3. Send email with reset link
       // For now, we'll simulate this process
-      
+
       console.log(`Password reset requested for: ${email}`);
-      
+
       // Simulate email sending
       res.json({ 
         message: "Password reset instructions have been sent to your email",
@@ -270,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { answers, timeSpent, questionTimings } = req.body;
-      
+
       // Find the mock test
       const mockTest = mockTests.find(test => test.id == id);
       if (!mockTest) {
@@ -319,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (evaluationResponse.ok) {
           const evaluationResult = await evaluationResponse.json();
-          
+
           // Transform response to match frontend expectations
           const transformedResult = {
             totalQuestions: evaluationResult.evaluation.metrics.total_questions,
@@ -376,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 timeSpent: questionTimings[index] || 90
               }))
             };
-            
+
             await storage.createQuizAttempt(quizAttempt);
             console.log("Advanced evaluation quiz attempt saved to database");
           } catch (dbError) {
@@ -394,7 +429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fallback to standard evaluation
       const evaluation = calculateDetailedEvaluation(mockTest, answers, timeSpent, questionTimings);
       (evaluation as any).pdfReportAvailable = false;
-      
+
       // Save quiz attempt to database
       try {
         const userId = (req as any).user?.id || 1;
@@ -412,15 +447,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             timeSpent: questionTimings[index] || 90
           }))
         };
-        
+
         await storage.createQuizAttempt(quizAttempt);
         console.log("Quiz attempt saved to database");
       } catch (dbError) {
         console.error("Failed to save quiz attempt:", dbError);
       }
-      
+
       res.json(evaluation);
-      
+
     } catch (error) {
       console.error("Mock test evaluation error:", error);
       res.status(500).json({ error: "Failed to evaluate mock test" });
@@ -431,11 +466,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports/:userId/:testId", async (req, res) => {
     try {
       const { userId, testId } = req.params;
-      
+
       // Proxy request to FastAPI backend
       const fetch = (await import('node-fetch')).default;
       const reportResponse = await fetch(`http://localhost:8001/report/${userId}/${testId}`);
-      
+
       if (reportResponse.ok) {
         const buffer = await reportResponse.buffer();
         res.setHeader('Content-Type', 'application/pdf');
@@ -468,11 +503,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isCorrect = userAnswer?.answer === correctAnswer;
       const isAttempted = userAnswer?.answer !== undefined;
       const questionTime = questionTimings[index] || 0;
-      
+
       // Expected time per question (2 minutes average)
       const expectedTime = 120;
       let timeCategory = 'onTime';
-      
+
       if (questionTime < expectedTime * 0.5) {
         timeCategory = 'superfast';
         timeScores.superfast++;
@@ -491,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isAttempted) {
         if (isCorrect) {
           correct++;
-          
+
           // Check for critical thinking questions (assertion-reason type)
           if (question.question?.english?.includes('Assertion') || 
               question.question?.english?.includes('Statement') ||
@@ -501,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             criticalThinkingTotal++;
           }
-          
+
           // Check for concept clarity questions
           if (question.question?.english?.includes('principle') || 
               question.question?.english?.includes('concept') ||
@@ -546,16 +581,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Calculate scores
     const totalQuestions = questions.length;
     const attempted = correct + incorrect;
-    
+
     const criticalThinkingScore = criticalThinkingTotal > 0 ? 
       Math.round((criticalThinkingCorrect / criticalThinkingTotal) * 100) : 0;
-    
+
     const knowledgeRetentionScore = totalQuestions > 0 ? 
       Math.round(((correct - incorrect) / totalQuestions) * 100) : 0;
-    
+
     const conceptClarityScore = conceptClarityTotal > 0 ? 
       Math.round((conceptClarityCorrect / conceptClarityTotal) * 100) : 0;
-    
+
     const timeManagementScore = attempted > 0 ? 
       Math.round(((timeScores.superfast + timeScores.onTime) / attempted) * 100) : 0;
 
@@ -605,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   function generateRecommendations(critical: number, retention: number, clarity: number, timeManagement: number) {
     const recommendations = [];
-    
+
     if (critical < 60) {
       recommendations.push("Focus on assertion-reason and analytical questions to improve critical thinking");
     }
@@ -618,7 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (timeManagement < 75) {
       recommendations.push("Practice time management with timed mock tests");
     }
-    
+
     return recommendations.length > 0 ? recommendations : ["Great performance! Continue with consistent practice"];
   }
 
@@ -655,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/questions/manual", (req, res) => {
     try {
       const { questions, subjectId, topicId } = req.body;
-      
+
       // Process and store manual questions
       const processedQuestions = questions.map((q: any, index: number) => ({
         id: Date.now() + index,
