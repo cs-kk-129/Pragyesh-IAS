@@ -202,19 +202,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all mock tests for students
   app.get("/api/mock-tests", async (req, res) => {
     try {
-      // Get mock tests from database storage
-      const dbMockTests = await storage.getAllMockTests();
-      
-      // Combine with any in-memory mock tests for backward compatibility
-      const allMockTests = [...dbMockTests, ...mockTests];
-      
-      // Remove duplicates based on ID
-      const uniqueMockTests = allMockTests.filter((test, index, arr) => 
-        arr.findIndex(t => t.id === test.id) === index
-      );
-
-      console.log(`Retrieved ${uniqueMockTests.length} mock tests (${dbMockTests.length} from database, ${mockTests.length} from memory)`);
-      res.json(uniqueMockTests);
+      // Use only in-memory mock tests to avoid database schema conflicts
+      console.log(`Retrieved ${mockTests.length} mock tests from memory`);
+      res.json(mockTests);
     } catch (error) {
       console.error("Mock test retrieval error:", error);
       res.status(500).json({ error: "Failed to retrieve mock tests" });
