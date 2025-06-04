@@ -163,17 +163,16 @@ export default function MockTestsEnhanced() {
   const [showEvaluation, setShowEvaluation] = useState(false);
   const [evaluationData, setEvaluationData] = useState<TestEvaluation | null>(null);
 
-  // Fetch mock tests
+  // Fetch mock tests (database-driven with date restrictions)
   const { data: mockTests = [], isLoading } = useQuery<MockTest[]>({
-    queryKey: ["/api/mock-tests"],
+    queryKey: ["/api/student/mock-tests"],
     queryFn: async () => {
-      const response = await fetch("/api/mock-tests");
-      if (!response.ok) throw new Error("Failed to fetch mock tests");
+      const response = await apiRequest("GET", "/api/student/mock-tests");
       return response.json();
     },
   });
 
-  // Evaluation mutation
+  // Evaluation mutation (database-driven)
   const evaluateMutation = useMutation({
     mutationFn: async ({ testId, answers, timeSpent, questionTimings }: {
       testId: number;
@@ -181,7 +180,7 @@ export default function MockTestsEnhanced() {
       timeSpent: number;
       questionTimings: number[];
     }) => {
-      const response = await apiRequest("POST", `/api/mock-tests/${testId}/evaluate`, {
+      const response = await apiRequest("POST", `/api/student/submit-mock-test/${testId}`, {
         answers,
         timeSpent,
         questionTimings
@@ -191,6 +190,13 @@ export default function MockTestsEnhanced() {
     onSuccess: (data: TestEvaluation) => {
       setEvaluationData(data);
       setShowEvaluation(true);
+      
+      // Invalidate mock tests query to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/student/mock-tests"] });
+    },
+    onError: (error) => {
+      console.error('Evaluation failed:', error);
+      alert('Failed to submit test. Please try again.');
     }
   });
 

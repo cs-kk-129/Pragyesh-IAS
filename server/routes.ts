@@ -461,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const mockTest = mockTests.find(test => test.id == parseInt(id));
         
         mockTestStorage.saveAttempt({
-          userId: userId,
+          userId: user.id,
           quizId: parseInt(id),
           score: evaluation.summary.overallScore,
           totalQuestions: evaluation.summary.totalQuestions,
