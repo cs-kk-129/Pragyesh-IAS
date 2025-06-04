@@ -225,9 +225,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   // QUIZZES
-  async createQuiz(quiz: InsertQuiz): Promise<Quiz> {
-    const [newQuiz] = await db.insert(quizzes).values(quiz).returning();
-    return newQuiz;
+  async createQuiz(quizData: any): Promise<any> {
+    try {
+      const insertData: any = {
+        title: quizData.title,
+        quizType: quizData.quizType || 'mock_test',
+        difficulty: quizData.difficulty || 'medium',
+        timeLimit: quizData.timeLimit,
+        description: quizData.description,
+        instructions: quizData.instructions,
+        language: quizData.language || 'both'
+      };
+
+      // Only add testDate if it exists and the column is available
+      if (quizData.testDate) {
+        insertData.testDate = new Date(quizData.testDate);
+      }
+
+      const [quiz] = await db.insert(schema.quizzes)
+        .values(insertData)
+        .returning();
+
+      return quiz;
+    } catch (error) {
+      console.error('Error creating quiz:', error);
+      throw error;
+    }
   }
 
   async getQuizById(id: number): Promise<Quiz | undefined> {
