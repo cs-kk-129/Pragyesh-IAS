@@ -201,10 +201,13 @@ export default function AdminDashboard() {
     },
   ];
 
-  // Fetch real-time evaluations data
+  // Fetch real-time evaluations data (database-driven)
   const { data: evaluationsData, isLoading: evaluationsLoading } = useQuery({
     queryKey: ["/api/admin/evaluations"],
-    queryFn: () => fetch('/api/admin/evaluations').then(res => res.json()),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/evaluations");
+      return response.json();
+    },
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
@@ -254,24 +257,18 @@ Follow these UPSC formatting guidelines:
 - Questions in both English and Hindi
 - Maintain UPSC exam standards for depth and accuracy`;
 
-        const response = await fetch('/api/generate-questions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            prompt,
-            questionType: 'objective',
-            generateBilingual: true,
-            subject,
-            topic
-          }),
+        const response = await apiRequest('POST', '/api/admin/generate-questions', {
+          prompt,
+          questionType: 'objective',
+          generateBilingual: true,
+          subject,
+          topic
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        if (data.questions) {
           allQuestions.push(...data.questions.map((q: any) => ({
-            id: Math.random().toString(),
+            id: q.id.toString(),
             question: q.question?.english || q.question,
             questionHindi: q.question?.hindi || q.questionHindi,
             options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
@@ -379,17 +376,17 @@ Follow these UPSC formatting guidelines:
 
       console.log("Creating mock test with data:", mockTestData);
       
-      // Call API to save the mock test
-      const response = await fetch('/api/mock-tests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mockTestData),
+      // Call database-driven API to save the mock test
+      const response = await apiRequest('POST', '/api/admin/create-mock-test', {
+        title: mockTestDetails.title,
+        description: mockTestDetails.description,
+        duration: mockTestDetails.duration,
+        testDate: mockTestDetails.scheduledDate,
+        selectedQuestionIds: selectedQuestions.map(q => parseInt(q.id))
       });
 
-      if (response.ok) {
-        const result = await response.json();
+      const result = await response.json();
+      if (result.success) {
         alert(`Mock test "${mockTestDetails.title}" created successfully with ${selectedQuestions.length} questions! Students can now see this test in their Mock Tests section.`);
         
         // Reset everything
@@ -398,7 +395,7 @@ Follow these UPSC formatting guidelines:
         setShowMockTestDialog(false);
         setMockTestDetails({ title: "", description: "", duration: 60, scheduledDate: "" });
       } else {
-        throw new Error('Failed to create mock test');
+        throw new Error(result.error || 'Failed to create mock test');
       }
     } catch (error) {
       console.error('Error creating mock test:', error);
