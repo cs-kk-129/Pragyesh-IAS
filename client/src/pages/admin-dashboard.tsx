@@ -303,41 +303,35 @@ Follow these UPSC formatting guidelines:
 
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          prompt: questionPrompt,
-          questionType: 'objective',
-          generateBilingual: true 
-        }),
+      const response = await apiRequest('POST', '/api/admin/generate-questions', {
+        prompt: questionPrompt,
+        questionType: 'objective'
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate questions');
-      }
 
       const data = await response.json();
       
-      // Transform API response to match our GeneratedQuestion type
-      const transformedQuestions = data.questions.map((q: any, index: number) => ({
-        id: `generated-${Date.now()}-${index}`,
-        question: q.question?.english || q.question,
-        questionHindi: q.question?.hindi || q.questionHindi,
-        options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
-        optionsHindi: q.options?.hindi || q.optionsHindi,
-        correctAnswer: q.correctAnswer?.english || q.correctAnswer,
-        type: "objective",
-        subject: q.subject || "General Knowledge",
-        topic: q.topic || "Mixed Topics",
-        difficulty: q.difficulty || "medium",
-        marks: 2,
-        isSelected: false,
-      }));
+      if (data.questions) {
+        // Transform database response to match our GeneratedQuestion type
+        const transformedQuestions = data.questions.map((q: any) => ({
+          id: q.id.toString(),
+          question: q.question?.english || q.question,
+          questionHindi: q.question?.hindi || q.questionHindi,
+          options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
+          optionsHindi: q.options?.hindi || q.optionsHindi,
+          correctAnswer: q.correctAnswer?.english || q.correctAnswer,
+          type: "objective",
+          subject: q.subject || "General Knowledge",
+          topic: q.topic || "Mixed Topics",
+          difficulty: q.difficulty || "medium",
+          marks: q.marks || 2,
+          isSelected: false,
+        }));
 
-      setGeneratedQuestions(transformedQuestions);
+        setGeneratedQuestions(transformedQuestions);
+        console.log(`Generated and saved ${data.questions.length} questions to database`);
+      } else {
+        throw new Error('No questions received from database');
+      }
     } catch (error) {
       console.error("Error generating questions:", error);
       alert("Failed to generate questions. Please try again with a different prompt.");

@@ -10,7 +10,7 @@ import { insertUserSchema } from "@shared/schema";
 import { IStorage } from "./storage";
 import { generateQuiz, answerDoubt } from "./openai";
 import * as schema from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.isAuthenticated()) {
@@ -964,6 +964,333 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Retrieved ${allEvaluations.length} evaluations (${dbEvaluations.length} from database, ${memoryEvaluations.length} from memory)`);
       res.json({ evaluations: allEvaluations });
+    } catch (error) {
+      console.error("Error fetching evaluations:", error);
+      res.json({ evaluations: [] });
+    }
+  });
+
+  // New database-driven question generation endpoint
+  app.post("/api/admin/generate-questions", isAuthenticated, async (req, res) => {
+    try {
+      const { prompt, questionType = 'objective' } = req.body;
+
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required" });
+      }
+
+      const questionCount = 10; // Fixed count for consistency
+      console.log(`Generating ${questionCount} questions for database storage`);
+
+      const enhancedPrompt = `
+        ${prompt}
+
+        Generate ONLY ${questionCount} questions and return as JSON:
+        {
+          "questions": [
+            {
+              "question": { 
+                "english": "Question text in English", 
+                "hindi": "Question text in Hindi" 
+              },
+              "options": { 
+                "english": ["Option A", "Option B", "Option C", "Option D"], 
+                "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"] 
+              },
+              "correctAnswer": { 
+                "english": "Correct option text", 
+                "hindi": "सही विकल्प पाठ" 
+              },
+              "explanation": { 
+                "english": "Explanation in English", 
+                "hindi": "हिंदी में व्याख्या" 
+              },
+              "difficulty": "medium",
+              "subject": "Subject name",
+              "topic": "Topic name",
+              "marks": 2
+            }
+          ]
+        }
+        Return ONLY the JSON object.
+      `;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            { 
+              role: "system", 
+              content: "You are an expert UPSC question generator. Generate high-quality multiple choice questions for competitive exam preparation. Always return valid JSON format with bilingual content." 
+            },
+            { role: "user", content: enhancedPrompt }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 1.0,
+          max_tokens: 8000,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+
+      // Save questions to database with quizId = 0 (unassigned)
+      const savedQuestions = [];
+      for (const question of result.questions) {
+        try {
+          const savedQuestion = await storage.createQuestion({
+            quizId: 0, // Unassigned - will be set when mock test is created
+            subjectId: null,
+            topicId: null,
+            subtopicId: null,
+            question: JSON.stringify(question.question),
+            options: question.options.english,
+            correctAnswer: question.correctAnswer.english,
+            explanation: question.explanation.english,
+            difficulty: question.difficulty || 'medium',
+            tags: [question.subject, question.topic]
+          });
+          
+          savedQuestions.push({
+            id: savedQuestion.id,
+            question: question.question,
+            options: question.options,
+            correctAnswer: question.correctAnswer,
+            explanation: question.explanation,
+            difficulty: question.difficulty,
+            subject: question.subject,
+            topic: question.topic,
+            marks: question.marks || 2,
+            isSelected: false
+          });
+        } catch (dbError) {
+          console.error("Failed to save question to database:", dbError);
+        }
+      }
+
+      console.log(`Saved ${savedQuestions.length} questions to database`);
+      res.json({ questions: savedQuestions });
+    } catch (error) {
+      console.error("Question generation error:", error);
+      res.status(500).json({ error: "Failed to generate questions" });
+    }
+  });
+
+  // Create mock test with selected questions and test date
+  app.post("/api/admin/create-mock-test", isAuthenticated, async (req, res) => {
+    try {
+      const { title, description, duration, testDate, selectedQuestionIds } = req.body;
+
+      if (!selectedQuestionIds || selectedQuestionIds.length === 0) {
+        return res.status(400).json({ error: "No questions selected" });
+      }
+
+      // Create quiz record in database
+      const quiz = await storage.createQuiz({
+        title,
+        quizType: 'mock_test',
+        difficulty: 'medium',
+        timeLimit: duration
+      });
+
+      // Update selected questions with the quiz ID
+      for (const questionId of selectedQuestionIds) {
+        await db.update(schema.questions)
+          .set({ quizId: quiz.id })
+          .where(eq(schema.questions.id, questionId));
+      }
+
+      // Delete unselected questions (those with quizId = 0)
+      await db.delete(schema.questions)
+        .where(eq(schema.questions.quizId, 0));
+
+      console.log(`Created mock test ${quiz.id} with ${selectedQuestionIds.length} questions`);
+      res.json({ success: true, mockTest: quiz });
+    } catch (error) {
+      console.error("Mock test creation error:", error);
+      res.status(500).json({ error: "Failed to create mock test" });
+    }
+  });
+
+  // Get mock tests for students (with date restrictions)
+  app.get("/api/student/mock-tests", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user.id;
+      const today = new Date().toISOString().split('T')[0];
+
+      // Get quizzes that are available today
+      const availableQuizzes = await db.select()
+        .from(schema.quizzes)
+        .where(eq(schema.quizzes.quizType, 'mock_test'));
+
+      // Check if user has already attempted each quiz
+      const mockTests = [];
+      for (const quiz of availableQuizzes) {
+        const existingAttempt = await db.select()
+          .from(schema.quizAttempts)
+          .where(
+            and(
+              eq(schema.quizAttempts.userId, userId),
+              eq(schema.quizAttempts.quizId, quiz.id)
+            )
+          );
+
+        if (existingAttempt.length === 0) {
+          // Get questions for this quiz
+          const questions = await db.select()
+            .from(schema.questions)
+            .where(eq(schema.questions.quizId, quiz.id));
+
+          mockTests.push({
+            id: quiz.id,
+            title: quiz.title,
+            duration: quiz.timeLimit,
+            totalQuestions: questions.length,
+            isAttempted: false,
+            status: 'available',
+            questions: questions.map(q => ({
+              id: q.id,
+              question: JSON.parse(q.question || '{}'),
+              options: q.options,
+              marks: 2
+            }))
+          });
+        }
+      }
+
+      res.json(mockTests);
+    } catch (error) {
+      console.error("Error fetching mock tests:", error);
+      res.status(500).json({ error: "Failed to fetch mock tests" });
+    }
+  });
+
+  // Submit mock test evaluation (database-driven)
+  app.post("/api/student/submit-mock-test/:id", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user.id;
+      const quizId = parseInt(req.params.id);
+      const { answers, timeSpent, questionTimings } = req.body;
+
+      // Check if user has already attempted this quiz
+      const existingAttempt = await db.select()
+        .from(schema.quizAttempts)
+        .where(
+          and(
+            eq(schema.quizAttempts.userId, userId),
+            eq(schema.quizAttempts.quizId, quizId)
+          )
+        );
+
+      if (existingAttempt.length > 0) {
+        return res.status(400).json({ error: "Test already attempted" });
+      }
+
+      // Get quiz questions for evaluation
+      const questions = await db.select()
+        .from(schema.questions)
+        .where(eq(schema.questions.quizId, quizId));
+
+      // Calculate score
+      let correct = 0;
+      const evaluatedAnswers = answers.map((answer: any, index: number) => {
+        const question = questions[index];
+        const isCorrect = answer.answer === question?.correctAnswer;
+        if (isCorrect) correct++;
+        
+        return {
+          questionId: question?.id || index + 1,
+          userAnswer: answer.answer || '',
+          isCorrect,
+          timeSpent: questionTimings[index] || 90
+        };
+      });
+
+      const totalQuestions = questions.length;
+      const score = Math.round((correct / totalQuestions) * 100);
+      const accuracy = Math.round((correct / totalQuestions) * 100);
+
+      // Save quiz attempt to database
+      const quizAttempt = await storage.createQuizAttempt({
+        userId,
+        quizId,
+        score,
+        totalQuestions,
+        accuracy,
+        timeTaken: Math.round(timeSpent),
+        answeredQuestions: evaluatedAnswers
+      });
+
+      console.log(`Quiz attempt saved: User ${userId}, Quiz ${quizId}, Score ${score}%`);
+
+      const evaluation = {
+        summary: {
+          totalQuestions,
+          correct,
+          incorrect: totalQuestions - correct,
+          unattempted: 0,
+          attempted: totalQuestions,
+          overallScore: score,
+          accuracy,
+          timeSpent: Math.round(timeSpent)
+        }
+      };
+
+      res.json(evaluation);
+    } catch (error) {
+      console.error("Mock test submission error:", error);
+      res.status(500).json({ error: "Failed to submit mock test" });
+    }
+  });
+
+  // Admin evaluations endpoint (database-driven)
+  app.get("/api/admin/evaluations", async (req, res) => {
+    try {
+      const dbAttempts = await storage.getAllQuizAttempts();
+      
+      const evaluations = await Promise.all(dbAttempts.map(async (attempt) => {
+        let user = null;
+        let quiz = null;
+        
+        try {
+          user = await storage.getUser(attempt.userId);
+          quiz = await storage.getQuizById(attempt.quizId);
+        } catch (err) {
+          console.error("Error getting user/quiz details:", err);
+        }
+        
+        return {
+          id: attempt.id,
+          studentName: user?.username || `User ${attempt.userId}`,
+          quizTitle: quiz?.title || `Mock Test ${attempt.quizId}`,
+          submissionType: 'objective',
+          submittedAt: attempt.completedAt?.toISOString() || new Date().toISOString(),
+          status: 'completed',
+          score: attempt.score,
+          timeSpent: attempt.timeTaken || 0,
+          createdAt: attempt.completedAt?.toISOString() || new Date().toISOString(),
+          userId: attempt.userId,
+          quizId: attempt.quizId,
+          totalQuestions: attempt.totalQuestions,
+          accuracy: attempt.accuracy || 0
+        };
+      }));
+      
+      const sortedEvaluations = evaluations.sort((a, b) => 
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+      );
+      
+      console.log(`Retrieved ${sortedEvaluations.length} evaluations from database`);
+      res.json({ evaluations: sortedEvaluations });
     } catch (error) {
       console.error("Error fetching evaluations:", error);
       res.json({ evaluations: [] });
