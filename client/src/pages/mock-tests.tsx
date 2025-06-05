@@ -330,13 +330,13 @@ export default function MockTests() {
     }
   };
 
-  const getDifficultyBadge = (difficulty: string) => {
+  const getDifficultyBadge = (difficulty: string | undefined) => {
     const variants = {
       easy: "bg-green-100 text-green-800",
       medium: "bg-yellow-100 text-yellow-800",
       hard: "bg-red-100 text-red-800",
     };
-    return variants[difficulty as keyof typeof variants] || variants.medium;
+    return variants[(difficulty || 'medium') as keyof typeof variants] || variants.medium;
   };
 
   const getStatusBadge = (status: string) => {
@@ -363,8 +363,8 @@ export default function MockTests() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <h1 className="text-lg font-semibold">{selectedTestData?.title}</h1>
-                <Badge className={getDifficultyBadge(selectedTestData?.difficulty || 'medium')}>
-                  {selectedTestData?.difficulty?.charAt(0).toUpperCase() + selectedTestData?.difficulty?.slice(1)}
+                <Badge className={getDifficultyBadge(selectedTestData?.difficulty)}>
+                  {(selectedTestData?.difficulty || 'medium').charAt(0).toUpperCase() + (selectedTestData?.difficulty || 'medium').slice(1)}
                 </Badge>
               </div>
               
@@ -758,7 +758,7 @@ export default function MockTests() {
                             </CardDescription>
                           </div>
                           <Badge className={getDifficultyBadge(test.difficulty)}>
-                            {test.difficulty.charAt(0).toUpperCase() + test.difficulty.slice(1)}
+                            {(test.difficulty || 'medium').charAt(0).toUpperCase() + (test.difficulty || 'medium').slice(1)}
                           </Badge>
                         </div>
                       </CardHeader>
