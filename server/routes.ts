@@ -1111,12 +1111,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No questions selected" });
       }
 
-      // Create quiz record in database
+      // Create quiz record in database with test date
       const quiz = await storage.createQuiz({
         title,
         quizType: 'mock_test',
         difficulty: 'medium',
         timeLimit: duration,
+        testDate: new Date(testDate),
         description: description || '',
         language: 'both'
       });
@@ -1146,10 +1147,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req as any).user.id;
       const today = new Date().toISOString().split('T')[0];
 
-      // Get quizzes that are available today
+      // Get quizzes that are scheduled for today
       const availableQuizzes = await db.select()
         .from(schema.quizzes)
-        .where(eq(schema.quizzes.quizType, 'mock_test'));
+        .where(
+          and(
+            eq(schema.quizzes.quizType, 'mock_test'),
+            sql`DATE(test_date) = ${today}`
+          )
+        );
+
+      console.log(`Found ${availableQuizzes.length} mock tests scheduled for ${today}`);
 
       // Check if user has already attempted each quiz
       const mockTests = [];
@@ -1172,20 +1180,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mockTests.push({
             id: quiz.id,
             title: quiz.title,
+            description: quiz.description,
             duration: quiz.timeLimit,
             totalQuestions: questions.length,
+            testDate: quiz.testDate?.toISOString().split('T')[0],
             isAttempted: false,
             status: 'available',
             questions: questions.map(q => ({
               id: q.id,
               question: JSON.parse(q.question || '{}'),
               options: q.options,
+              correctAnswer: q.correctAnswer,
               marks: 2
             }))
           });
+        } else {
+          console.log(`User ${userId} already attempted quiz ${quiz.id}`);
         }
       }
 
+      console.log(`Returning ${mockTests.length} available mock tests for user ${userId}`);
       res.json(mockTests);
     } catch (error) {
       console.error("Error fetching mock tests:", error);
