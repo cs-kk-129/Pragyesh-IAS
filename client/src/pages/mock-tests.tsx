@@ -153,7 +153,7 @@ export default function MockTests() {
     if (!selectedTestData?.questions) {
       return [];
     }
-    
+
     // Transform admin questions to match Question interface
     return selectedTestData.questions.map((q: any, index: number) => ({
       id: index + 1,
@@ -275,13 +275,13 @@ export default function MockTests() {
   const handleTestSubmit = () => {
     setIsTestStarted(false);
     setIsTestCompleted(true);
-    
+
     // Calculate results
     const answeredQuestions = questionStates.filter(state => state.isAnswered).length;
     const correctAnswers = questionStates.filter((state, index) => 
       state.isAnswered && state.selectedAnswer === mockQuestions[index]?.correctAnswer
     ).length;
-    
+
     const results = {
       totalQuestions: mockQuestions.length,
       attempted: answeredQuestions,
@@ -291,7 +291,7 @@ export default function MockTests() {
       score: Math.round((correctAnswers / mockQuestions.length) * 100),
       timeSpent: selectedTestData ? (selectedTestData.duration * 60 - timeLeft) : 0,
     };
-    
+
     setTestResults(results);
     setShowSubmitDialog(false);
   };
@@ -299,7 +299,7 @@ export default function MockTests() {
   const getQuestionStatusIcon = (index: number) => {
     const state = questionStates[index];
     if (!state) return <Circle className="h-4 w-4 text-gray-400" />;
-    
+
     if (state.isAnswered && state.isMarkedForReview) {
       return <CheckCircle className="h-4 w-4 text-purple-500" />;
     } else if (state.isAnswered) {
@@ -316,7 +316,7 @@ export default function MockTests() {
   const getQuestionStatusColor = (index: number) => {
     const state = questionStates[index];
     if (!state) return "bg-gray-100";
-    
+
     if (state.isAnswered && state.isMarkedForReview) {
       return "bg-purple-100 border-purple-300";
     } else if (state.isAnswered) {
@@ -346,7 +346,7 @@ export default function MockTests() {
       completed: { color: "bg-yellow-100 text-yellow-800", text: "Completed" },
       evaluated: { color: "bg-green-100 text-green-800", text: "Evaluated" },
     };
-    
+
     const variant = variants[status as keyof typeof variants] || variants.not_started;
     return <Badge className={variant.color}>{variant.text}</Badge>;
   };
@@ -354,7 +354,7 @@ export default function MockTests() {
   if (isTestStarted) {
     const currentQuestion = mockQuestions[currentQuestionIndex];
     const currentState = questionStates[currentQuestionIndex];
-    
+
     return (
       <div className="flex h-screen bg-background">
         <div className="flex-1 flex flex-col">
@@ -367,7 +367,7 @@ export default function MockTests() {
                   {(selectedTestData?.difficulty || 'medium').charAt(0).toUpperCase() + (selectedTestData?.difficulty || 'medium').slice(1)}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Clock className="h-5 w-5 text-red-500" />
@@ -375,7 +375,7 @@ export default function MockTests() {
                     {formatTime(timeLeft)}
                   </span>
                 </div>
-                
+
                 <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive">
@@ -416,7 +416,7 @@ export default function MockTests() {
                     <Badge variant="outline">{currentQuestion?.subject}</Badge>
                     <Badge variant="outline">{currentQuestion?.marks} marks</Badge>
                   </div>
-                  
+
                   <Button
                     variant={currentState?.isMarkedForReview ? "default" : "outline"}
                     onClick={handleMarkForReview}
@@ -442,14 +442,14 @@ export default function MockTests() {
                         </Button>
                       </div>
                     </div>
-                    
+
                     <h3 className="text-lg font-medium mb-6">
                       {selectedLanguage === 'english' 
                         ? currentQuestion?.question 
                         : currentQuestion?.questionHindi || currentQuestion?.question
                       }
                     </h3>
-                    
+
                     <RadioGroup
                       value={currentState?.selectedAnswer?.toString()}
                       onValueChange={(value) => handleAnswerSelect(parseInt(value))}
@@ -482,7 +482,7 @@ export default function MockTests() {
                     <ChevronLeft className="mr-2 h-4 w-4" />
                     Previous
                   </Button>
-                  
+
                   <Button
                     onClick={handleNextQuestion}
                     disabled={currentQuestionIndex === mockQuestions.length - 1}
@@ -498,7 +498,7 @@ export default function MockTests() {
             <div className="w-80 border-l bg-muted/20 p-4">
               <div className="space-y-4">
                 <h3 className="font-medium">Question Navigator</h3>
-                
+
                 {/* Legend */}
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
@@ -572,7 +572,7 @@ export default function MockTests() {
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
           <MobileNav />
-          
+
           <main className="flex-1 overflow-y-auto p-6">
             <div className="max-w-4xl mx-auto space-y-6">
               {/* Success Message */}
@@ -603,7 +603,7 @@ export default function MockTests() {
                         </div>
                         <div className="text-sm text-muted-foreground">Overall Score</div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span>Total Questions:</span>
@@ -627,7 +627,7 @@ export default function MockTests() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <h4 className="font-medium">Performance Analysis</h4>
                       <div className="space-y-3">
@@ -638,7 +638,7 @@ export default function MockTests() {
                           </div>
                           <Progress value={(testResults.correct / testResults.attempted) * 100} className="h-2" />
                         </div>
-                        
+
                         <div>
                           <div className="flex justify-between text-sm mb-1">
                             <span>Completion Rate</span>
@@ -646,7 +646,7 @@ export default function MockTests() {
                           </div>
                           <Progress value={(testResults.attempted / testResults.totalQuestions) * 100} className="h-2" />
                         </div>
-                        
+
                         <div className="flex justify-between text-sm">
                           <span>Time Spent:</span>
                           <span className="font-medium">{formatTime(testResults.timeSpent)}</span>
@@ -699,7 +699,7 @@ export default function MockTests() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <MobileNav />
-        
+
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header Section */}
@@ -884,8 +884,7 @@ export default function MockTests() {
               onValueChange={(value) => setSelectedLanguage(value as 'english' | 'hindi')}
               className="space-y-4"
             >
-              <div 
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+              <div className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedLanguage === 'english' ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary/50'
                 }`}
               >
