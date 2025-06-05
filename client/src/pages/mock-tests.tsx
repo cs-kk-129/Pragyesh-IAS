@@ -121,9 +121,13 @@ export default function MockTests() {
   const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
-  // Fetch mock tests created by admin from API
+  // Fetch mock tests created by admin from API (database-driven)
   const { data: mockTests = [], isLoading: isLoadingTests } = useQuery<MockTest[]>({
-    queryKey: ["/api/mock-tests"],
+    queryKey: ["/api/student/mock-tests"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/student/mock-tests");
+      return response.json();
+    },
   });
 
   // Initialize selectedTest when mockTests load

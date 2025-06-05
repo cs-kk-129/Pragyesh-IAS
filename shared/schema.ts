@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -105,11 +105,11 @@ export const insertQuizSchema = createInsertSchema(quizzes).pick({
 
 // Quiz questions model
 export const questions = pgTable("questions", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   quizId: integer("quiz_id").notNull(),
   subjectId: integer("subject_id"),
   topicId: integer("topic_id"),
-  subtopicId: integer("subtopic_id"),
+  sectionId: integer("section_id"), // renamed from subtopicId
   question: text("question").notNull(),
   options: json("options").notNull().$type<string[]>(),
   correctAnswer: text("correct_answer").notNull(),
@@ -124,14 +124,13 @@ export const insertQuestionSchema = createInsertSchema(questions).pick({
   quizId: true,
   subjectId: true,
   topicId: true,
-  subtopicId: true,
+  sectionId: true,
   question: true,
   options: true,
   correctAnswer: true,
   explanation: true,
   difficulty: true,
   tags: true,
-  isBookmarked: true,
 });
 
 // Quiz attempt model

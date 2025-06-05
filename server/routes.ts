@@ -1047,17 +1047,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const savedQuestions = [];
       for (const question of result.questions) {
         try {
+          // Parse tags to extract IDs: [subjectName, sectionName, topicName?]
+          const tags = [question.subject, question.topic];
+          let subjectId = null, sectionId = null, topicId = null;
+          
+          // For demonstration, assign IDs based on subject names
+          // In production, you'd lookup actual IDs from subjects/sections/topics tables
+          if (question.subject === "History") subjectId = 1;
+          else if (question.subject === "Geography") subjectId = 2;
+          else if (question.subject === "Polity") subjectId = 3;
+          else if (question.subject === "Economics") subjectId = 4;
+          else subjectId = 1; // Default to General Studies
+          
+          if (question.topic) {
+            // Assign section ID based on topic (simplified mapping)
+            sectionId = Math.floor(Math.random() * 10) + 1; // Random for demo
+          }
+
           const savedQuestion = await storage.createQuestion({
             quizId: 0, // Unassigned - will be set when mock test is created
-            subjectId: null,
-            topicId: null,
-            subtopicId: null,
+            subjectId,
+            topicId,
+            sectionId,
             question: JSON.stringify(question.question),
             options: question.options.english,
             correctAnswer: question.correctAnswer.english,
             explanation: question.explanation.english,
             difficulty: question.difficulty || 'medium',
-            tags: [question.subject, question.topic]
+            tags
           });
           
           savedQuestions.push({
