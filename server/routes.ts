@@ -1099,7 +1099,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title,
         quizType: 'mock_test',
         difficulty: 'medium',
-        timeLimit: duration
+        timeLimit: duration,
+        description: description || '',
+        language: 'both'
       });
 
       // Update selected questions with the quiz ID
