@@ -783,7 +783,7 @@ export default function MockTests() {
                         <div>
                           <h4 className="font-medium mb-2">Subjects Covered:</h4>
                           <div className="flex flex-wrap gap-2">
-                            {test.subjects.map((subject, index) => (
+                            {(test.subjects || []).map((subject, index) => (
                               <Badge key={index} variant="outline">
                                 {subject}
                               </Badge>
