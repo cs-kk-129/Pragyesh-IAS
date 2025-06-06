@@ -1085,13 +1085,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             actualSectionId = sectionMatch?.id || null;
           }
 
+          console.log('Creating question with data:', {
+            quizId: 0,
+            subjectId: actualSubjectId,
+            sectionId: actualSectionId,
+            question: JSON.stringify(question.question),
+            options: Array.isArray(question.options.english) ? question.options.english : [],
+            correctAnswer: question.correctAnswer.english,
+            explanation: question.explanation.english,
+            difficulty: question.difficulty || 'medium',
+            tags
+          });
+
           const savedQuestion = await storage.createQuestion({
             quizId: 0, // Unassigned - will be set when mock test is created
             subjectId: actualSubjectId,
             topicId: null, // Will be set based on detailed topic mapping
             sectionId: actualSectionId,
             question: JSON.stringify(question.question),
-            options: question.options.english,
+            options: Array.isArray(question.options.english) ? question.options.english : [],
             correctAnswer: question.correctAnswer.english,
             explanation: question.explanation.english,
             difficulty: question.difficulty || 'medium',

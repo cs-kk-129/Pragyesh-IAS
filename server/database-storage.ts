@@ -281,8 +281,15 @@ export class DatabaseStorage implements IStorage {
 
   // QUESTIONS
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    const [newQuestion] = await db.insert(questions).values(question).returning();
-    return newQuestion;
+    try {
+      console.log('Creating question with data:', JSON.stringify(question, null, 2));
+      const [newQuestion] = await db.insert(questions).values(question).returning();
+      console.log('Question created successfully with ID:', newQuestion.id);
+      return newQuestion;
+    } catch (error) {
+      console.error('Error creating question in database:', error);
+      throw error;
+    }
   }
 
   async getQuestionsByQuiz(quizId: number): Promise<Question[]> {
