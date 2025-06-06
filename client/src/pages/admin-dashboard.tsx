@@ -167,6 +167,15 @@ export default function AdminDashboard() {
     scheduledDate: "",
   });
 
+  // Additional state for new functionality
+  const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [selectAllQuestions, setSelectAllQuestions] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [processedFileQuestions, setProcessedFileQuestions] = useState<GeneratedQuestion[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedSection, setSelectedSection] = useState<string>('');
+  const [customSection, setCustomSection] = useState<string>('');
+
   // Mock data - in real app, this would come from API
   const mockUsers: User[] = [
     {

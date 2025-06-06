@@ -1064,11 +1064,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sectionId = Math.floor(Math.random() * 10) + 1; // Random for demo
           }
 
+          // Lookup actual subject/section IDs from database
+          const subjects = await storage.getAllSubjects();
+          const subjectMatch = subjects.find(s => 
+            s.name.toLowerCase().includes(question.subject.toLowerCase())
+          );
+          
+          let actualSubjectId = subjectMatch?.id || 1;
+          let actualSectionId = null;
+          
+          // Get sections for the matched subject
+          if (subjectMatch) {
+            const sections = await db.select()
+              .from(schema.topics)
+              .where(eq(schema.topics.subjectId, subjectMatch.id));
+            
+            const sectionMatch = sections.find(s => 
+              s.name.toLowerCase().includes(question.topic?.toLowerCase() || '')
+            );
+            actualSectionId = sectionMatch?.id || null;
+          }
+
           const savedQuestion = await storage.createQuestion({
             quizId: 0, // Unassigned - will be set when mock test is created
-            subjectId,
-            topicId,
-            sectionId,
+            subjectId: actualSubjectId,
+            topicId: null, // Will be set based on detailed topic mapping
+            sectionId: actualSectionId,
             question: JSON.stringify(question.question),
             options: question.options.english,
             correctAnswer: question.correctAnswer.english,
@@ -1111,7 +1132,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No questions selected" });
       }
 
-      // Create quiz record in database with test date
+      // Analyze selected questions to determine quiz metadata
+      const selectedQuestions = await db.select()
+        .from(schema.questions)
+        .where(sql`id = ANY(${selectedQuestionIds})`);
+      
+      // Extract unique subject/section/topic IDs from questions
+      const subjectIds = selectedQuestions.map(q => q.subjectId).filter(Boolean);
+      const sectionIds = selectedQuestions.map(q => q.sectionId).filter(Boolean);
+      const topicIds = selectedQuestions.map(q => q.topicId).filter(Boolean);
+      
+      const uniqueSubjectIds = subjectIds.filter((id, index) => subjectIds.indexOf(id) === index);
+      const uniqueSectionIds = sectionIds.filter((id, index) => sectionIds.indexOf(id) === index);
+      const uniqueTopicIds = topicIds.filter((id, index) => topicIds.indexOf(id) === index);
+
+      // Create quiz record in database with metadata from questions
       const quiz = await storage.createQuiz({
         title,
         quizType: 'mock_test',
@@ -1119,7 +1154,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeLimit: duration,
         testDate: new Date(testDate),
         description: description || '',
-        language: 'both'
+        language: 'both',
+        subjectId: uniqueSubjectIds.length === 1 ? uniqueSubjectIds[0] : null, // Single subject only
+        topicId: uniqueSectionIds.length === 1 ? uniqueSectionIds[0] : null,   // Single section only
+        subtopicId: uniqueTopicIds.length === 1 ? uniqueTopicIds[0] : null     // Single topic only
       });
 
       // Update selected questions with the quiz ID

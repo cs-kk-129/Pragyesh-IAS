@@ -1,0 +1,13 @@
+The mock test is being created but it shows 0 questions. 
+Not able to attempt the mock test as it shows in progress without any questions in the mock test.
+The quizzes table is working correctly. Its creating entires for the generated mock tests but its not populating a few fields such as subject_id, topic_id (rename topic_id to section_id), subtopic_id (rename subtopic_id to topic_id). Make sure the quizzes table grabs the data from the generated questions without omitting any wherever provided. If the quiz is generated on one or more subjects / sections, include all the respective values subject_id, section_id and topic_id
+The questions table isn’t storing the generated questions properly. The generated questions using the AI questions tab in the admin page aren’t getting stored in the questions table.
+
+And there are a few changes to be made in the AI questions tab in the admin page:
+1. Upon clicking the select Topics and generate  button, it’s not showing the entire list of sections in the respective subjects. Fix it and make sure all the sections in a particular subject are visible. 
+2. Also, the difficulty level is set to medium by default initially. Give a functionality to the admin to choose a difficulty level of the test about to be created before generating the questions.
+3. Once the questions are generated, add a select all check box in the top if the admin chooses to add all the questions to the mock test instead of manually checking each box.
+
+There are a few changes to be made in the Manual Input tab in the admin page:
+1. The subject and Topic section field is not showing all the list of available subjects in the subject field in the drop down menu. Make sure it shows all the available list of subjects in the drop down. Rename the Topic field to ‘Section’ and create a drop-down menu for the Section field as well. After selecting a subject, the section should show only the list of sections in that respective subject. And provide admin the functionality to manually enter the section name if he chooses to. 
+2. Also, add a functionality to the admin to upload a file which contains all the questions required for the mock test. (Allowe all the possible filetypes). Once the file is uploaded, it should be able to identify and process the questions and should follow a similar workflow that’s present in the AI questions tab. (Segment and segregate each question accordingly and give the admin to choose which questions he wants to use to create the mock test.) Include a select all checkbox at the top for this too if the admin chooses to select all the questions. Also before creating the mock test give the admin the option to assign a difficulty level to the created mock test using the questions from the uploaded file.
