@@ -274,7 +274,7 @@ export default function ManualQuestionInput() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={selectAllFile}
-                    onCheckedChange={setSelectAllFile}
+                    onCheckedChange={(checked) => setSelectAllFile(checked as boolean)}
                   />
                   <Label className="text-sm">Select All</Label>
                 </div>

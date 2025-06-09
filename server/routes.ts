@@ -62,7 +62,7 @@ const upload = multer({
     if (allowedTypes.includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new Error('Unsupported file type'), false);
+      cb(null, false);
     }
   }
 });
@@ -204,7 +204,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload processing endpoint for manual question input
+  app.post("/api/admin/process-question-file", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
+      const file = req.file;
+      const fileExtension = path.extname(file.originalname).toLowerCase();
+      let extractedText = '';
+      
+      // Process different file types
+      switch (fileExtension) {
+        case '.txt':
+          extractedText = file.buffer.toString('utf-8');
+          break;
+          
+        case '.csv':
+          // Simple CSV parsing for questions
+          const csvData = file.buffer.toString('utf-8');
+          const lines = csvData.split('\n');
+          extractedText = lines.join('\n');
+          break;
+          
+        case '.json':
+          try {
+            const jsonData = JSON.parse(file.buffer.toString('utf-8'));
+            extractedText = JSON.stringify(jsonData, null, 2);
+          } catch (error) {
+            return res.status(400).json({ error: "Invalid JSON format" });
+          }
+          break;
+          
+        default:
+          return res.status(400).json({ error: "Unsupported file format" });
+      }
+
+      // Use OpenAI to extract and structure questions from the text
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at extracting and structuring UPSC exam questions from various text formats. 
+            
+            Analyze the provided text and extract/create well-structured multiple choice questions.
+            
+            For each question, provide:
+            1. A clear, well-structured question
+            2. Four answer options (A, B, C, D) 
+            3. The correct answer
+            4. Subject classification
+            5. Topic classification
+            6. Difficulty level (easy/medium/hard)
+            7. Marks (usually 2 for UPSC)
+            8. Brief explanation
+            
+            Format your response as a JSON object with this structure:
+            {
+              "questions": [
+                {
+                  "question": "Your question here",
+                  "options": ["Option A", "Option B", "Option C", "Option D"],
+                  "correctAnswer": "Option A",
+                  "subject": "Subject name",
+                  "topic": "Topic name",
+                  "difficulty": "medium",
+                  "marks": 2,
+                  "explanation": "Brief explanation"
+                }
+              ]
+            }
+            
+            If the text contains existing questions, extract them. If it's content/notes, create relevant questions from it.
+            Ensure all questions are factually accurate and appropriate for UPSC preparation.`
+          },
+          {
+            role: "user",
+            content: `Please extract/create UPSC questions from this text:\n\n${extractedText}`
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+      
+      if (!result.questions || !Array.isArray(result.questions)) {
+        throw new Error("Could not extract valid questions from file");
+      }
+
+      console.log(`Successfully processed ${fileExtension} file and extracted ${result.questions.length} questions`);
+      
+      res.json({ 
+        success: true, 
+        questions: result.questions,
+        count: result.questions.length,
+        fileType: fileExtension
+      });
+
+    } catch (error) {
+      console.error("Error processing file:", error);
+      res.status(500).json({ 
+        error: "Failed to process file",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Mock test creation endpoint
   app.post("/api/mock-tests", async (req, res) => {

@@ -867,24 +867,18 @@ Follow these UPSC formatting guidelines:
 
                                     {question.options && (
                                       <div className="grid grid-cols-2 gap-2 mt-2">
-                                        {(Array.isArray(question.options) ? question.options : 
-                                          (typeof question.options === 'string' ? JSON.parse(question.options).english || JSON.parse(question.options) : 
-                                           question.options.english || [])).map((option, index) => (
+                                        {(Array.isArray(question.options) ? question.options : []).map((option: string, index: number) => (
                                           <div
                                             key={index}
                                             className={`p-2 rounded border ${
-                                              option === (typeof question.correctAnswer === 'string' && question.correctAnswer.startsWith('{') ? 
-                                                JSON.parse(question.correctAnswer).english : 
-                                                question.correctAnswer?.english || question.correctAnswer)
+                                              option === question.correctAnswer
                                                 ? "bg-green-50 border-green-200"
                                                 : "bg-gray-50"
                                             }`}
                                           >
                                             <span className="text-sm">
                                               {String.fromCharCode(65 + index)}. {option}
-                                              {option === (typeof question.correctAnswer === 'string' && question.correctAnswer.startsWith('{') ? 
-                                                JSON.parse(question.correctAnswer).english : 
-                                                question.correctAnswer?.english || question.correctAnswer) && (
+                                              {option === question.correctAnswer && (
                                                 <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
                                               )}
                                             </span>
