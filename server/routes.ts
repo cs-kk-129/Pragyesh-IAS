@@ -11,6 +11,36 @@ import { IStorage } from "./storage";
 import { generateQuiz, answerDoubt } from "./openai";
 import * as schema from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+import crypto from "crypto";
+import OpenAI from "openai";
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Simple subject mapping function
+function getSubjectIdByName(subjectName: string): number {
+  const subjectMap: { [key: string]: number } = {
+    'Indian History': 1,
+    'Art and Culture': 2,
+    'Geography': 3,
+    'Indian Polity': 4,
+    'Economics': 5,
+    'Environment': 6,
+    'Science and Technology': 7,
+    'Current Affairs': 8,
+    'General Knowledge': 1,
+    'History': 1,
+    'Culture': 2,
+    'Polity': 4,
+    'General': 1
+  };
+  
+  return subjectMap[subjectName] || 1; // Default to Indian History
+}
 
 const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.isAuthenticated()) {
@@ -18,6 +48,24 @@ const isAuthenticated = (req: any, res: any, next: any) => {
   }
   res.status(401).json({ message: "Unauthorized" });
 };
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.txt', '.docx', '.pdf', '.csv', '.json'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedTypes.includes(fileExtension)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type'), false);
+    }
+  }
+});
 
 // Global mock tests storage (module level to persist)
 const mockTests: any[] = [];
