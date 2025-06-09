@@ -167,7 +167,7 @@ export default function AdminDashboard() {
     scheduledDate: "",
   });
 
-  // Additional state for new functionality
+  // Additional state for enhanced functionality
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [selectAllQuestions, setSelectAllQuestions] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
