@@ -1050,46 +1050,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Parse tags to extract subject and topic information
           const tags = [question.subject, question.topic].filter(Boolean);
 
-          // Map tags to actual subject/section IDs from database
+          // Map subject using direct database lookup
           const subjects = await storage.getAllSubjects();
           let actualSubjectId = 1; // Default to Indian History
           let actualSectionId = null;
           
-          // Map subject based on tags or question subject
           const subjectName = question.subject || tags[0] || '';
           console.log('Mapping subject:', subjectName);
           
-          // Find matching subject
-          const subjectMatch = subjects.find(s => {
-            const name = s.name.toLowerCase();
-            const searchTerm = subjectName.toLowerCase();
-            
-            return name.includes(searchTerm) || 
-                   searchTerm.includes('history') && name.includes('history') ||
-                   searchTerm.includes('culture') && name.includes('culture') ||
-                   searchTerm.includes('art') && name.includes('art') ||
-                   searchTerm.includes('geography') && name.includes('geography') ||
-                   searchTerm.includes('polity') && name.includes('polity') ||
-                   searchTerm.includes('economy') && name.includes('economy') ||
-                   searchTerm.includes('science') && name.includes('science') ||
-                   searchTerm.includes('environment') && name.includes('environment');
-          });
-          
-          if (subjectMatch) {
-            actualSubjectId = subjectMatch.id;
-            console.log('Found subject match:', subjectMatch.name, 'ID:', actualSubjectId);
-            
-            // Get sections for the matched subject
-            const sections = await db.select()
-              .from(schema.topics)
-              .where(eq(schema.topics.subjectId, subjectMatch.id));
-            
-            const topicName = question.topic || tags[1] || '';
-            const sectionMatch = sections.find(s => 
-              s.name.toLowerCase().includes(topicName.toLowerCase())
-            );
-            actualSectionId = sectionMatch?.id || null;
+          // Direct subject mapping logic
+          if (subjectName.toLowerCase().includes('art') && subjectName.toLowerCase().includes('culture')) {
+            actualSubjectId = 2; // Art & Culture
+          } else if (subjectName.toLowerCase().includes('geography')) {
+            actualSubjectId = 3; // Geography
+          } else if (subjectName.toLowerCase().includes('polity')) {
+            actualSubjectId = 4; // Indian Polity & Governance
+          } else if (subjectName.toLowerCase().includes('economy')) {
+            actualSubjectId = 5; // Indian Economy
+          } else if (subjectName.toLowerCase().includes('environment')) {
+            actualSubjectId = 6; // Environment & Ecology
+          } else if (subjectName.toLowerCase().includes('science') && subjectName.toLowerCase().includes('technology')) {
+            actualSubjectId = 7; // Science & Technology
+          } else if (subjectName.toLowerCase().includes('general') && subjectName.toLowerCase().includes('science')) {
+            actualSubjectId = 8; // General Science
+          } else if (subjectName.toLowerCase().includes('ethics')) {
+            actualSubjectId = 9; // Ethics, Integrity & Aptitude
+          } else if (subjectName.toLowerCase().includes('current')) {
+            actualSubjectId = 10; // Current Affairs
+          } else if (subjectName.toLowerCase().includes('csat')) {
+            actualSubjectId = 11; // CSAT
+          } else if (subjectName.toLowerCase().includes('history')) {
+            actualSubjectId = 1; // Indian History
           }
+          
+          console.log(`Mapped "${subjectName}" to subject ID: ${actualSubjectId}`);
 
           console.log('Creating question with data:', {
             quizId: 0,
