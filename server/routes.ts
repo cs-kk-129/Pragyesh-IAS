@@ -1047,40 +1047,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const savedQuestions = [];
       for (const question of result.questions) {
         try {
-          // Parse tags to extract IDs: [subjectName, sectionName, topicName?]
-          const tags = [question.subject, question.topic];
-          let subjectId = null, sectionId = null, topicId = null;
-          
-          // For demonstration, assign IDs based on subject names
-          // In production, you'd lookup actual IDs from subjects/sections/topics tables
-          if (question.subject === "History") subjectId = 1;
-          else if (question.subject === "Geography") subjectId = 2;
-          else if (question.subject === "Polity") subjectId = 3;
-          else if (question.subject === "Economics") subjectId = 4;
-          else subjectId = 1; // Default to General Studies
-          
-          if (question.topic) {
-            // Assign section ID based on topic (simplified mapping)
-            sectionId = Math.floor(Math.random() * 10) + 1; // Random for demo
-          }
+          // Parse tags to extract subject and topic information
+          const tags = [question.subject, question.topic].filter(Boolean);
 
-          // Lookup actual subject/section IDs from database
+          // Map tags to actual subject/section IDs from database
           const subjects = await storage.getAllSubjects();
-          const subjectMatch = subjects.find(s => 
-            s.name.toLowerCase().includes(question.subject.toLowerCase())
-          );
-          
-          let actualSubjectId = subjectMatch?.id || 1;
+          let actualSubjectId = 1; // Default to Indian History
           let actualSectionId = null;
           
-          // Get sections for the matched subject
+          // Map subject based on tags or question subject
+          const subjectName = question.subject || tags[0] || '';
+          console.log('Mapping subject:', subjectName);
+          
+          // Find matching subject
+          const subjectMatch = subjects.find(s => {
+            const name = s.name.toLowerCase();
+            const searchTerm = subjectName.toLowerCase();
+            
+            return name.includes(searchTerm) || 
+                   searchTerm.includes('history') && name.includes('history') ||
+                   searchTerm.includes('culture') && name.includes('culture') ||
+                   searchTerm.includes('art') && name.includes('art') ||
+                   searchTerm.includes('geography') && name.includes('geography') ||
+                   searchTerm.includes('polity') && name.includes('polity') ||
+                   searchTerm.includes('economy') && name.includes('economy') ||
+                   searchTerm.includes('science') && name.includes('science') ||
+                   searchTerm.includes('environment') && name.includes('environment');
+          });
+          
           if (subjectMatch) {
+            actualSubjectId = subjectMatch.id;
+            console.log('Found subject match:', subjectMatch.name, 'ID:', actualSubjectId);
+            
+            // Get sections for the matched subject
             const sections = await db.select()
               .from(schema.topics)
               .where(eq(schema.topics.subjectId, subjectMatch.id));
             
+            const topicName = question.topic || tags[1] || '';
             const sectionMatch = sections.find(s => 
-              s.name.toLowerCase().includes(question.topic?.toLowerCase() || '')
+              s.name.toLowerCase().includes(topicName.toLowerCase())
             );
             actualSectionId = sectionMatch?.id || null;
           }
@@ -1145,9 +1151,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Analyze selected questions to determine quiz metadata
-      const selectedQuestions = await db.select()
-        .from(schema.questions)
-        .where(sql`id = ANY(${selectedQuestionIds})`);
+      const selectedQuestions = [];
+      for (const questionId of selectedQuestionIds) {
+        const question = await db.select()
+          .from(schema.questions)
+          .where(eq(schema.questions.id, questionId))
+          .limit(1);
+        if (question.length > 0) {
+          selectedQuestions.push(question[0]);
+        }
+      }
       
       // Extract unique subject/section/topic IDs from questions
       const subjectIds = selectedQuestions.map(q => q.subjectId).filter(Boolean);
