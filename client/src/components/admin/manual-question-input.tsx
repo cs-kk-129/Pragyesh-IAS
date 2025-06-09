@@ -45,6 +45,11 @@ export default function ManualQuestionInput() {
   const [bulkInput, setBulkInput] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
+  const [customSection, setCustomSection] = useState("");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [fileQuestions, setFileQuestions] = useState<Question[]>([]);
+  const [selectAllFile, setSelectAllFile] = useState(false);
 
   const addQuestionMutation = useMutation({
     mutationFn: async (data: { questions: Question[]; subjectId: string; topicId: string }) => {
@@ -91,8 +96,83 @@ export default function ManualQuestionInput() {
     }));
   };
 
+  // Fetch all subjects for dropdown
+  const { data: subjects = [] } = useQuery({
+    queryKey: ["/api/subjects"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/subjects");
+      return response.json();
+    }
+  });
+
+  // Fetch sections based on selected subject
+  const { data: sections = [] } = useQuery({
+    queryKey: ["/api/topics", selectedSubject],
+    queryFn: async () => {
+      if (!selectedSubject) return [];
+      const response = await apiRequest("GET", `/api/topics?subjectId=${selectedSubject}`);
+      return response.json();
+    },
+    enabled: !!selectedSubject
+  });
+
+  // Handle file upload processing
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+    setIsProcessingFile(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/process-question-file', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process file');
+      }
+
+      const data = await response.json();
+      
+      // Convert processed file data to question format
+      const processedQuestions: Question[] = data.questions.map((q: any, index: number) => ({
+        question: q.question || q.text || '',
+        questionHindi: q.questionHindi || '',
+        options: q.options || [],
+        optionsHindi: q.optionsHindi || [],
+        correctAnswer: q.correctAnswer || q.answer || 0,
+        explanation: q.explanation || '',
+        explanationHindi: q.explanationHindi || '',
+        difficulty: q.difficulty || 'medium',
+        marks: q.marks || 2,
+        subject: selectedSubject || 'General',
+        topic: selectedTopic || customSection || 'Mixed'
+      }));
+
+      setFileQuestions(processedQuestions);
+      toast({
+        title: "File Processed Successfully",
+        description: `Extracted ${processedQuestions.length} questions from file`
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "File Processing Failed",
+        description: "Please check the file format and try again",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingFile(false);
+    }
+  };
+
   const submitAllQuestions = () => {
-    if (questions.length === 0) {
+    if (questions.length === 0 && fileQuestions.length === 0) {
       toast({
         title: "No Questions",
         description: "Please add questions before submitting",
@@ -101,8 +181,10 @@ export default function ManualQuestionInput() {
       return;
     }
 
+    const allQuestions = [...questions, ...fileQuestions.filter((_, index) => selectAllFile || fileQuestions[index]?.isSelected)];
+    
     addQuestionMutation.mutate({
-      questions,
+      questions: allQuestions,
       subjectId: selectedSubject,
       topicId: selectedTopic
     });
@@ -110,15 +192,128 @@ export default function ManualQuestionInput() {
 
   return (
     <div className="space-y-6">
+      {/* File Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Question File</CardTitle>
+          <CardDescription>
+            Upload a file containing questions in supported formats (TXT, DOCX, PDF, CSV, JSON)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Input
+              type="file"
+              accept=".txt,.docx,.pdf,.csv,.json"
+              onChange={handleFileUpload}
+              disabled={isProcessingFile}
+              className="flex-1"
+            />
+            <Button disabled={isProcessingFile} variant="outline">
+              {isProcessingFile ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Subject and Section Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects.map((subject: any) => (
+                    <SelectItem key={subject.id} value={subject.id.toString()}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="section">Section</Label>
+              <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sections.map((section: any) => (
+                    <SelectItem key={section.id} value={section.id.toString()}>
+                      {section.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Or enter custom section name"
+                value={customSection}
+                onChange={(e) => setCustomSection(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* File Questions Display */}
+          {fileQuestions.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Questions from File</h4>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={selectAllFile}
+                    onCheckedChange={setSelectAllFile}
+                  />
+                  <Label className="text-sm">Select All</Label>
+                </div>
+              </div>
+              
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {fileQuestions.map((question, index) => (
+                  <Card key={index} className="p-3">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        checked={selectAllFile || question.isSelected}
+                        onCheckedChange={(checked) => {
+                          setFileQuestions(prev => prev.map((q, i) => 
+                            i === index ? { ...q, isSelected: checked as boolean } : q
+                          ));
+                        }}
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{question.question}</p>
+                        <p className="text-xs text-gray-600">
+                          {question.subject} - {question.topic} ({question.difficulty})
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Manual Question Input</h2>
         <div className="flex items-center space-x-4">
           <Badge variant="outline">
-            {questions.length} Questions in Batch
+            {questions.length + fileQuestions.filter(q => selectAllFile || q.isSelected).length} Questions Total
           </Badge>
           <Button 
             onClick={submitAllQuestions} 
-            disabled={questions.length === 0 || addQuestionMutation.isPending}
+            disabled={(questions.length === 0 && fileQuestions.length === 0) || addQuestionMutation.isPending}
             className="bg-gradient-to-r from-green-500 to-green-600"
           >
             <Upload className="mr-2 h-4 w-4" />

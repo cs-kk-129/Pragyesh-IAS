@@ -309,9 +309,20 @@ Follow these UPSC formatting guidelines:
 
     setIsGenerating(true);
     try {
+      // Extract requested number from prompt and double it for admin choice
+      const numberMatch = questionPrompt.match(/(\d+)\s*(?:questions?|mcqs?)/i);
+      const requestedCount = numberMatch ? parseInt(numberMatch[1]) : 10;
+      const generateCount = requestedCount * 2; // Generate double for selection
+
+      // Enhanced prompt with difficulty and increased count
+      const enhancedPrompt = questionPrompt.replace(/(\d+)/, generateCount.toString()) + 
+        `\n\nDifficulty Level: ${selectedDifficulty.toUpperCase()}. Generate ${generateCount} questions to give admin choice for selection.`;
+
       const response = await apiRequest('POST', '/api/admin/generate-questions', {
-        prompt: questionPrompt,
-        questionType: 'objective'
+        prompt: enhancedPrompt,
+        questionType: 'objective',
+        difficulty: selectedDifficulty,
+        requestedCount: generateCount
       });
 
       const data = await response.json();
@@ -320,21 +331,22 @@ Follow these UPSC formatting guidelines:
         // Transform database response to match our GeneratedQuestion type
         const transformedQuestions = data.questions.map((q: any) => ({
           id: q.id.toString(),
-          question: q.question?.english || q.question,
-          questionHindi: q.question?.hindi || q.questionHindi,
-          options: Array.isArray(q.options) ? q.options : (q.options?.english || q.options),
-          optionsHindi: q.options?.hindi || q.optionsHindi,
-          correctAnswer: q.correctAnswer?.english || q.correctAnswer,
+          question: typeof q.question === 'object' ? q.question?.english || q.question?.hindi || '' : q.question,
+          questionHindi: typeof q.question === 'object' ? q.question?.hindi : q.questionHindi,
+          options: Array.isArray(q.options) ? q.options : (typeof q.options === 'object' ? q.options?.english || [] : []),
+          optionsHindi: typeof q.options === 'object' ? q.options?.hindi : q.optionsHindi,
+          correctAnswer: typeof q.correctAnswer === 'object' ? q.correctAnswer?.english || q.correctAnswer?.hindi || '' : q.correctAnswer,
           type: "objective",
           subject: q.subject || "General Knowledge",
           topic: q.topic || "Mixed Topics",
-          difficulty: q.difficulty || "medium",
+          difficulty: q.difficulty || selectedDifficulty,
           marks: q.marks || 2,
           isSelected: false,
         }));
 
         setGeneratedQuestions(transformedQuestions);
-        console.log(`Generated and saved ${data.questions.length} questions to database`);
+        setSelectAllQuestions(false); // Reset select all state
+        console.log(`Generated and saved ${data.questions.length} questions to database (requested ${requestedCount}, generated ${generateCount} for choice)`);
       } else {
         throw new Error('No questions received from database');
       }
@@ -740,6 +752,29 @@ Follow these UPSC formatting guidelines:
                         />
                       </div>
 
+                      {/* Difficulty Selection */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium">Difficulty Level</label>
+                        <RadioGroup
+                          value={selectedDifficulty}
+                          onValueChange={(value) => setSelectedDifficulty(value as 'easy' | 'medium' | 'hard')}
+                          className="flex space-x-6"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="easy" id="easy" />
+                            <Label htmlFor="easy">Easy</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="medium" id="medium" />
+                            <Label htmlFor="medium">Medium</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="hard" id="hard" />
+                            <Label htmlFor="hard">Hard</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
                       <div className="flex space-x-4">
                         <Button
                           onClick={handleGenerateQuestions}
@@ -774,7 +809,24 @@ Follow these UPSC formatting guidelines:
                     {generatedQuestions.length > 0 && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium">Generated Questions</h3>
+                          <div className="flex items-center space-x-4">
+                            <h3 className="text-lg font-medium">Generated Questions</h3>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="select-all-questions"
+                                checked={selectAllQuestions}
+                                onCheckedChange={(checked) => {
+                                  setSelectAllQuestions(checked as boolean);
+                                  setGeneratedQuestions(prev => 
+                                    prev.map(q => ({ ...q, isSelected: checked as boolean }))
+                                  );
+                                }}
+                              />
+                              <Label htmlFor="select-all-questions" className="text-sm font-medium">
+                                Select All
+                              </Label>
+                            </div>
+                          </div>
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-muted-foreground">
                               {generatedQuestions.filter(q => q.isSelected).length} of {generatedQuestions.length} selected
