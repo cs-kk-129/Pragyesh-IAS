@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Upload, FileText } from "lucide-react";
+import { Plus, Trash2, Upload, FileText, CheckCircle } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -141,25 +141,27 @@ export default function ManualQuestionInput() {
 
       const data = await response.json();
       
-      // Convert processed file data to question format
+      // Convert processed file data to question format with selection capability
       const processedQuestions: Question[] = data.questions.map((q: any, index: number) => ({
         question: q.question || q.text || '',
         questionHindi: q.questionHindi || '',
-        options: q.options || [],
+        options: Array.isArray(q.options) ? q.options : [],
         optionsHindi: q.optionsHindi || [],
-        correctAnswer: q.correctAnswer || q.answer || 0,
+        correctAnswer: Array.isArray(q.options) ? 
+          (q.options.indexOf(q.correctAnswer) !== -1 ? q.options.indexOf(q.correctAnswer) : 0) : 0,
         explanation: q.explanation || '',
         explanationHindi: q.explanationHindi || '',
         difficulty: q.difficulty || 'medium',
         marks: q.marks || 2,
-        subject: selectedSubject || 'General',
-        topic: selectedTopic || customSection || 'Mixed'
+        subject: q.subject || 'General Knowledge',
+        topic: q.topic || 'Mixed Topics',
+        isSelected: false
       }));
 
       setFileQuestions(processedQuestions);
       toast({
         title: "File Processed Successfully",
-        description: `Extracted ${processedQuestions.length} questions from file`
+        description: `Extracted ${processedQuestions.length} questions from file. Select questions to create mock test.`
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -170,6 +172,61 @@ export default function ManualQuestionInput() {
       });
     } finally {
       setIsProcessingFile(false);
+    }
+  };
+
+  // Create mock test from selected questions
+  const createMockTestFromSelected = async () => {
+    const selectedQuestions = fileQuestions.filter(q => q.isSelected);
+    
+    if (selectedQuestions.length === 0) {
+      toast({
+        title: "No Questions Selected",
+        description: "Please select at least one question to create a mock test",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const mockTestData = {
+        title: `Mock Test - ${uploadedFile?.name || 'File Upload'} (${selectedQuestions.length} Questions)`,
+        description: `Mock test created from uploaded file with ${selectedQuestions.length} selected questions`,
+        duration: Math.max(60, selectedQuestions.length * 2), // 2 minutes per question, minimum 60 minutes
+        scheduledDate: new Date().toISOString(),
+        questions: selectedQuestions.map(q => ({
+          question: { english: q.question, hindi: q.questionHindi || '' },
+          options: { english: q.options, hindi: q.optionsHindi || [] },
+          correctAnswer: { english: q.options[q.correctAnswer] || '', hindi: '' },
+          subject: q.subject,
+          topic: q.topic,
+          marks: q.marks,
+          explanation: q.explanation
+        }))
+      };
+
+      const response = await apiRequest('POST', '/api/mock-tests', mockTestData);
+      
+      if (response.ok) {
+        toast({
+          title: "Mock Test Created Successfully",
+          description: `Created mock test with ${selectedQuestions.length} questions from uploaded file`
+        });
+        
+        // Reset state
+        setFileQuestions([]);
+        setUploadedFile(null);
+        setSelectAllFile(false);
+      } else {
+        throw new Error('Failed to create mock test');
+      }
+    } catch (error) {
+      console.error('Error creating mock test:', error);
+      toast({
+        title: "Failed to Create Mock Test",
+        description: "Please try again",
+        variant: "destructive"
+      });
     }
   };
 
@@ -270,35 +327,89 @@ export default function ManualQuestionInput() {
           {fileQuestions.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Questions from File</h4>
+                <div className="flex items-center space-x-4">
+                  <h4 className="font-medium">Questions from File ({fileQuestions.length} extracted)</h4>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={selectAllFile}
+                      onCheckedChange={(checked) => {
+                        setSelectAllFile(checked as boolean);
+                        setFileQuestions(prev => prev.map(q => ({ ...q, isSelected: checked as boolean })));
+                      }}
+                    />
+                    <Label className="text-sm">Select All</Label>
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={selectAllFile}
-                    onCheckedChange={(checked) => setSelectAllFile(checked as boolean)}
-                  />
-                  <Label className="text-sm">Select All</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {fileQuestions.filter(q => q.isSelected).length} of {fileQuestions.length} selected
+                  </span>
+                  <Button
+                    onClick={createMockTestFromSelected}
+                    disabled={fileQuestions.filter(q => q.isSelected).length === 0}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600"
+                  >
+                    Create Mock Test
+                  </Button>
                 </div>
               </div>
               
-              <div className="max-h-64 overflow-y-auto space-y-2">
+              <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fileQuestions.map((question, index) => (
-                  <Card key={index} className="p-3">
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        checked={selectAllFile || question.isSelected}
-                        onCheckedChange={(checked) => {
-                          setFileQuestions(prev => prev.map((q, i) => 
-                            i === index ? { ...q, isSelected: checked as boolean } : q
-                          ));
-                        }}
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{question.question}</p>
-                        <p className="text-xs text-gray-600">
-                          {question.subject} - {question.topic} ({question.difficulty})
-                        </p>
+                  <Card key={index} className={question.isSelected ? "ring-2 ring-primary" : ""}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          checked={question.isSelected}
+                          onCheckedChange={(checked) => {
+                            setFileQuestions(prev => prev.map((q, i) => 
+                              i === index ? { ...q, isSelected: checked as boolean } : q
+                            ));
+                          }}
+                        />
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">{question.subject}</Badge>
+                              <Badge variant="outline">{question.difficulty}</Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {question.marks} marks
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="font-medium">{question.question}</p>
+
+                          {question.options && question.options.length > 0 && (
+                            <div className="grid grid-cols-2 gap-2">
+                              {question.options.map((option: string, optIndex: number) => (
+                                <div
+                                  key={optIndex}
+                                  className={`p-2 rounded border ${
+                                    optIndex === question.correctAnswer
+                                      ? "bg-green-50 border-green-200"
+                                      : "bg-gray-50"
+                                  }`}
+                                >
+                                  <span className="text-sm">
+                                    {String.fromCharCode(65 + optIndex)}. {option}
+                                    {optIndex === question.correctAnswer && (
+                                      <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
+                                    )}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {question.explanation && (
+                            <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
+                              <strong>Explanation:</strong> {question.explanation}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </CardContent>
                   </Card>
                 ))}
               </div>

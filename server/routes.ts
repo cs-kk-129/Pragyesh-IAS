@@ -197,7 +197,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await response.json();
       const result = JSON.parse(data.choices[0].message.content);
 
-      res.json(result);
+      // Save questions to database with UUIDs
+      const savedQuestions = [];
+      if (result.questions && Array.isArray(result.questions)) {
+        for (const questionData of result.questions) {
+          try {
+            // Map subject name to subject ID
+            const subjectId = getSubjectIdByName(questionData.subject);
+            
+            const questionId = crypto.randomUUID();
+            const question = await storage.createQuestion({
+              question: typeof questionData.question === 'object' ? 
+                JSON.stringify(questionData.question) : questionData.question,
+              questionHindi: typeof questionData.question === 'object' ? 
+                questionData.question.hindi : undefined,
+              options: typeof questionData.options === 'object' ? 
+                questionData.options.english || questionData.options : questionData.options,
+              optionsHindi: typeof questionData.options === 'object' ? 
+                questionData.options.hindi : undefined,
+              correctAnswer: typeof questionData.correctAnswer === 'object' ? 
+                questionData.correctAnswer.english || questionData.correctAnswer : questionData.correctAnswer,
+              explanation: questionData.explanation || '',
+              difficulty: questionData.difficulty || 'medium',
+              marks: questionData.marks || 2,
+              subjectId: subjectId,
+              topicId: 1, // Default topic
+              type: 'objective'
+            });
+            
+            // Add the generated ID to the question object
+            question.id = questionId;
+            
+            savedQuestions.push(question);
+            console.log(`Saved question with ID: ${question.id}, Subject ID: ${subjectId}`);
+          } catch (error) {
+            console.error("Error saving individual question:", error);
+          }
+        }
+      }
+
+      console.log(`Successfully generated and saved ${savedQuestions.length} questions to database`);
+      
+      // Return the saved questions with database IDs
+      res.json({ 
+        success: true, 
+        questions: savedQuestions,
+        count: savedQuestions.length
+      });
     } catch (error) {
       console.error("Question generation error:", error);
       res.status(500).json({ error: "Failed to generate questions" });
