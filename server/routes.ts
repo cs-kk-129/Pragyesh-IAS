@@ -1467,13 +1467,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             testDate: quiz.testDate?.toISOString().split('T')[0],
             isAttempted: false,
             status: 'available',
-            questions: questions.map(q => ({
-              id: q.id,
-              question: JSON.parse(q.question || '{}'),
-              options: q.options,
-              correctAnswer: q.correctAnswer,
-              marks: 2
-            }))
+            questions: questions.map(q => {
+              let questionText;
+              try {
+                // Try to parse as JSON first
+                const parsed = JSON.parse(q.question || '{}');
+                questionText = typeof parsed === 'object' ? parsed : { english: q.question, hindi: '' };
+              } catch (e) {
+                // If JSON parsing fails, treat as plain text
+                questionText = { english: q.question || '', hindi: '' };
+              }
+              
+              return {
+                id: q.id,
+                question: questionText,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                marks: 2
+              };
+            })
           });
         } else {
           console.log(`User ${userId} already attempted quiz ${quiz.id}`);
