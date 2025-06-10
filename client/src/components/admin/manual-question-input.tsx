@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Upload, FileText, CheckCircle } from "lucide-react";
+import { Plus, Trash2, Upload, FileText, CheckCircle, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -77,6 +78,36 @@ export default function ManualQuestionInput() {
       toast({
         title: "Error",
         description: error.message || "Failed to add questions",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const createMockTestMutation = useMutation({
+    mutationFn: async (data: { title: string; description: string; duration: number; scheduledDate: string; questions: Question[] }) => {
+      const response = await apiRequest("POST", "/api/mock-tests", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Mock Test Created Successfully",
+        description: `Mock test "${data.mockTest.title}" has been created with ${data.mockTest.totalQuestions} questions.`
+      });
+      setShowMockTestDialog(false);
+      setQuestions([]);
+      setFileQuestions([]);
+      setMockTestData({
+        title: "",
+        description: "",
+        duration: 120,
+        scheduledDate: new Date().toISOString().split('T')[0],
+        difficulty: "medium"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create mock test",
         variant: "destructive"
       });
     }
@@ -433,6 +464,14 @@ export default function ManualQuestionInput() {
             {questions.length + fileQuestions.filter(q => selectAllFile || q.isSelected).length} Questions Total
           </Badge>
           <Button 
+            onClick={() => setShowMockTestDialog(true)}
+            disabled={(questions.length === 0 && fileQuestions.length === 0)}
+            className="bg-gradient-to-r from-blue-500 to-blue-600"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Mock Test
+          </Button>
+          <Button 
             onClick={submitAllQuestions} 
             disabled={(questions.length === 0 && fileQuestions.length === 0) || addQuestionMutation.isPending}
             className="bg-gradient-to-r from-green-500 to-green-600"
@@ -597,6 +636,148 @@ export default function ManualQuestionInput() {
           </CardContent>
         </Card>
       )}
+
+      {/* Mock Test Creation Dialog */}
+      <Dialog open={showMockTestDialog} onOpenChange={setShowMockTestDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create Mock Test</DialogTitle>
+            <DialogDescription>
+              Configure your mock test with {questions.length + fileQuestions.filter(q => selectAllFile || q.isSelected).length} selected questions.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={mockTestData.title}
+                onChange={(e) => setMockTestData(prev => ({ ...prev, title: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter mock test title"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={mockTestData.description}
+                onChange={(e) => setMockTestData(prev => ({ ...prev, description: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter test description"
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">
+                Duration (minutes)
+              </Label>
+              <Input
+                id="duration"
+                type="number"
+                value={mockTestData.duration}
+                onChange={(e) => setMockTestData(prev => ({ ...prev, duration: parseInt(e.target.value) || 120 }))}
+                className="col-span-3"
+                min="30"
+                max="300"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="scheduledDate" className="text-right">
+                Scheduled Date
+              </Label>
+              <Input
+                id="scheduledDate"
+                type="date"
+                value={mockTestData.scheduledDate}
+                onChange={(e) => setMockTestData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="difficulty" className="text-right">
+                Difficulty
+              </Label>
+              <Select 
+                value={mockTestData.difficulty} 
+                onValueChange={(value) => setMockTestData(prev => ({ ...prev, difficulty: value }))}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMockTestDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                const allQuestions = [
+                  ...questions,
+                  ...fileQuestions.filter(q => selectAllFile || q.isSelected)
+                ];
+                
+                if (allQuestions.length === 0) {
+                  toast({
+                    title: "No Questions Selected",
+                    description: "Please add or select questions before creating a mock test.",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                
+                if (!mockTestData.title.trim()) {
+                  toast({
+                    title: "Title Required",
+                    description: "Please enter a title for the mock test.",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                
+                createMockTestMutation.mutate({
+                  title: mockTestData.title,
+                  description: mockTestData.description,
+                  duration: mockTestData.duration,
+                  scheduledDate: mockTestData.scheduledDate,
+                  questions: allQuestions
+                });
+              }}
+              disabled={createMockTestMutation.isPending}
+              className="bg-gradient-to-r from-blue-500 to-blue-600"
+            >
+              {createMockTestMutation.isPending ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Create Mock Test
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
