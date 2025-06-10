@@ -205,28 +205,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Map subject name to subject ID
             const subjectId = getSubjectIdByName(questionData.subject);
             
-            const questionId = crypto.randomUUID();
+            // Create a temporary quiz first to associate questions
+            let tempQuizId = 1; // Default temporary quiz
+            
             const question = await storage.createQuestion({
+              quizId: tempQuizId,
               question: typeof questionData.question === 'object' ? 
                 JSON.stringify(questionData.question) : questionData.question,
-              questionHindi: typeof questionData.question === 'object' ? 
-                questionData.question.hindi : undefined,
               options: typeof questionData.options === 'object' ? 
                 questionData.options.english || questionData.options : questionData.options,
-              optionsHindi: typeof questionData.options === 'object' ? 
-                questionData.options.hindi : undefined,
               correctAnswer: typeof questionData.correctAnswer === 'object' ? 
                 questionData.correctAnswer.english || questionData.correctAnswer : questionData.correctAnswer,
               explanation: questionData.explanation || '',
               difficulty: questionData.difficulty || 'medium',
-              marks: questionData.marks || 2,
               subjectId: subjectId,
               topicId: 1, // Default topic
-              type: 'objective'
+              sectionId: 1 // Default section
             });
-            
-            // Add the generated ID to the question object
-            question.id = questionId;
             
             savedQuestions.push(question);
             console.log(`Saved question with ID: ${question.id}, Subject ID: ${subjectId}`);
@@ -363,19 +358,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { title, description, duration, scheduledDate, questions } = req.body;
 
-      const mockTestData = {
+      // Create quiz in database
+      const quiz = await storage.createQuiz({
         title,
-        description,
-        duration,
-        scheduledDate,
-        questions,
+        description: description || '',
+        quizType: 'mock_test',
+        subjectId: 1, // Multi-subject mock test
+        topicId: 1,
         difficulty: 'medium',
-        subjects: Array.from(new Set(questions.map((q: any) => q.subject)))
-      };
+        timeLimit: duration || 120,
+        testDate: new Date(scheduledDate),
+        instructions: 'Complete all questions within the time limit.',
+        language: 'english'
+      });
 
-      // Use in-memory storage to avoid schema conflicts
+      // Save questions to database linked to this quiz
+      const savedQuestions = [];
+      for (const questionData of questions) {
+        try {
+          const question = await storage.createQuestion({
+            quizId: quiz.id,
+            question: typeof questionData.question === 'object' ? 
+              questionData.question.english : questionData.question,
+            options: typeof questionData.options === 'object' ? 
+              questionData.options.english : questionData.options,
+            correctAnswer: typeof questionData.correctAnswer === 'object' ? 
+              questionData.correctAnswer.english : questionData.correctAnswer,
+            explanation: questionData.explanation || '',
+            difficulty: questionData.difficulty || 'medium',
+            subjectId: getSubjectIdByName(questionData.subject || 'General Knowledge'),
+            topicId: 1,
+            sectionId: 1
+          });
+          savedQuestions.push(question);
+        } catch (error) {
+          console.error("Error saving question:", error);
+        }
+      }
+
+      // Also add to in-memory storage for compatibility
       const mockTest = {
-        id: mockTests.length + 1,
+        id: quiz.id,
         title,
         description,
         duration,
@@ -391,8 +414,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       mockTests.push(mockTest);
 
-      console.log(`Mock test "${title}" created successfully with ${questions.length} questions`);
-      res.status(201).json({ success: true, mockTest });
+      console.log(`Mock test "${title}" created successfully with ${savedQuestions.length} questions in database`);
+      res.status(201).json({ success: true, mockTest: { ...mockTest, databaseId: quiz.id } });
     } catch (error) {
       console.error("Mock test creation error:", error);
       res.status(500).json({ error: "Failed to create mock test" });
@@ -1402,15 +1425,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/student/mock-tests", isAuthenticated, async (req, res) => {
     try {
       const userId = (req as any).user.id;
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      // Get quizzes that are scheduled for today
+      // Get quizzes that are scheduled for today or future dates
       const availableQuizzes = await db.select()
         .from(schema.quizzes)
         .where(
           and(
             eq(schema.quizzes.quizType, 'mock_test'),
-            sql`DATE(test_date) = ${today}`
+            sql`test_date >= ${today.toISOString()}`
           )
         );
 

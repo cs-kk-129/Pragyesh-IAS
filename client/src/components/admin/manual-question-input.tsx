@@ -52,6 +52,14 @@ export default function ManualQuestionInput() {
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [fileQuestions, setFileQuestions] = useState<Question[]>([]);
   const [selectAllFile, setSelectAllFile] = useState(false);
+  const [showMockTestDialog, setShowMockTestDialog] = useState(false);
+  const [mockTestData, setMockTestData] = useState({
+    title: "",
+    description: "",
+    duration: 120,
+    scheduledDate: new Date().toISOString().split('T')[0],
+    difficulty: "medium"
+  });
 
   const addQuestionMutation = useMutation({
     mutationFn: async (data: { questions: Question[]; subjectId: string; topicId: string }) => {
