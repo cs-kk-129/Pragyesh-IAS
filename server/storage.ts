@@ -220,6 +220,12 @@ export class MemStorage implements IStorage {
     this.questions.set(id, question);
     return question;
   }
+ /* async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
+    const [question] = await db.insert(schema.questions)
+      .values(insertQuestion)
+      .returning(); // Returns inserted row
+    return question;
+  }*/
   
   async getQuestionsByQuiz(quizId: number): Promise<Question[]> {
     return Array.from(this.questions.values()).filter(

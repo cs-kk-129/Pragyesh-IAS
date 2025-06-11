@@ -282,12 +282,21 @@ export class DatabaseStorage implements IStorage {
   // QUESTIONS
   async createQuestion(question: InsertQuestion): Promise<Question> {
     try {
-      console.log('Creating question with data:', JSON.stringify(question, null, 2));
-      const [newQuestion] = await db.insert(questions).values(question).returning();
-      console.log('Question created successfully with ID:', newQuestion.id);
+      console.log('DATABASE STORAGE: Creating question with data:', JSON.stringify(question, null, 2));
+      
+      // Convert options to proper string array
+      const questionData = {
+        ...question,
+        options: Array.isArray(question.options) 
+          ? [...question.options] 
+          : Object.values(question.options || {}).filter(v => typeof v === 'string')
+      };
+      
+      const [newQuestion] = await db.insert(questions).values(questionData).returning();
+      console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.id);
       return newQuestion;
     } catch (error) {
-      console.error('Error creating question in database:', error);
+      console.error('DATABASE STORAGE: Error creating question in database:', error);
       throw error;
     }
   }

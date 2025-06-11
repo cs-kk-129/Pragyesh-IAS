@@ -205,11 +205,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Map subject name to subject ID
             const subjectId = getSubjectIdByName(questionData.subject);
             
-            // Create a temporary quiz first to associate questions
-            let tempQuizId = 1; // Default temporary quiz
+            console.log('Mapping subject:', questionData.subject);
+            console.log(`Mapped "${questionData.subject}" to subject ID: ${subjectId}`);
             
-            const question = await storage.createQuestion({
-              quizId: tempQuizId,
+            const questionPayload = {
+              quizId: 0, // Temporary quiz ID for standalone questions
               question: typeof questionData.question === 'object' ? 
                 JSON.stringify(questionData.question) : questionData.question,
               options: typeof questionData.options === 'object' ? 
@@ -219,9 +219,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               explanation: questionData.explanation || '',
               difficulty: questionData.difficulty || 'medium',
               subjectId: subjectId,
-              topicId: 1, // Default topic
-              sectionId: 1 // Default section
-            });
+              topicId: null,
+              sectionId: null,
+              tags: questionData.tags || [questionData.subject]
+            };
+            
+            console.log('Creating question with data:', questionPayload);
+            const question = await storage.createQuestion(questionPayload);
             
             savedQuestions.push(question);
             console.log(`Saved question with ID: ${question.id}, Subject ID: ${subjectId}`);
@@ -1319,7 +1323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             difficulty: question.difficulty || 'medium',
             tags
           });
-
+console.log('Question data:', JSON.stringify(question, null, 2));
+          console.log('ROUTES: About to call storage.createQuestion');
           const savedQuestion = await storage.createQuestion({
             quizId: 0, // Unassigned - will be set when mock test is created
             subjectId: actualSubjectId,
@@ -1332,6 +1337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             difficulty: question.difficulty || 'medium',
             tags
           });
+          console.log('ROUTES: Question saved with ID:', savedQuestion.id);
           
           savedQuestions.push({
             id: savedQuestion.id,
