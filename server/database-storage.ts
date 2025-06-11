@@ -321,12 +321,13 @@ export class DatabaseStorage implements IStorage {
       const result = await pool.query(insertQuery, values);
       const newQuestion = result.rows[0];
       
-      console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.id);
+      console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.options);
+      console.log('DATABASE bharati', typeof newQuestion.options);
       return {
         id: newQuestion.id,
         quizId: newQuestion.quiz_id,
         question: newQuestion.question,
-        options: JSON.parse(newQuestion.options || '[]'),
+        options: newQuestion.options || '',
         correctAnswer: newQuestion.correct_answer,
         explanation: newQuestion.explanation,
         difficulty: newQuestion.difficulty,
