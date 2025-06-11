@@ -13,6 +13,7 @@ import type {
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db, pool } from "./db";
+import crypto from "crypto";
 import { eq, and, desc, isNull, lte, gte } from "drizzle-orm";
 import { IStorage } from "./storage";
 import * as schema from "@shared/schema";
@@ -284,17 +285,58 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('DATABASE STORAGE: Creating question with data:', JSON.stringify(question, null, 2));
       
-      // Convert options to proper string array
-      const questionData = {
-        ...question,
-        options: Array.isArray(question.options) 
-          ? [...question.options] 
-          : Object.values(question.options || {}).filter(v => typeof v === 'string')
-      };
+      // Extract and clean the options array
+      let cleanOptions: string[] = [];
+      if (Array.isArray(question.options)) {
+        cleanOptions = question.options;
+      } else if (question.options && typeof question.options === 'object') {
+        cleanOptions = Object.values(question.options).filter(v => typeof v === 'string') as string[];
+      }
       
-      const [newQuestion] = await db.insert(questions).values(questionData).returning();
+      // Use raw SQL to bypass TypeScript issues
+      const questionId = crypto.randomUUID();
+      const insertQuery = `
+        INSERT INTO questions (id, quiz_id, question, options, correct_answer, explanation, difficulty, subject_id, topic_id, section_id, tags, is_bookmarked, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING *
+      `;
+      
+      const values = [
+        questionId,
+        question.quizId || 0,
+        question.question || '',
+        JSON.stringify(cleanOptions),
+        question.correctAnswer || '',
+        question.explanation || '',
+        question.difficulty || 'medium',
+        question.subjectId || null,
+        question.topicId || null,
+        question.sectionId || null,
+        JSON.stringify(question.tags || []),
+        false,
+        new Date()
+      ];
+      
+      console.log('DATABASE STORAGE: Executing raw SQL insert with values:', values);
+      const result = await pool.query(insertQuery, values);
+      const newQuestion = result.rows[0];
+      
       console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.id);
-      return newQuestion;
+      return {
+        id: newQuestion.id,
+        quizId: newQuestion.quiz_id,
+        question: newQuestion.question,
+        options: JSON.parse(newQuestion.options || '[]'),
+        correctAnswer: newQuestion.correct_answer,
+        explanation: newQuestion.explanation,
+        difficulty: newQuestion.difficulty,
+        subjectId: newQuestion.subject_id,
+        topicId: newQuestion.topic_id,
+        sectionId: newQuestion.section_id,
+        tags: JSON.parse(newQuestion.tags || '[]'),
+        isBookmarked: newQuestion.is_bookmarked,
+        createdAt: newQuestion.created_at
+      };
     } catch (error) {
       console.error('DATABASE STORAGE: Error creating question in database:', error);
       throw error;
