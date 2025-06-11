@@ -323,18 +323,44 @@ export class DatabaseStorage implements IStorage {
       
       console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.options);
       console.log('DATABASE bharati', typeof newQuestion.options);
+      // Parse tags safely
+      let parsedTags = [];
+      try {
+        if (typeof newQuestion.tags === 'string') {
+          parsedTags = JSON.parse(newQuestion.tags);
+        } else if (Array.isArray(newQuestion.tags)) {
+          parsedTags = newQuestion.tags;
+        }
+      } catch (e) {
+        console.warn('Failed to parse tags, using empty array:', newQuestion.tags);
+        parsedTags = [];
+      }
+
+      // Parse options safely
+      let parsedOptions = [];
+      try {
+        if (typeof newQuestion.options === 'string') {
+          parsedOptions = JSON.parse(newQuestion.options);
+        } else if (Array.isArray(newQuestion.options)) {
+          parsedOptions = newQuestion.options;
+        }
+      } catch (e) {
+        console.warn('Failed to parse options, using empty array:', newQuestion.options);
+        parsedOptions = [];
+      }
+
       return {
         id: newQuestion.id,
         quizId: newQuestion.quiz_id,
         question: newQuestion.question,
-        options: newQuestion.options || '',
+        options: parsedOptions,
         correctAnswer: newQuestion.correct_answer,
         explanation: newQuestion.explanation,
         difficulty: newQuestion.difficulty,
         subjectId: newQuestion.subject_id,
         topicId: newQuestion.topic_id,
         sectionId: newQuestion.section_id,
-        tags: JSON.parse(newQuestion.tags || '[]'),
+        tags: parsedTags,
         isBookmarked: newQuestion.is_bookmarked,
         createdAt: newQuestion.created_at
       };
