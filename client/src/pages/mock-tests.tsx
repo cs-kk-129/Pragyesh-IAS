@@ -148,58 +148,7 @@ export default function MockTests() {
     }
   }, [selectedTest, mockTests]);
 
-  // Show loading state
-  if (isLoadingTests) {
-    return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <MobileNav />
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
-              <div className="text-center space-y-4">
-                <h1 className="text-3xl font-bold tracking-tight">Mock Tests</h1>
-                <p className="text-muted-foreground">Loading mock tests...</p>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  // Show empty state if no mock tests available
-  if (!isLoadingTests && mockTests.length === 0) {
-    return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <MobileNav />
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
-              <div className="text-center space-y-4">
-                <h1 className="text-3xl font-bold tracking-tight">Mock Tests</h1>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-8">
-                      <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Mock Tests Available</h3>
-                      <p className="text-muted-foreground">
-                        No mock tests are currently scheduled or available for you to attempt.
-                        Please check back later or contact your administrator.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
+  
 
   // Get questions from selected test
   const getCurrentTestQuestions = (): Question[] => {
@@ -460,6 +409,59 @@ export default function MockTests() {
     const variant = variants[status as keyof typeof variants] || variants.not_started;
     return <Badge className={variant.color}>{variant.text}</Badge>;
   };
+
+  // Show loading state
+  if (isLoadingTests) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <MobileNav />
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="text-center space-y-4">
+                <h1 className="text-3xl font-bold tracking-tight">Mock Tests</h1>
+                <p className="text-muted-foreground">Loading mock tests...</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no mock tests available
+  if (!isLoadingTests && mockTests.length === 0) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <MobileNav />
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="text-center space-y-4">
+                <h1 className="text-3xl font-bold tracking-tight">Mock Tests</h1>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                      <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Mock Tests Available</h3>
+                      <p className="text-muted-foreground">
+                        No mock tests are currently scheduled or available for you to attempt.
+                        Please check back later or contact your administrator.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   if (isTestStarted) {
     const currentQuestion = mockQuestions[currentQuestionIndex];
