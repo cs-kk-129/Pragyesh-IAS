@@ -1274,11 +1274,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const savedQuestions = [];
       for (const question of result.questions) {
         try {
+          // Validate question structure
+          if (!question || !question.question || !question.options || !question.correctAnswer) {
+            console.error('Invalid question structure:', question);
+            continue;
+          }
+
           // Parse tags to extract subject and topic information
           const tags = [question.subject, question.topic].filter(Boolean);
 
           // Map subject using direct database lookup
-          const subjects = await storage.getAllSubjects();
           let actualSubjectId = 1; // Default to Indian History
           let actualSectionId = null;
           
@@ -1312,18 +1317,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log(`Mapped "${subjectName}" to subject ID: ${actualSubjectId}`);
 
+          // Extract English options safely
+          let englishOptions = [];
+          let englishCorrectAnswer = '';
+          let englishExplanation = '';
+          let englishQuestion = '';
+
+          try {
+            // Handle question text
+            if (typeof question.question === 'object' && question.question.english) {
+              englishQuestion = question.question.english;
+            } else if (typeof question.question === 'string') {
+              englishQuestion = question.question;
+            }
+
+            // Handle options
+            if (question.options && question.options.english && Array.isArray(question.options.english)) {
+              englishOptions = question.options.english;
+            } else if (Array.isArray(question.options)) {
+              englishOptions = question.options;
+            }
+
+            // Handle correct answer
+            if (typeof question.correctAnswer === 'object' && question.correctAnswer.english) {
+              englishCorrectAnswer = question.correctAnswer.english;
+            } else if (typeof question.correctAnswer === 'string') {
+              englishCorrectAnswer = question.correctAnswer;
+            }
+
+            // Handle explanation
+            if (typeof question.explanation === 'object' && question.explanation.english) {
+              englishExplanation = question.explanation.english;
+            } else if (typeof question.explanation === 'string') {
+              englishExplanation = question.explanation;
+            }
+
+          } catch (parseError) {
+            console.error('Error parsing question fields:', parseError);
+            continue;
+          }
+
           console.log('Creating question with data:', {
             quizId: 0,
             subjectId: actualSubjectId,
             sectionId: actualSectionId,
             question: JSON.stringify(question.question),
-            options: Array.isArray(question.options.english) ? question.options.english : [],
-            correctAnswer: question.correctAnswer.english,
-            explanation: question.explanation.english,
+            options: englishOptions,
+            correctAnswer: englishCorrectAnswer,
+            explanation: englishExplanation,
             difficulty: question.difficulty || 'medium',
             tags
           });
-console.log('Question data:', JSON.stringify(question, null, 2));
+
           console.log('ROUTES: About to call storage.createQuestion');
           const savedQuestion = await storage.createQuestion({
             quizId: 0, // Unassigned - will be set when mock test is created
@@ -1331,9 +1376,9 @@ console.log('Question data:', JSON.stringify(question, null, 2));
             topicId: null, // Will be set based on detailed topic mapping
             sectionId: actualSectionId,
             question: JSON.stringify(question.question),
-            options: Array.isArray(question.options.english) ? question.options.english : [],
-            correctAnswer: question.correctAnswer.english,
-            explanation: question.explanation.english,
+            options: englishOptions,
+            correctAnswer: englishCorrectAnswer,
+            explanation: englishExplanation,
             difficulty: question.difficulty || 'medium',
             tags
           });
@@ -1353,6 +1398,7 @@ console.log('Question data:', JSON.stringify(question, null, 2));
           });
         } catch (dbError) {
           console.error("Failed to save question to database:", dbError);
+          console.error("Question data that failed:", question);
         }
       }
 
@@ -1464,31 +1510,94 @@ console.log('Question data:', JSON.stringify(question, null, 2));
             .from(schema.questions)
             .where(eq(schema.questions.quizId, quiz.id));
 
+          // Extract unique subjects from question tags
+          const subjects = Array.from(new Set(
+            questions.map(q => {
+              try {
+                const tags = Array.isArray(q.tags) ? q.tags : [];
+                return tags[0] || 'General Studies';
+              } catch (e) {
+                return 'General Studies';
+              }
+            })
+          ));
+
           mockTests.push({
             id: quiz.id,
             title: quiz.title,
-            description: quiz.description,
-            duration: quiz.timeLimit,
+            description: quiz.description || '',
+            duration: quiz.timeLimit || 120,
             totalQuestions: questions.length,
+            difficulty: quiz.difficulty || 'medium',
+            subjects: subjects,
             testDate: quiz.testDate?.toISOString().split('T')[0],
+            isActive: true,
             isAttempted: false,
-            status: 'available',
+            status: 'not_started',
             questions: questions.map(q => {
               let questionText;
+              let optionsData;
+              let correctAnswerData;
+              
               try {
-                // Try to parse as JSON first
-                const parsed = JSON.parse(q.question || '{}');
-                questionText = typeof parsed === 'object' ? parsed : { english: q.question, hindi: '' };
-              } catch (e) {
-                // If JSON parsing fails, treat as plain text
+                // Parse question text
+                if (typeof q.question === 'string' && q.question.startsWith('{')) {
+                  const parsed = JSON.parse(q.question);
+                  questionText = parsed;
+                } else {
+                  questionText = { 
+                    english: q.question || '', 
+                    hindi: q.question || '' 
+                  };
+                }
+                
+                // Parse options - ensure it's an array
+                if (Array.isArray(q.options)) {
+                  optionsData = {
+                    english: q.options,
+                    hindi: q.options // Use same for now
+                  };
+                } else {
+                  optionsData = {
+                    english: [],
+                    hindi: []
+                  };
+                }
+                
+                // Parse correct answer
+                correctAnswerData = {
+                  english: q.correctAnswer || '',
+                  hindi: q.correctAnswer || ''
+                };
+                
+              } catch (parseError) {
+                console.error('Error parsing question data:', parseError);
                 questionText = { english: q.question || '', hindi: '' };
+                optionsData = { english: [], hindi: [] };
+                correctAnswerData = { english: q.correctAnswer || '', hindi: '' };
+              }
+              
+              // Extract subject and topic from tags
+              let subject = 'General Studies';
+              let topic = 'Mixed Topics';
+              
+              try {
+                if (Array.isArray(q.tags) && q.tags.length > 0) {
+                  subject = q.tags[0] || 'General Studies';
+                  topic = q.tags[1] || 'Mixed Topics';
+                }
+              } catch (e) {
+                // Use defaults
               }
               
               return {
                 id: q.id,
                 question: questionText,
-                options: q.options,
-                correctAnswer: q.correctAnswer,
+                options: optionsData,
+                correctAnswer: correctAnswerData,
+                subject: subject,
+                topic: topic,
+                difficulty: q.difficulty || 'medium',
                 marks: 2
               };
             })
@@ -1536,7 +1645,24 @@ console.log('Question data:', JSON.stringify(question, null, 2));
       let correct = 0;
       const evaluatedAnswers = answers.map((answer: any, index: number) => {
         const question = questions[index];
-        const isCorrect = answer.answer === question?.correctAnswer;
+        let isCorrect = false;
+        
+        if (question && answer.answer !== undefined && answer.answer !== null) {
+          // Compare the user's answer (option text) with the correct answer
+          if (typeof answer.answer === 'string' && question.correctAnswer) {
+            isCorrect = answer.answer.trim() === question.correctAnswer.trim();
+          } else if (typeof answer.answer === 'number') {
+            // If answer is an index, get the option text and compare
+            try {
+              const questionOptions = Array.isArray(question.options) ? question.options : [];
+              const userAnswerText = questionOptions[answer.answer] || '';
+              isCorrect = userAnswerText.trim() === question.correctAnswer.trim();
+            } catch (e) {
+              isCorrect = false;
+            }
+          }
+        }
+        
         if (isCorrect) correct++;
         
         return {

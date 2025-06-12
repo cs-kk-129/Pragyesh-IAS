@@ -155,17 +155,74 @@ export default function MockTests() {
     }
 
     // Transform admin questions to match Question interface
-    return selectedTestData.questions.map((q: any, index: number) => ({
-      id: index + 1,
-      question: q.question?.english || q.question || "",
-      questionHindi: q.question?.hindi || q.questionHindi || "",
-      options: q.options?.english || q.options || [],
-      optionsHindi: q.options?.hindi || q.optionsHindi || [],
-      correctAnswer: (q.options?.english || q.options || []).indexOf(q.correctAnswer?.english || q.correctAnswer) || 0,
-      marks: q.marks || 2,
-      subject: q.subject || "General",
-      topic: q.topic || "Mixed",
-    }));
+    return selectedTestData.questions.map((q: any, index: number) => {
+      let questionText = "";
+      let questionHindi = "";
+      let options: string[] = [];
+      let optionsHindi: string[] = [];
+      let correctAnswerIndex = 0;
+
+      try {
+        // Handle question text
+        if (typeof q.question === 'object') {
+          questionText = q.question.english || "";
+          questionHindi = q.question.hindi || "";
+        } else {
+          questionText = q.question || "";
+          questionHindi = q.questionHindi || "";
+        }
+
+        // Handle options
+        if (typeof q.options === 'object' && q.options.english) {
+          options = Array.isArray(q.options.english) ? q.options.english : [];
+          optionsHindi = Array.isArray(q.options.hindi) ? q.options.hindi : options;
+        } else if (Array.isArray(q.options)) {
+          options = q.options;
+          optionsHindi = q.optionsHindi || options;
+        }
+
+        // Handle correct answer - find the index of the correct answer
+        let correctAnswerText = "";
+        if (typeof q.correctAnswer === 'object') {
+          correctAnswerText = q.correctAnswer.english || "";
+        } else {
+          correctAnswerText = q.correctAnswer || "";
+        }
+
+        // Find the index of the correct answer in the options array
+        correctAnswerIndex = options.findIndex(option => option === correctAnswerText);
+        if (correctAnswerIndex === -1) {
+          // If exact match not found, try partial match
+          correctAnswerIndex = options.findIndex(option => 
+            option.toLowerCase().includes(correctAnswerText.toLowerCase()) ||
+            correctAnswerText.toLowerCase().includes(option.toLowerCase())
+          );
+        }
+        // Default to 0 if still not found
+        if (correctAnswerIndex === -1) {
+          correctAnswerIndex = 0;
+        }
+
+      } catch (error) {
+        console.error('Error parsing question data:', error, q);
+        // Fallback values
+        questionText = "Error loading question";
+        options = ["Option A", "Option B", "Option C", "Option D"];
+        correctAnswerIndex = 0;
+      }
+
+      return {
+        id: index + 1,
+        question: questionText,
+        questionHindi: questionHindi,
+        options: options,
+        optionsHindi: optionsHindi,
+        correctAnswer: correctAnswerIndex,
+        marks: q.marks || 2,
+        subject: q.subject || "General",
+        topic: q.topic || "Mixed",
+      };
+    });
   };
 
   const mockQuestions = getCurrentTestQuestions();
