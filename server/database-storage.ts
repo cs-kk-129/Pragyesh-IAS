@@ -315,7 +315,7 @@ export class DatabaseStorage implements IStorage {
         console.warn('Empty question text provided, using default');
       }
       
-      // Use raw SQL to ensure proper insertion
+      // Use raw SQL to ensure proper insertion with proper UUID generation
       const questionId = crypto.randomUUID();
       const insertQuery = `
         INSERT INTO questions (id, quiz_id, question, options, correct_answer, explanation, difficulty, subject_id, topic_id, section_id, tags, is_bookmarked, created_at)
@@ -342,9 +342,14 @@ export class DatabaseStorage implements IStorage {
       console.log('DATABASE STORAGE: Executing raw SQL insert for question:', questionId);
       console.log('DATABASE STORAGE: Quiz ID:', question.quizId || 0);
       console.log('DATABASE STORAGE: Options length:', cleanOptions.length);
+      console.log('DATABASE STORAGE: Insert values:', values.map((v, i) => `$${i+1}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(', '));
       
       const result = await pool.query(insertQuery, values);
       const newQuestion = result.rows[0];
+      
+      if (!newQuestion) {
+        throw new Error('Question insertion returned no data');
+      }
       
       console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.id);
       
