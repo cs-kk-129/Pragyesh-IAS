@@ -1419,28 +1419,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No questions selected" });
       }
 
-      // Analyze selected questions to determine quiz metadata
-      const selectedQuestions = [];
-      for (const questionId of selectedQuestionIds) {
-        const question = await db.select()
-          .from(schema.questions)
-          .where(eq(schema.questions.id, questionId))
-          .limit(1);
-        if (question.length > 0) {
-          selectedQuestions.push(question[0]);
-        }
-      }
-      
-      // Extract unique subject/section/topic IDs from questions
-      const subjectIds = selectedQuestions.map(q => q.subjectId).filter(Boolean);
-      const sectionIds = selectedQuestions.map(q => q.sectionId).filter(Boolean);
-      const topicIds = selectedQuestions.map(q => q.topicId).filter(Boolean);
-      
-      const uniqueSubjectIds = subjectIds.filter((id, index) => subjectIds.indexOf(id) === index);
-      const uniqueSectionIds = sectionIds.filter((id, index) => sectionIds.indexOf(id) === index);
-      const uniqueTopicIds = topicIds.filter((id, index) => topicIds.indexOf(id) === index);
+      console.log(`Creating mock test with ${selectedQuestionIds.length} selected questions`);
 
-      // Create quiz record in database with metadata from questions
+      // Create quiz record in database first
       const quiz = await storage.createQuiz({
         title,
         quizType: 'mock_test',
@@ -1449,24 +1430,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         testDate: new Date(testDate),
         description: description || '',
         language: 'both',
-        subjectId: uniqueSubjectIds.length === 1 ? uniqueSubjectIds[0] : null, // Single subject only
-        topicId: uniqueSectionIds.length === 1 ? uniqueSectionIds[0] : null,   // Single section only
-        subtopicId: uniqueTopicIds.length === 1 ? uniqueTopicIds[0] : null     // Single topic only
+        subjectId: 1, // Default subject
+        topicId: null,
+        subtopicId: null
       });
 
-      // Update selected questions with the quiz ID
+      console.log(`Created quiz with ID: ${quiz.id}`);
+
+      // Update selected questions with the quiz ID using string comparison
+      let updatedCount = 0;
       for (const questionId of selectedQuestionIds) {
-        await db.update(schema.questions)
-          .set({ quizId: quiz.id })
-          .where(eq(schema.questions.id, questionId));
+        try {
+          const result = await db.update(schema.questions)
+            .set({ quizId: quiz.id })
+            .where(eq(schema.questions.id, questionId.toString()));
+          
+          console.log(`Updated question ${questionId} to quiz ${quiz.id}`);
+          updatedCount++;
+        } catch (updateError) {
+          console.error(`Failed to update question ${questionId}:`, updateError);
+        }
       }
 
-      // Delete unselected questions (those with quizId = 0)
-      await db.delete(schema.questions)
-        .where(eq(schema.questions.quizId, 0));
+      console.log(`Updated ${updatedCount} questions to be assigned to quiz ${quiz.id}`);
 
-      console.log(`Created mock test ${quiz.id} with ${selectedQuestionIds.length} questions`);
-      res.json({ success: true, mockTest: quiz });
+      // Clean up unselected questions (those still with quizId = 0) after a delay
+      setTimeout(async () => {
+        try {
+          const deleted = await db.delete(schema.questions)
+            .where(eq(schema.questions.quizId, 0));
+          console.log(`Cleaned up ${deleted} unassigned questions`);
+        } catch (cleanupError) {
+          console.error("Failed to cleanup unassigned questions:", cleanupError);
+        }
+      }, 5000); // 5 second delay to ensure assignment is complete
+
+      res.json({ 
+        success: true, 
+        mockTest: quiz,
+        questionsAssigned: updatedCount
+      });
     } catch (error) {
       console.error("Mock test creation error:", error);
       res.status(500).json({ error: "Failed to create mock test" });
@@ -1510,98 +1513,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .from(schema.questions)
             .where(eq(schema.questions.quizId, quiz.id));
 
-          // Extract unique subjects from question tags
-          const subjects = Array.from(new Set(
-            questions.map(q => {
-              try {
-                const tags = Array.isArray(q.tags) ? q.tags : [];
-                return tags[0] || 'General Studies';
-              } catch (e) {
-                return 'General Studies';
-              }
-            })
-          ));
+          console.log(`Quiz ${quiz.id} has ${questions.length} questions`);
 
-          mockTests.push({
-            id: quiz.id,
-            title: quiz.title,
-            description: quiz.description || '',
-            duration: quiz.timeLimit || 120,
-            totalQuestions: questions.length,
-            difficulty: quiz.difficulty || 'medium',
-            subjects: subjects,
-            testDate: quiz.testDate?.toISOString().split('T')[0],
-            isActive: true,
-            isAttempted: false,
-            status: 'not_started',
-            questions: questions.map(q => {
-              let questionText;
-              let optionsData;
-              let correctAnswerData;
-              
-              try {
-                // Parse question text
-                if (typeof q.question === 'string' && q.question.startsWith('{')) {
-                  const parsed = JSON.parse(q.question);
-                  questionText = parsed;
-                } else {
-                  questionText = { 
-                    english: q.question || '', 
-                    hindi: q.question || '' 
+          // Only include mock tests that have questions
+          if (questions.length > 0) {
+            // Extract unique subjects from question tags
+            const subjects = Array.from(new Set(
+              questions.map(q => {
+                try {
+                  if (typeof q.tags === 'string') {
+                    const parsedTags = JSON.parse(q.tags);
+                    return Array.isArray(parsedTags) ? parsedTags[0] || 'General Studies' : 'General Studies';
+                  } else if (Array.isArray(q.tags)) {
+                    return q.tags[0] || 'General Studies';
+                  }
+                  return 'General Studies';
+                } catch (e) {
+                  return 'General Studies';
+                }
+              })
+            ));
+
+            mockTests.push({
+              id: quiz.id,
+              title: quiz.title,
+              description: quiz.description || '',
+              duration: quiz.timeLimit || 120,
+              totalQuestions: questions.length,
+              difficulty: quiz.difficulty || 'medium',
+              subjects: subjects,
+              testDate: quiz.testDate?.toISOString().split('T')[0],
+              isActive: true,
+              isAttempted: false,
+              status: 'not_started',
+              questions: questions.map(q => {
+                let questionText;
+                let optionsData;
+                let correctAnswerData;
+                
+                try {
+                  // Parse question text
+                  if (typeof q.question === 'string' && q.question.startsWith('{')) {
+                    const parsed = JSON.parse(q.question);
+                    questionText = parsed;
+                  } else {
+                    questionText = { 
+                      english: q.question || '', 
+                      hindi: q.question || '' 
+                    };
+                  }
+                  
+                  // Parse options - handle both string and array formats
+                  if (typeof q.options === 'string') {
+                    try {
+                      const parsedOptions = JSON.parse(q.options);
+                      optionsData = {
+                        english: Array.isArray(parsedOptions) ? parsedOptions : [],
+                        hindi: Array.isArray(parsedOptions) ? parsedOptions : []
+                      };
+                    } catch (e) {
+                      optionsData = { english: [], hindi: [] };
+                    }
+                  } else if (Array.isArray(q.options)) {
+                    optionsData = {
+                      english: q.options,
+                      hindi: q.options
+                    };
+                  } else {
+                    optionsData = { english: [], hindi: [] };
+                  }
+                  
+                  // Parse correct answer
+                  correctAnswerData = {
+                    english: q.correctAnswer || '',
+                    hindi: q.correctAnswer || ''
                   };
+                  
+                } catch (parseError) {
+                  console.error('Error parsing question data for question', q.id, ':', parseError);
+                  questionText = { english: q.question || 'Error loading question', hindi: '' };
+                  optionsData = { english: ['Option A', 'Option B', 'Option C', 'Option D'], hindi: [] };
+                  correctAnswerData = { english: 'Option A', hindi: '' };
                 }
                 
-                // Parse options - ensure it's an array
-                if (Array.isArray(q.options)) {
-                  optionsData = {
-                    english: q.options,
-                    hindi: q.options // Use same for now
-                  };
-                } else {
-                  optionsData = {
-                    english: [],
-                    hindi: []
-                  };
+                // Extract subject and topic from tags
+                let subject = 'General Studies';
+                let topic = 'Mixed Topics';
+                
+                try {
+                  if (typeof q.tags === 'string') {
+                    const parsedTags = JSON.parse(q.tags);
+                    if (Array.isArray(parsedTags) && parsedTags.length > 0) {
+                      subject = parsedTags[0] || 'General Studies';
+                      topic = parsedTags[1] || 'Mixed Topics';
+                    }
+                  } else if (Array.isArray(q.tags) && q.tags.length > 0) {
+                    subject = q.tags[0] || 'General Studies';
+                    topic = q.tags[1] || 'Mixed Topics';
+                  }
+                } catch (e) {
+                  // Use defaults
                 }
                 
-                // Parse correct answer
-                correctAnswerData = {
-                  english: q.correctAnswer || '',
-                  hindi: q.correctAnswer || ''
+                return {
+                  id: q.id,
+                  question: questionText,
+                  options: optionsData,
+                  correctAnswer: correctAnswerData,
+                  subject: subject,
+                  topic: topic,
+                  difficulty: q.difficulty || 'medium',
+                  marks: 2
                 };
-                
-              } catch (parseError) {
-                console.error('Error parsing question data:', parseError);
-                questionText = { english: q.question || '', hindi: '' };
-                optionsData = { english: [], hindi: [] };
-                correctAnswerData = { english: q.correctAnswer || '', hindi: '' };
-              }
-              
-              // Extract subject and topic from tags
-              let subject = 'General Studies';
-              let topic = 'Mixed Topics';
-              
-              try {
-                if (Array.isArray(q.tags) && q.tags.length > 0) {
-                  subject = q.tags[0] || 'General Studies';
-                  topic = q.tags[1] || 'Mixed Topics';
-                }
-              } catch (e) {
-                // Use defaults
-              }
-              
-              return {
-                id: q.id,
-                question: questionText,
-                options: optionsData,
-                correctAnswer: correctAnswerData,
-                subject: subject,
-                topic: topic,
-                difficulty: q.difficulty || 'medium',
-                marks: 2
-              };
-            })
-          });
+              })
+            });
+          } else {
+            console.log(`Quiz ${quiz.id} has no questions, skipping`);
+          }
         } else {
           console.log(`User ${userId} already attempted quiz ${quiz.id}`);
         }

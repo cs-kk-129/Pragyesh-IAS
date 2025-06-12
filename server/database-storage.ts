@@ -315,7 +315,7 @@ export class DatabaseStorage implements IStorage {
         console.warn('Empty question text provided, using default');
       }
       
-      // Use raw SQL to bypass TypeScript issues
+      // Use raw SQL to ensure proper insertion
       const questionId = crypto.randomUUID();
       const insertQuery = `
         INSERT INTO questions (id, quiz_id, question, options, correct_answer, explanation, difficulty, subject_id, topic_id, section_id, tags, is_bookmarked, created_at)
@@ -339,7 +339,10 @@ export class DatabaseStorage implements IStorage {
         new Date()
       ];
       
-      console.log('DATABASE STORAGE: Executing raw SQL insert with values:', values.map((v, i) => i === 2 || i === 3 ? `[${typeof v}]` : v));
+      console.log('DATABASE STORAGE: Executing raw SQL insert for question:', questionId);
+      console.log('DATABASE STORAGE: Quiz ID:', question.quizId || 0);
+      console.log('DATABASE STORAGE: Options length:', cleanOptions.length);
+      
       const result = await pool.query(insertQuery, values);
       const newQuestion = result.rows[0];
       
