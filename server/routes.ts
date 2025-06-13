@@ -38,7 +38,7 @@ function getSubjectIdByName(subjectName: string): number {
     'Polity': 4,
     'General': 1
   };
-  
+
   return subjectMap[subjectName] || 1; // Default to Indian History
 }
 
@@ -58,7 +58,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.txt', '.docx', '.pdf', '.csv', '.json'];
     const fileExtension = path.extname(file.originalname).toLowerCase();
-    
+
     if (allowedTypes.includes(fileExtension)) {
       cb(null, true);
     } else {
@@ -204,10 +204,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             // Map subject name to subject ID
             const subjectId = getSubjectIdByName(questionData.subject);
-            
+
             console.log('Mapping subject:', questionData.subject);
             console.log(`Mapped "${questionData.subject}" to subject ID: ${subjectId}`);
-            
+
             const questionPayload = {
               quizId: 0, // Temporary quiz ID for standalone questions
               question: typeof questionData.question === 'object' ? 
@@ -223,10 +223,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               sectionId: null,
               tags: questionData.tags || [questionData.subject]
             };
-            
+
             console.log('Creating question with data:', questionPayload);
             const question = await storage.createQuestion(questionPayload);
-            
+
             savedQuestions.push(question);
             console.log(`Saved question with ID: ${question.id}, Subject ID: ${subjectId}`);
           } catch (error) {
@@ -236,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`Successfully generated and saved ${savedQuestions.length} questions to database`);
-      
+
       // Return the saved questions with database IDs
       res.json({ 
         success: true, 
@@ -259,20 +259,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = req.file;
       const fileExtension = path.extname(file.originalname).toLowerCase();
       let extractedText = '';
-      
+
       // Process different file types
       switch (fileExtension) {
         case '.txt':
           extractedText = file.buffer.toString('utf-8');
           break;
-          
+
         case '.csv':
           // Simple CSV parsing for questions
           const csvData = file.buffer.toString('utf-8');
           const lines = csvData.split('\n');
           extractedText = lines.join('\n');
           break;
-          
+
         case '.json':
           try {
             const jsonData = JSON.parse(file.buffer.toString('utf-8'));
@@ -281,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(400).json({ error: "Invalid JSON format" });
           }
           break;
-          
+
         default:
           return res.status(400).json({ error: "Unsupported file format" });
       }
@@ -293,9 +293,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             role: "system",
             content: `You are an expert at extracting and structuring UPSC exam questions from various text formats. 
-            
+
             Analyze the provided text and extract/create well-structured multiple choice questions.
-            
+
             For each question, provide:
             1. A clear, well-structured question
             2. Four answer options (A, B, C, D) 
@@ -305,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             6. Difficulty level (easy/medium/hard)
             7. Marks (usually 2 for UPSC)
             8. Brief explanation
-            
+
             Format your response as a JSON object with this structure:
             {
               "questions": [
@@ -321,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               ]
             }
-            
+
             If the text contains existing questions, extract them. If it's content/notes, create relevant questions from it.
             Ensure all questions are factually accurate and appropriate for UPSC preparation.`
           },
@@ -334,13 +334,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const result = JSON.parse(response.choices[0].message.content || "{}");
-      
+
       if (!result.questions || !Array.isArray(result.questions)) {
         throw new Error("Could not extract valid questions from file");
       }
 
       console.log(`Successfully processed ${fileExtension} file and extracted ${result.questions.length} questions`);
-      
+
       res.json({ 
         success: true, 
         questions: result.questions,
@@ -525,11 +525,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (dbError) {
         console.log("Database lookup failed, checking memory");
       }
-      
+
       if (!mockTest) {
         mockTest = mockTests.find(test => test.id == id);
       }
-      
+
       if (!mockTest) {
         return res.status(404).json({ error: "Mock test not found" });
       }
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const user = (req as any).user;
         const mockTest = mockTests.find(test => test.id == parseInt(id));
-        
+
         mockTestStorage.saveAttempt({
           userId: user.id,
           quizId: parseInt(id),
@@ -1135,22 +1135,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get all quiz attempts from database
       const dbAttempts = await storage.getAllQuizAttempts();
-      
+
       // Get in-memory attempts as fallback
       const memoryAttempts = mockTestStorage.getAllAttempts();
-      
+
       // Transform database attempts to evaluation format
       const dbEvaluations = await Promise.all(dbAttempts.map(async (attempt) => {
         let user = null;
         let mockTest = null;
-        
+
         try {
           user = await storage.getUser(attempt.userId);
           mockTest = mockTests.find(test => test.id === attempt.quizId);
         } catch (err) {
           console.error("Error getting user/test details:", err);
         }
-        
+
         return {
           id: attempt.id,
           studentName: user?.username || `User ${attempt.userId}`,
@@ -1167,7 +1167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           accuracy: attempt.accuracy || 0
         };
       }));
-      
+
       // Transform memory attempts to evaluation format
       const memoryEvaluations = memoryAttempts.map(attempt => ({
         id: `mem_${attempt.id}`,
@@ -1184,11 +1184,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalQuestions: attempt.totalQuestions,
         accuracy: attempt.accuracy
       }));
-      
+
       // Combine and sort by submission time
       const allEvaluations = [...dbEvaluations, ...memoryEvaluations]
         .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-      
+
       console.log(`Retrieved ${allEvaluations.length} evaluations (${dbEvaluations.length} from database, ${memoryEvaluations.length} from memory)`);
       res.json({ evaluations: allEvaluations });
     } catch (error) {
@@ -1286,10 +1286,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Map subject using direct database lookup
           let actualSubjectId = 1; // Default to Indian History
           let actualSectionId = null;
-          
+
           const subjectName = question.subject || tags[0] || '';
           console.log('Mapping subject:', subjectName);
-          
+
           // Direct subject mapping logic
           if (subjectName.toLowerCase().includes('art') && subjectName.toLowerCase().includes('culture')) {
             actualSubjectId = 2; // Art & Culture
@@ -1314,7 +1314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else if (subjectName.toLowerCase().includes('history')) {
             actualSubjectId = 1; // Indian History
           }
-          
+
           console.log(`Mapped "${subjectName}" to subject ID: ${actualSubjectId}`);
 
           // Extract English options safely
@@ -1383,9 +1383,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             tags
           });
           console.log('ROUTES: Question saved with ID:', savedQuestion.id);
-          
+
           savedQuestions.push({
-            id: savedQuestion.id,
+            id: savedQuestion.id, // This is the UUID from the database
+            databaseId: savedQuestion.id, // Also store as databaseId for clarity
             question: question.question,
             options: question.options,
             correctAnswer: question.correctAnswer,
@@ -1421,7 +1422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Filter out null/undefined question IDs
       const validQuestionIds = selectedQuestionIds.filter(id => id !== null && id !== undefined && id !== '');
-      
+
       if (validQuestionIds.length === 0) {
         return res.status(400).json({ error: "No valid questions selected" });
       }
@@ -1453,7 +1454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             'UPDATE questions SET quiz_id = $1 WHERE id = $2',
             [quiz.id, questionId.toString()]
           );
-          
+
           if (updateResult.rowCount > 0) {
             console.log(`Updated question ${questionId} to quiz ${quiz.id}`);
             updatedCount++;
@@ -1547,7 +1548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 let questionText;
                 let optionsData;
                 let correctAnswerData;
-                
+
                 try {
                   // Parse question text - handle both string and JSON formats
                   if (typeof q.question === 'string' && q.question.includes('{') && q.question.includes('english')) {
@@ -1567,7 +1568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hindi: q.question || '' 
                     };
                   }
-                  
+
                   // Parse options - handle both string and array formats
                   if (typeof q.options === 'string' && q.options) {
                     try {
@@ -1595,13 +1596,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hindi: ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D'] 
                     };
                   }
-                  
+
                   // Parse correct answer
                   correctAnswerData = {
                     english: q.correctAnswer || optionsData.english[0] || 'Option A',
                     hindi: q.correctAnswer || optionsData.hindi[0] || 'विकल्प A'
                   };
-                  
+
                 } catch (parseError) {
                   console.error('Error parsing question data for question', q.id, ':', parseError);
                   questionText = { english: `Question ${index + 1}`, hindi: `प्रश्न ${index + 1}` };
@@ -1611,11 +1612,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   };
                   correctAnswerData = { english: 'Option A', hindi: 'विकल्प A' };
                 }
-                
+
                 // Extract subject and topic from tags
                 let subject = 'General Studies';
                 let topic = 'Mixed Topics';
-                
+
                 try {
                   if (typeof q.tags === 'string' && q.tags) {
                     const parsedTags = JSON.parse(q.tags);
@@ -1630,7 +1631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 } catch (e) {
                   // Use defaults
                 }
-                
+
                 return {
                   id: q.id,
                   question: questionText,
@@ -1708,7 +1709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const evaluatedAnswers = answers.map((answer: any, index: number) => {
         const question = questions[index];
         let isCorrect = false;
-        
+
         if (question && answer.answer !== undefined && answer.answer !== null) {
           // Compare the user's answer (option text) with the correct answer
           if (typeof answer.answer === 'string' && question.correctAnswer) {
@@ -1724,9 +1725,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         }
-        
+
         if (isCorrect) correct++;
-        
+
         return {
           questionId: question?.id || index + 1,
           userAnswer: answer.answer || '',
@@ -1739,8 +1740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const score = Math.round((correct / totalQuestions) * 100);
       const accuracy = Math.round((correct / totalQuestions) * 100);
 
-      // Save quiz attempt to database
-      const quizAttempt = await storage.createQuizAttempt({
+      // Save quiz attempt to database      const quizAttempt = await storage.createQuizAttempt({
         userId,
         quizId,
         score,
@@ -1776,18 +1776,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/evaluations", async (req, res) => {
     try {
       const dbAttempts = await storage.getAllQuizAttempts();
-      
+
       const evaluations = await Promise.all(dbAttempts.map(async (attempt) => {
         let user = null;
         let quiz = null;
-        
+
         try {
           user = await storage.getUser(attempt.userId);
           quiz = await storage.getQuizById(attempt.quizId);
         } catch (err) {
           console.error("Error getting user/quiz details:", err);
         }
-        
+
         return {
           id: attempt.id,
           studentName: user?.username || `User ${attempt.userId}`,
@@ -1804,11 +1804,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           accuracy: attempt.accuracy || 0
         };
       }));
-      
+
       const sortedEvaluations = evaluations.sort((a, b) => 
         new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
       );
-      
+
       console.log(`Retrieved ${sortedEvaluations.length} evaluations from database`);
       res.json({ evaluations: sortedEvaluations });
     } catch (error) {

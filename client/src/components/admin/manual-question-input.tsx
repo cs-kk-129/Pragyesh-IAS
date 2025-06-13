@@ -85,7 +85,7 @@ export default function ManualQuestionInput() {
 
   const createMockTestMutation = useMutation({
     mutationFn: async (data: { title: string; description: string; duration: number; scheduledDate: string; questions: Question[] }) => {
-      const response = await apiRequest("POST", "/api/mock-tests", data);
+      const response = await apiRequest("POST", "/api/admin/create-mock-test", data);
       return response.json();
     },
     onSuccess: (data) => {
@@ -179,7 +179,7 @@ export default function ManualQuestionInput() {
       }
 
       const data = await response.json();
-      
+
       // Convert processed file data to question format with selection capability
       const processedQuestions: Question[] = data.questions.map((q: any, index: number) => ({
         question: q.question || q.text || '',
@@ -217,7 +217,7 @@ export default function ManualQuestionInput() {
   // Create mock test from selected questions
   const createMockTestFromSelected = async () => {
     const selectedQuestions = fileQuestions.filter(q => q.isSelected);
-    
+
     if (selectedQuestions.length === 0) {
       toast({
         title: "No Questions Selected",
@@ -245,13 +245,13 @@ export default function ManualQuestionInput() {
       };
 
       const response = await apiRequest('POST', '/api/mock-tests', mockTestData);
-      
+
       if (response.ok) {
         toast({
           title: "Mock Test Created Successfully",
           description: `Created mock test with ${selectedQuestions.length} questions from uploaded file`
         });
-        
+
         // Reset state
         setFileQuestions([]);
         setUploadedFile(null);
@@ -280,7 +280,7 @@ export default function ManualQuestionInput() {
     }
 
     const allQuestions = [...questions, ...fileQuestions.filter((_, index) => selectAllFile || fileQuestions[index]?.isSelected)];
-    
+
     addQuestionMutation.mutate({
       questions: allQuestions,
       subjectId: selectedSubject,
@@ -392,7 +392,7 @@ export default function ManualQuestionInput() {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fileQuestions.map((question, index) => (
                   <Card key={index} className={question.isSelected ? "ring-2 ring-primary" : ""}>
@@ -646,7 +646,7 @@ export default function ManualQuestionInput() {
               Configure your mock test with {questions.length + fileQuestions.filter(q => selectAllFile || q.isSelected).length} selected questions.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">
@@ -660,7 +660,7 @@ export default function ManualQuestionInput() {
                 placeholder="Enter mock test title"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
                 Description
@@ -674,7 +674,7 @@ export default function ManualQuestionInput() {
                 rows={3}
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="duration" className="text-right">
                 Duration (minutes)
@@ -689,7 +689,7 @@ export default function ManualQuestionInput() {
                 max="300"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="scheduledDate" className="text-right">
                 Scheduled Date
@@ -702,7 +702,7 @@ export default function ManualQuestionInput() {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="difficulty" className="text-right">
                 Difficulty
@@ -722,7 +722,7 @@ export default function ManualQuestionInput() {
               </Select>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowMockTestDialog(false)}>
               Cancel
@@ -733,7 +733,7 @@ export default function ManualQuestionInput() {
                   ...questions,
                   ...fileQuestions.filter(q => selectAllFile || q.isSelected)
                 ];
-                
+
                 if (allQuestions.length === 0) {
                   toast({
                     title: "No Questions Selected",
@@ -742,7 +742,7 @@ export default function ManualQuestionInput() {
                   });
                   return;
                 }
-                
+
                 if (!mockTestData.title.trim()) {
                   toast({
                     title: "Title Required",
@@ -751,7 +751,7 @@ export default function ManualQuestionInput() {
                   });
                   return;
                 }
-                
+
                 createMockTestMutation.mutate({
                   title: mockTestData.title,
                   description: mockTestData.description,
