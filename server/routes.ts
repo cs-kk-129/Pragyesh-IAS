@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { sql } from 'drizzle-orm';
-import { db } from './db';
+import { db, pool } from './db';
 import { storage } from './storage';
 import { mockTestStorage } from "./mock-test-storage";
 import { z } from "zod";
