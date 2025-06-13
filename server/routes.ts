@@ -1740,7 +1740,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const score = Math.round((correct / totalQuestions) * 100);
       const accuracy = Math.round((correct / totalQuestions) * 100);
 
-      // Save quiz attempt to database      const quizAttempt = await storage.createQuizAttempt({
+      // Save quiz attempt to database
+      const quizAttempt = await storage.createQuizAttempt({
         userId,
         quizId,
         score,
