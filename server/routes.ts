@@ -1525,24 +1525,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             console.log(`Quiz ${quiz.id} ("${quiz.title}") has ${questions.length} questions`);
 
-            // Only include mock tests that have questions
-            if (questions.length > 0) {
-              // Extract unique subjects from question tags
-              const subjects = Array.from(new Set(
-                questions.map(q => {
-                  try {
-                    if (typeof q.tags === 'string' && q.tags) {
-                      const parsedTags = JSON.parse(q.tags);
-                      return Array.isArray(parsedTags) ? parsedTags[0] || 'General Studies' : 'General Studies';
-                    } else if (Array.isArray(q.tags)) {
-                      return q.tags[0] || 'General Studies';
-                    }
-                    return 'General Studies';
-                  } catch (e) {
-                    return 'General Studies';
+            // Include all mock tests, even those with 0 questions, but mark them appropriately
+            const hasQuestions = questions.length > 0;
+            
+            // Extract unique subjects from question tags
+            const subjects = hasQuestions ? Array.from(new Set(
+              questions.map(q => {
+                try {
+                  if (typeof q.tags === 'string' && q.tags) {
+                    const parsedTags = JSON.parse(q.tags);
+                    return Array.isArray(parsedTags) ? parsedTags[0] || 'General Studies' : 'General Studies';
+                  } else if (Array.isArray(q.tags)) {
+                    return q.tags[0] || 'General Studies';
                   }
-                })
-              ));
+                  return 'General Studies';
+                } catch (e) {
+                  return 'General Studies';
+                }
+              })
+            )) : ['No Subject'];
 
               const processedQuestions = questions.map((q, index) => {
                 let questionText;
@@ -1644,6 +1645,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               });
 
+              // Check if test date allows access
+              const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              testDate.setHours(0, 0, 0, 0);
+              
+              const isAccessible = testDate <= today; // Allow access if test date is today or in the past
+              
               mockTests.push({
                 id: quiz.id,
                 title: quiz.title,
@@ -1653,14 +1662,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 difficulty: quiz.difficulty || 'medium',
                 subjects: subjects,
                 testDate: quiz.testDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                isActive: true,
+                isActive: isAccessible && hasQuestions,
                 isAttempted: false,
-                status: 'not_started',
+                status: !hasQuestions ? 'no_questions' : (!isAccessible ? 'upcoming' : 'available'),
                 questions: processedQuestions
               });
-            } else {
-              console.log(`Quiz ${quiz.id} has no questions, skipping`);
-            }
           } else {
             console.log(`User ${userId} already attempted quiz ${quiz.id}`);
           }
