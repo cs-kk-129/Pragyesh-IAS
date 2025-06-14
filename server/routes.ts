@@ -1421,7 +1421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Filter out null/undefined question IDs
-      const validQuestionIds = selectedQuestionIds.filter(id => id !== null && id !== undefined && id !== '');
+      const validQuestionIds = selectedQuestionIds.filter((id: any) => id !== null && id !== undefined && id !== '');
 
       if (validQuestionIds.length === 0) {
         return res.status(400).json({ error: "No valid questions selected" });
@@ -1455,7 +1455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             [quiz.id, questionId.toString()]
           );
 
-          if (updateResult.rowCount > 0) {
+          if ((updateResult.rowCount ?? 0) > 0) {
             console.log(`Updated question ${questionId} to quiz ${quiz.id}`);
             updatedCount++;
           } else {
