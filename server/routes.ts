@@ -1545,7 +1545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               })
             )) : ['No Subject'];
 
-              const processedQuestions = questions.map((q, index) => {
+            const processedQuestions = hasQuestions ? questions.map((q, index) => {
                 let questionText;
                 let optionsData;
                 let correctAnswerData;
@@ -1580,7 +1580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       };
                     } catch (e) {
                       // If parsing fails, split by common delimiters or use as single option
-                      const optionsList = q.options.split(/[,\n\r]/).filter(opt => opt.trim());
+                      const optionsList = String(q.options || '').split(/[,\n\r]/).filter((opt: string) => opt.trim());
                       optionsData = {
                         english: optionsList.length > 0 ? optionsList : ['Option A', 'Option B', 'Option C', 'Option D'],
                         hindi: optionsList.length > 0 ? optionsList : ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D']
@@ -1643,17 +1643,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   difficulty: q.difficulty || 'medium',
                   marks: 2
                 };
-              });
+              }) : [];
 
-              // Check if test date allows access
-              const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              testDate.setHours(0, 0, 0, 0);
-              
-              const isAccessible = testDate <= today; // Allow access if test date is today or in the past
-              
-              mockTests.push({
+            // Check if test date allows access
+            const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            testDate.setHours(0, 0, 0, 0);
+            
+            const isAccessible = testDate <= today; // Allow access if test date is today or in the past
+            
+            mockTests.push({
                 id: quiz.id,
                 title: quiz.title,
                 description: quiz.description || '',
