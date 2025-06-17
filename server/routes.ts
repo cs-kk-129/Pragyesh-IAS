@@ -1721,6 +1721,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             const isAccessible = testDate <= today; // Allow access if test date is today or in the past
             
+            // Determine test status based on questions and date
+            let testStatus = 'not_started';
+            if (!hasQuestions) {
+              testStatus = 'no_questions';
+            } else if (!isAccessible) {
+              testStatus = 'upcoming';
+            } else {
+              testStatus = 'available';
+            }
+            
             mockTests.push({
                 id: quiz.id,
                 title: quiz.title,
@@ -1732,7 +1742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 testDate: quiz.testDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
                 isActive: isAccessible && hasQuestions,
                 isAttempted: false,
-                status: !hasQuestions ? 'no_questions' : (!isAccessible ? 'upcoming' : 'available'),
+                status: testStatus,
                 questions: processedQuestions
               });
           } else {

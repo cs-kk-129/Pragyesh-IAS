@@ -400,14 +400,17 @@ export default function MockTests() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      not_started: { color: "bg-gray-100 text-gray-800", text: "Not Started" },
+      not_started: { color: "bg-gray-100 text-gray-800", text: "Ready" },
+      available: { color: "bg-green-100 text-green-800", text: "Available" },
+      upcoming: { color: "bg-blue-100 text-blue-800", text: "Upcoming" },
+      no_questions: { color: "bg-red-100 text-red-800", text: "No Questions" },
       in_progress: { color: "bg-blue-100 text-blue-800", text: "In Progress" },
       completed: { color: "bg-yellow-100 text-yellow-800", text: "Completed" },
       evaluated: { color: "bg-green-100 text-green-800", text: "Evaluated" },
     };
 
     const variant = variants[status as keyof typeof variants] || variants.not_started;
-    return <Badge className={variant.color}>{variant.text}</Badge>;
+    return <Badge className={`${variant.color} text-xs px-2 py-1`}>{variant.text}</Badge>;
   };
 
   // Show loading state
@@ -831,12 +834,16 @@ export default function MockTests() {
                       <TabsTrigger
                         key={`test-${test.id}`}
                         value={`test-${test.id}`}
-                        className="h-auto p-4 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        className="h-auto p-3 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
-                        <div className="space-y-1 w-full">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">{test.title}</span>
-                            {getStatusBadge(test.status)}
+                        <div className="space-y-2 w-full min-w-0">
+                          <div className="space-y-1">
+                            <div className="font-medium text-sm leading-tight break-words pr-2">
+                              {test.title}
+                            </div>
+                            <div className="flex justify-end">
+                              {getStatusBadge(test.status)}
+                            </div>
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {test.totalQuestions} Questions • {test.duration}min
@@ -920,7 +927,7 @@ export default function MockTests() {
 
                         {/* Action Button */}
                         <div className="flex justify-center pt-4">
-                          {test.status === 'not_started' ? (
+                          {(test.status === 'not_started' || test.status === 'available') && !test.isAttempted ? (
                             <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
                               <DialogTrigger asChild>
                                 <Button size="lg" className="px-8">
@@ -964,6 +971,14 @@ export default function MockTests() {
                             <Button variant="outline" size="lg">
                               <Trophy className="mr-2 h-4 w-4" />
                               View Results ({test.score}%)
+                            </Button>
+                          ) : test.status === 'no_questions' ? (
+                            <Button variant="secondary" size="lg" disabled>
+                              No Questions Available
+                            </Button>
+                          ) : test.status === 'upcoming' ? (
+                            <Button variant="secondary" size="lg" disabled>
+                              Test Scheduled for {test.testDate}
                             </Button>
                           ) : (
                             <Button variant="secondary" size="lg" disabled>
