@@ -123,12 +123,19 @@ export default function MockTests() {
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
 
   // Fetch mock tests created by admin from API (database-driven)
-  const { data: mockTests = [], isLoading: isLoadingTests } = useQuery<MockTest[]>({
+  const { data: mockTestsRaw = [], isLoading: isLoadingTests } = useQuery<MockTest[]>({
     queryKey: ["/api/student/mock-tests"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/student/mock-tests");
       return response.json();
     },
+  });
+
+  // Sort mock tests by date in descending order (latest first)
+  const mockTests = [...mockTestsRaw].sort((a, b) => {
+    const dateA = new Date(a.testDate || a.scheduledDate || '1970-01-01');
+    const dateB = new Date(b.testDate || b.scheduledDate || '1970-01-01');
+    return dateB.getTime() - dateA.getTime();
   });
 
   // Initialize selectedTest when mockTests load
@@ -829,26 +836,29 @@ export default function MockTests() {
 
             <div className="flex gap-6">
               {/* Vertical Tabs */}
-              <div className="w-80">
+              <div className="w-80 min-w-[280px] max-w-[320px]">
                 <Tabs orientation="vertical" value={selectedTest} onValueChange={setSelectedTest}>
-                  <TabsList className="grid w-full grid-rows-3 h-auto">
+                  <TabsList className="grid w-full h-auto space-y-1 bg-transparent">
                     {mockTests.map((test) => (
                       <TabsTrigger
                         key={`test-${test.id}`}
                         value={`test-${test.id}`}
-                        className="h-auto p-3 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        className="h-auto p-3 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground w-full bg-muted/50 hover:bg-muted border rounded-lg"
                       >
-                        <div className="space-y-2 w-full min-w-0">
+                        <div className="space-y-2 w-full min-w-0 overflow-hidden">
                           <div className="space-y-1">
-                            <div className="font-medium text-sm leading-tight break-words pr-2">
+                            <div className="font-medium text-sm leading-tight break-words whitespace-normal line-clamp-2">
                               {test.title}
                             </div>
-                            <div className="flex justify-end">
+                            <div className="flex justify-between items-center">
+                              <div className="text-xs text-muted-foreground truncate">
+                                {test.testDate || test.scheduledDate}
+                              </div>
                               {getStatusBadge(test.status)}
                             </div>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {test.totalQuestions} Questions • {test.duration}min
+                            {test.totalQuestions} Q • {test.duration}min
                           </div>
                           {test.score && (
                             <div className="text-xs font-medium text-green-600">
@@ -969,6 +979,11 @@ export default function MockTests() {
                                 </div>
                               </DialogContent>
                             </Dialog>
+                          ) : test.status === 'expired' ? (
+                            <Button variant="secondary" size="lg" disabled>
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Test Expired ({test.testDate})
+                            </Button>
                           ) : test.status === 'completed' && test.score !== undefined ? (
                             <Button variant="outline" size="lg">
                               <Trophy className="mr-2 h-4 w-4" />
@@ -983,11 +998,6 @@ export default function MockTests() {
                             <Button variant="secondary" size="lg" disabled>
                               <Clock className="mr-2 h-4 w-4" />
                               Scheduled for {test.testDate}
-                            </Button>
-                          ) : test.status === 'expired' ? (
-                            <Button variant="secondary" size="lg" disabled>
-                              <XCircle className="mr-2 h-4 w-4" />
-                              Test Expired ({test.testDate})
                             </Button>
                           ) : test.status === 'completed' ? (
                             <Button variant="secondary" size="lg" disabled>
