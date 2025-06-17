@@ -92,7 +92,7 @@ export default function ManualQuestionInput() {
         topicId: "1"    // Default topic ID
       });
       const savedQuestions = await questionsResponse.json();
-      
+
       // Then create mock test with question IDs
       const response = await apiRequest("POST", "/api/admin/create-mock-test", {
         title: data.title,
@@ -242,46 +242,7 @@ export default function ManualQuestionInput() {
       return;
     }
 
-    try {
-      const mockTestData = {
-        title: `Mock Test - ${uploadedFile?.name || 'File Upload'} (${selectedQuestions.length} Questions)`,
-        description: `Mock test created from uploaded file with ${selectedQuestions.length} selected questions`,
-        duration: Math.max(60, selectedQuestions.length * 2), // 2 minutes per question, minimum 60 minutes
-        scheduledDate: new Date().toISOString(),
-        questions: selectedQuestions.map(q => ({
-          question: { english: q.question, hindi: q.questionHindi || '' },
-          options: { english: q.options, hindi: q.optionsHindi || [] },
-          correctAnswer: { english: q.options[q.correctAnswer] || '', hindi: '' },
-          subject: q.subject,
-          topic: q.topic,
-          marks: q.marks,
-          explanation: q.explanation
-        }))
-      };
-
-      const response = await apiRequest('POST', '/api/mock-tests', mockTestData);
-
-      if (response.ok) {
-        toast({
-          title: "Mock Test Created Successfully",
-          description: `Created mock test with ${selectedQuestions.length} questions from uploaded file`
-        });
-
-        // Reset state
-        setFileQuestions([]);
-        setUploadedFile(null);
-        setSelectAllFile(false);
-      } else {
-        throw new Error('Failed to create mock test');
-      }
-    } catch (error) {
-      console.error('Error creating mock test:', error);
-      toast({
-        title: "Failed to Create Mock Test",
-        description: "Please try again",
-        variant: "destructive"
-      });
-    }
+    setShowMockTestDialog(true);
   };
 
   const submitAllQuestions = () => {
@@ -767,6 +728,7 @@ export default function ManualQuestionInput() {
                   return;
                 }
 
+                // Use createMockTestMutation for consistency
                 createMockTestMutation.mutate({
                   title: mockTestData.title,
                   description: mockTestData.description,
