@@ -403,7 +403,7 @@ Follow these UPSC formatting guidelines:
         description: mockTestDetails.description,
         duration: mockTestDetails.duration,
         testDate: mockTestDetails.scheduledDate,
-        selectedQuestionIds: selectedQuestions.map(q => parseInt(q.id))
+        selectedQuestionIds: selectedQuestions.map(q => q.id) // Use full UUID, don't parse as integer
       });
 
       const result = await response.json();

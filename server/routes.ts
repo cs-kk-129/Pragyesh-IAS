@@ -1480,8 +1480,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No questions selected" });
       }
 
-      // Filter out null/undefined question IDs
-      const validQuestionIds = selectedQuestionIds.filter((id: any) => id !== null && id !== undefined && id !== '');
+      // Filter out null/undefined question IDs and ensure they are strings (UUIDs)
+      const validQuestionIds = selectedQuestionIds.filter((id: any) => 
+        id !== null && id !== undefined && id !== '' && typeof id === 'string'
+      );
 
       if (validQuestionIds.length === 0) {
         return res.status(400).json({ error: "No valid questions selected" });
@@ -1509,10 +1511,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let updatedCount = 0;
       for (const questionId of validQuestionIds) {
         try {
-          // First check if question exists
+          // First check if question exists (questionId is already a string UUID)
           const existingQuestion = await db.select()
             .from(schema.questions)
-            .where(eq(schema.questions.id, questionId.toString()))
+            .where(eq(schema.questions.id, questionId))
             .limit(1);
 
           if (existingQuestion.length === 0) {
@@ -1523,7 +1525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Use drizzle ORM for reliable updates
           const updateResult = await db.update(schema.questions)
             .set({ quizId: quiz.id })
-            .where(eq(schema.questions.id, questionId.toString()));
+            .where(eq(schema.questions.id, questionId));
 
           console.log(`Successfully updated question ${questionId} to quiz ${quiz.id}`);
           updatedCount++;
