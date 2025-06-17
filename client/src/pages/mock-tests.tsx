@@ -83,9 +83,10 @@ type MockTest = {
   isActive: boolean;
   isAttempted: boolean;
   score?: number;
-  status: 'not_started' | 'in_progress' | 'completed' | 'evaluated';
+  status: 'not_started' | 'available' | 'upcoming' | 'expired' | 'no_questions' | 'in_progress' | 'completed' | 'evaluated';
   questions?: any[]; // Questions created by admin
   scheduledDate?: string;
+  testDate?: string;
 };
 
 type Question = {
@@ -401,11 +402,12 @@ export default function MockTests() {
   const getStatusBadge = (status: string) => {
     const variants = {
       not_started: { color: "bg-gray-100 text-gray-800", text: "Ready" },
-      available: { color: "bg-green-100 text-green-800", text: "Available" },
+      available: { color: "bg-green-100 text-green-800", text: "Available Today" },
       upcoming: { color: "bg-blue-100 text-blue-800", text: "Upcoming" },
+      expired: { color: "bg-orange-100 text-orange-800", text: "Expired" },
       no_questions: { color: "bg-red-100 text-red-800", text: "No Questions" },
       in_progress: { color: "bg-blue-100 text-blue-800", text: "In Progress" },
-      completed: { color: "bg-yellow-100 text-yellow-800", text: "Completed" },
+      completed: { color: "bg-purple-100 text-purple-800", text: "Completed" },
       evaluated: { color: "bg-green-100 text-green-800", text: "Evaluated" },
     };
 
@@ -927,7 +929,7 @@ export default function MockTests() {
 
                         {/* Action Button */}
                         <div className="flex justify-center pt-4">
-                          {(test.status === 'not_started' || test.status === 'available') && !test.isAttempted ? (
+                          {test.status === 'available' && !test.isAttempted ? (
                             <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
                               <DialogTrigger asChild>
                                 <Button size="lg" className="px-8">
@@ -967,22 +969,34 @@ export default function MockTests() {
                                 </div>
                               </DialogContent>
                             </Dialog>
-                          ) : test.status === 'evaluated' ? (
+                          ) : test.status === 'completed' && test.score !== undefined ? (
                             <Button variant="outline" size="lg">
                               <Trophy className="mr-2 h-4 w-4" />
                               View Results ({test.score}%)
                             </Button>
                           ) : test.status === 'no_questions' ? (
                             <Button variant="secondary" size="lg" disabled>
+                              <AlertCircle className="mr-2 h-4 w-4" />
                               No Questions Available
                             </Button>
                           ) : test.status === 'upcoming' ? (
                             <Button variant="secondary" size="lg" disabled>
-                              Test Scheduled for {test.testDate}
+                              <Clock className="mr-2 h-4 w-4" />
+                              Scheduled for {test.testDate}
+                            </Button>
+                          ) : test.status === 'expired' ? (
+                            <Button variant="secondary" size="lg" disabled>
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Test Expired ({test.testDate})
+                            </Button>
+                          ) : test.status === 'completed' ? (
+                            <Button variant="secondary" size="lg" disabled>
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Already Completed
                             </Button>
                           ) : (
                             <Button variant="secondary" size="lg" disabled>
-                              {test.status === 'completed' ? 'Evaluation Pending' : 'In Progress'}
+                              {test.status === 'in_progress' ? 'In Progress' : 'Not Available'}
                             </Button>
                           )}
                         </div>

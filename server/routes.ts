@@ -1558,24 +1558,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get mock tests for students (with date restrictions)
+  // Get mock tests for students (show all tests, restrict attempts by date)
   app.get("/api/student/mock-tests", isAuthenticated, async (req, res) => {
     try {
       const userId = (req as any).user.id;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Get quizzes that are scheduled for today or future dates, OR use a more lenient date check
+      // Get ALL mock test quizzes (no date filtering)
       const availableQuizzes = await db.select()
         .from(schema.quizzes)
         .where(eq(schema.quizzes.quizType, 'mock_test'));
 
       console.log(`Found ${availableQuizzes.length} mock tests total`);
 
-      // Check if user has already attempted each quiz
+      // Process each quiz, including those already attempted (to show in history)
       const mockTests = [];
       for (const quiz of availableQuizzes) {
         try {
+          // Check if user has already attempted this quiz
           const existingAttempt = await db.select()
             .from(schema.quizAttempts)
             .where(
@@ -1585,176 +1586,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
               )
             );
 
-          if (existingAttempt.length === 0) {
-            // Get questions for this quiz with better error handling
-            const questions = await db.select()
-              .from(schema.questions)
-              .where(eq(schema.questions.quizId, quiz.id));
+          const isAlreadyAttempted = existingAttempt.length > 0;
 
-            console.log(`Quiz ${quiz.id} ("${quiz.title}") has ${questions.length} questions`);
+          // Get questions for this quiz
+          const questions = await db.select()
+            .from(schema.questions)
+            .where(eq(schema.questions.quizId, quiz.id));
 
-            // Include all mock tests, even those with 0 questions, but mark them appropriately
-            const hasQuestions = questions.length > 0;
-            
-            // Extract unique subjects from question tags
-            const subjects = hasQuestions ? Array.from(new Set(
-              questions.map(q => {
-                try {
-                  if (typeof q.tags === 'string' && q.tags) {
-                    const parsedTags = JSON.parse(q.tags);
-                    return Array.isArray(parsedTags) ? parsedTags[0] || 'General Studies' : 'General Studies';
-                  } else if (Array.isArray(q.tags)) {
-                    return q.tags[0] || 'General Studies';
-                  }
-                  return 'General Studies';
-                } catch (e) {
-                  return 'General Studies';
+          console.log(`Quiz ${quiz.id} ("${quiz.title}") has ${questions.length} questions`);
+
+          const hasQuestions = questions.length > 0;
+          
+          // Extract unique subjects from question tags
+          const subjects = hasQuestions ? Array.from(new Set(
+            questions.map(q => {
+              try {
+                if (typeof q.tags === 'string' && q.tags) {
+                  const parsedTags = JSON.parse(q.tags);
+                  return Array.isArray(parsedTags) ? parsedTags[0] || 'General Studies' : 'General Studies';
+                } else if (Array.isArray(q.tags)) {
+                  return q.tags[0] || 'General Studies';
                 }
-              })
-            )) : ['No Subject'];
+                return 'General Studies';
+              } catch (e) {
+                return 'General Studies';
+              }
+            })
+          )) : ['No Subject'];
 
-            const processedQuestions = hasQuestions ? questions.map((q, index) => {
-                let questionText;
-                let optionsData;
-                let correctAnswerData;
+          const processedQuestions = hasQuestions ? questions.map((q, index) => {
+              let questionText;
+              let optionsData;
+              let correctAnswerData;
 
-                try {
-                  // Parse question text - handle both string and JSON formats
-                  if (typeof q.question === 'string' && q.question.includes('{') && q.question.includes('english')) {
-                    try {
-                      const parsed = JSON.parse(q.question);
-                      questionText = parsed;
-                    } catch (e) {
-                      // If JSON parsing fails, treat as regular string
-                      questionText = { 
-                        english: q.question || '', 
-                        hindi: q.question || '' 
-                      };
-                    }
-                  } else {
+              try {
+                // Parse question text - handle both string and JSON formats
+                if (typeof q.question === 'string' && q.question.includes('{') && q.question.includes('english')) {
+                  try {
+                    const parsed = JSON.parse(q.question);
+                    questionText = parsed;
+                  } catch (e) {
+                    // If JSON parsing fails, treat as regular string
                     questionText = { 
                       english: q.question || '', 
                       hindi: q.question || '' 
                     };
                   }
+                } else {
+                  questionText = { 
+                    english: q.question || '', 
+                    hindi: q.question || '' 
+                  };
+                }
 
-                  // Parse options - handle both string and array formats
-                  if (typeof q.options === 'string' && q.options) {
-                    try {
-                      const parsedOptions = JSON.parse(q.options);
-                      optionsData = {
-                        english: Array.isArray(parsedOptions) ? parsedOptions : [parsedOptions],
-                        hindi: Array.isArray(parsedOptions) ? parsedOptions : [parsedOptions]
-                      };
-                    } catch (e) {
-                      // If parsing fails, split by common delimiters or use as single option
-                      const optionsList = String(q.options || '').split(/[,\n\r]/).filter((opt: string) => opt.trim());
-                      optionsData = {
-                        english: optionsList.length > 0 ? optionsList : ['Option A', 'Option B', 'Option C', 'Option D'],
-                        hindi: optionsList.length > 0 ? optionsList : ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D']
-                      };
-                    }
-                  } else if (Array.isArray(q.options)) {
+                // Parse options - handle both string and array formats
+                if (typeof q.options === 'string' && q.options) {
+                  try {
+                    const parsedOptions = JSON.parse(q.options);
                     optionsData = {
-                      english: q.options,
-                      hindi: q.options
+                      english: Array.isArray(parsedOptions) ? parsedOptions : [parsedOptions],
+                      hindi: Array.isArray(parsedOptions) ? parsedOptions : [parsedOptions]
                     };
-                  } else {
-                    optionsData = { 
-                      english: ['Option A', 'Option B', 'Option C', 'Option D'], 
-                      hindi: ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D'] 
+                  } catch (e) {
+                    // If parsing fails, split by common delimiters or use as single option
+                    const optionsList = String(q.options || '').split(/[,\n\r]/).filter((opt: string) => opt.trim());
+                    optionsData = {
+                      english: optionsList.length > 0 ? optionsList : ['Option A', 'Option B', 'Option C', 'Option D'],
+                      hindi: optionsList.length > 0 ? optionsList : ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D']
                     };
                   }
-
-                  // Parse correct answer
-                  correctAnswerData = {
-                    english: q.correctAnswer || optionsData.english[0] || 'Option A',
-                    hindi: q.correctAnswer || optionsData.hindi[0] || 'विकल्प A'
+                } else if (Array.isArray(q.options)) {
+                  optionsData = {
+                    english: q.options,
+                    hindi: q.options
                   };
-
-                } catch (parseError) {
-                  console.error('Error parsing question data for question', q.id, ':', parseError);
-                  questionText = { english: `Question ${index + 1}`, hindi: `प्रश्न ${index + 1}` };
+                } else {
                   optionsData = { 
                     english: ['Option A', 'Option B', 'Option C', 'Option D'], 
                     hindi: ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D'] 
                   };
-                  correctAnswerData = { english: 'Option A', hindi: 'विकल्प A' };
                 }
 
-                // Extract subject and topic from tags
-                let subject = 'General Studies';
-                let topic = 'Mixed Topics';
-
-                try {
-                  if (typeof q.tags === 'string' && q.tags) {
-                    const parsedTags = JSON.parse(q.tags);
-                    if (Array.isArray(parsedTags) && parsedTags.length > 0) {
-                      subject = parsedTags[0] || 'General Studies';
-                      topic = parsedTags[1] || 'Mixed Topics';
-                    }
-                  } else if (Array.isArray(q.tags) && q.tags.length > 0) {
-                    subject = q.tags[0] || 'General Studies';
-                    topic = q.tags[1] || 'Mixed Topics';
-                  }
-                } catch (e) {
-                  // Use defaults
-                }
-
-                return {
-                  id: q.id,
-                  question: questionText,
-                  options: optionsData,
-                  correctAnswer: correctAnswerData,
-                  subject: subject,
-                  topic: topic,
-                  difficulty: q.difficulty || 'medium',
-                  marks: 2
+                // Parse correct answer
+                correctAnswerData = {
+                  english: q.correctAnswer || optionsData.english[0] || 'Option A',
+                  hindi: q.correctAnswer || optionsData.hindi[0] || 'विकल्प A'
                 };
-              }) : [];
 
-            // Check if test date allows access
-            const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            testDate.setHours(0, 0, 0, 0);
-            
-            const isAccessible = testDate <= today; // Allow access if test date is today or in the past
-            
-            // Determine test status based on questions and date
-            let testStatus = 'not_started';
-            if (!hasQuestions) {
-              testStatus = 'no_questions';
-            } else if (!isAccessible) {
-              testStatus = 'upcoming';
-            } else {
-              testStatus = 'available';
-            }
-            
-            mockTests.push({
-                id: quiz.id,
-                title: quiz.title,
-                description: quiz.description || '',
-                duration: quiz.timeLimit || 120,
-                totalQuestions: questions.length,
-                difficulty: quiz.difficulty || 'medium',
-                subjects: subjects,
-                testDate: quiz.testDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                isActive: isAccessible && hasQuestions,
-                isAttempted: false,
-                status: testStatus,
-                questions: processedQuestions
-              });
+              } catch (parseError) {
+                console.error('Error parsing question data for question', q.id, ':', parseError);
+                questionText = { english: `Question ${index + 1}`, hindi: `प्रश्न ${index + 1}` };
+                optionsData = { 
+                  english: ['Option A', 'Option B', 'Option C', 'Option D'], 
+                  hindi: ['विकल्प A', 'विकल्प B', 'विकल्प C', 'विकल्प D'] 
+                };
+                correctAnswerData = { english: 'Option A', hindi: 'विकल्प A' };
+              }
+
+              // Extract subject and topic from tags
+              let subject = 'General Studies';
+              let topic = 'Mixed Topics';
+
+              try {
+                if (typeof q.tags === 'string' && q.tags) {
+                  const parsedTags = JSON.parse(q.tags);
+                  if (Array.isArray(parsedTags) && parsedTags.length > 0) {
+                    subject = parsedTags[0] || 'General Studies';
+                    topic = parsedTags[1] || 'Mixed Topics';
+                  }
+                } else if (Array.isArray(q.tags) && q.tags.length > 0) {
+                  subject = q.tags[0] || 'General Studies';
+                  topic = q.tags[1] || 'Mixed Topics';
+                }
+              } catch (e) {
+                // Use defaults
+              }
+
+              return {
+                id: q.id,
+                question: questionText,
+                options: optionsData,
+                correctAnswer: correctAnswerData,
+                subject: subject,
+                topic: topic,
+                difficulty: q.difficulty || 'medium',
+                marks: 2
+              };
+            }) : [];
+
+          // Check if test date allows access (only for today's date)
+          const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
+          testDate.setHours(0, 0, 0, 0);
+          
+          const isScheduledForToday = testDate.getTime() === today.getTime();
+          
+          // Determine test status based on questions, date, and attempt status
+          let testStatus = 'not_started';
+          let isActive = false;
+          
+          if (isAlreadyAttempted) {
+            testStatus = 'completed';
+            isActive = false;
+          } else if (!hasQuestions) {
+            testStatus = 'no_questions';
+            isActive = false;
+          } else if (isScheduledForToday) {
+            testStatus = 'available';
+            isActive = true;
+          } else if (testDate > today) {
+            testStatus = 'upcoming';
+            isActive = false;
           } else {
-            console.log(`User ${userId} already attempted quiz ${quiz.id}`);
+            testStatus = 'expired';
+            isActive = false;
           }
+
+          // Get attempt score if already attempted
+          let attemptScore = null;
+          if (isAlreadyAttempted && existingAttempt.length > 0) {
+            attemptScore = existingAttempt[0].score;
+          }
+          
+          mockTests.push({
+              id: quiz.id,
+              title: quiz.title,
+              description: quiz.description || '',
+              duration: quiz.timeLimit || 120,
+              totalQuestions: questions.length,
+              difficulty: quiz.difficulty || 'medium',
+              subjects: subjects,
+              testDate: quiz.testDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+              isActive: isActive,
+              isAttempted: isAlreadyAttempted,
+              status: testStatus,
+              score: attemptScore,
+              questions: processedQuestions
+            });
+
         } catch (quizError) {
           console.error(`Error processing quiz ${quiz.id}:`, quizError);
           continue; // Skip this quiz and continue with others
         }
       }
 
-      console.log(`Returning ${mockTests.length} available mock tests for user ${userId}`);
+      // Sort tests: today's tests first, then by date (newest first)
+      mockTests.sort((a, b) => {
+        const aDate = new Date(a.testDate);
+        const bDate = new Date(b.testDate);
+        
+        // If one is today and other is not, prioritize today's test
+        const aIsToday = aDate.getTime() === today.getTime();
+        const bIsToday = bDate.getTime() === today.getTime();
+        
+        if (aIsToday && !bIsToday) return -1;
+        if (!aIsToday && bIsToday) return 1;
+        
+        // Otherwise sort by date (newest first)
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      console.log(`Returning ${mockTests.length} mock tests for user ${userId} (including all dates)`);
       res.json(mockTests);
     } catch (error) {
       console.error("Error fetching mock tests:", error);
