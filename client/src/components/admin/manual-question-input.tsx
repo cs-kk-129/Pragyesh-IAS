@@ -92,6 +92,7 @@ export default function ManualQuestionInput() {
         topicId: "1"    // Default topic ID
       });
       const savedQuestions = await questionsResponse.json();
+      const questionIds = savedQuestions.questions?.map((q: any) => q.id) || [];
 
       // Then create mock test with question IDs
       const response = await apiRequest("POST", "/api/admin/create-mock-test", {
@@ -99,7 +100,7 @@ export default function ManualQuestionInput() {
         description: data.description,
         duration: data.duration,
         testDate: data.scheduledDate,
-        selectedQuestionIds: savedQuestions.questions?.map((q: any) => q.id) || []
+        selectedQuestionIds: questionIds
       });
       return response.json();
     },

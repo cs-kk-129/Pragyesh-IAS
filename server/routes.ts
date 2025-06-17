@@ -1487,7 +1487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No valid questions selected" });
       }
 
-      console.log(`Creating mock test with ${validQuestionIds.length} valid selected questions`);
+      console.log(`Creating mock test with ${validQuestionIds.length} valid selected questions:`, validQuestionIds);
 
       // Create quiz record in database first
       const quiz = await storage.createQuiz({
@@ -1509,18 +1509,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let updatedCount = 0;
       for (const questionId of validQuestionIds) {
         try {
-          // Use raw SQL for more reliable updates
-          const updateResult = await pool.query(
-            'UPDATE questions SET quiz_id = $1 WHERE id = $2',
-            [quiz.id, questionId.toString()]
-          );
+          // First check if question exists
+          const existingQuestion = await db.select()
+            .from(schema.questions)
+            .where(eq(schema.questions.id, questionId.toString()))
+            .limit(1);
 
-          if ((updateResult.rowCount ?? 0) > 0) {
-            console.log(`Updated question ${questionId} to quiz ${quiz.id}`);
-            updatedCount++;
-          } else {
-            console.warn(`Question ${questionId} not found or already assigned`);
+          if (existingQuestion.length === 0) {
+            console.warn(`Question ${questionId} not found in database`);
+            continue;
           }
+
+          // Use drizzle ORM for reliable updates
+          const updateResult = await db.update(schema.questions)
+            .set({ quizId: quiz.id })
+            .where(eq(schema.questions.id, questionId.toString()));
+
+          console.log(`Successfully updated question ${questionId} to quiz ${quiz.id}`);
+          updatedCount++;
         } catch (updateError) {
           console.error(`Failed to update question ${questionId}:`, updateError);
         }
