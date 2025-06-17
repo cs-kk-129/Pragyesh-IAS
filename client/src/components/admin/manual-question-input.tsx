@@ -85,7 +85,22 @@ export default function ManualQuestionInput() {
 
   const createMockTestMutation = useMutation({
     mutationFn: async (data: { title: string; description: string; duration: number; scheduledDate: string; questions: Question[] }) => {
-      const response = await apiRequest("POST", "/api/admin/create-mock-test", data);
+      // First, save questions to get their IDs
+      const questionsResponse = await apiRequest("POST", "/api/admin/questions/manual", {
+        questions: data.questions,
+        subjectId: "1", // Default subject ID
+        topicId: "1"    // Default topic ID
+      });
+      const savedQuestions = await questionsResponse.json();
+      
+      // Then create mock test with question IDs
+      const response = await apiRequest("POST", "/api/admin/create-mock-test", {
+        title: data.title,
+        description: data.description,
+        duration: data.duration,
+        testDate: data.scheduledDate,
+        selectedQuestionIds: savedQuestions.questions?.map((q: any) => q.id) || []
+      });
       return response.json();
     },
     onSuccess: (data) => {

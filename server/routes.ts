@@ -935,24 +935,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin manual question input endpoint
-  app.post("/api/admin/questions/manual", (req, res) => {
+  app.post("/api/admin/questions/manual", async (req, res) => {
     try {
       const { questions, subjectId, topicId } = req.body;
 
-      // Process and store manual questions
-      const processedQuestions = questions.map((q: any, index: number) => ({
-        id: Date.now() + index,
-        ...q,
-        subjectId,
-        topicId,
-        createdAt: new Date().toISOString(),
-        createdBy: 1 // placeholder admin ID
-      }));
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ error: "No valid questions provided" });
+      }
+
+      console.log(`Processing ${questions.length} manual questions for database storage`);
+
+      // Save questions to database with proper structure
+      const savedQuestions = [];
+      for (const question of questions) {
+        try {
+          // Map subject using the same logic as AI generation
+          let actualSubjectId = parseInt(subjectId) || 1;
+          const subjectName = question.subject || '';
+          
+          if (subjectName.toLowerCase().includes('art') && subjectName.toLowerCase().includes('culture')) {
+            actualSubjectId = 2;
+          } else if (subjectName.toLowerCase().includes('geography')) {
+            actualSubjectId = 3;
+          } else if (subjectName.toLowerCase().includes('polity')) {
+            actualSubjectId = 4;
+          } else if (subjectName.toLowerCase().includes('economy')) {
+            actualSubjectId = 5;
+          } else if (subjectName.toLowerCase().includes('environment')) {
+            actualSubjectId = 6;
+          } else if (subjectName.toLowerCase().includes('science') && subjectName.toLowerCase().includes('technology')) {
+            actualSubjectId = 7;
+          } else if (subjectName.toLowerCase().includes('general') && subjectName.toLowerCase().includes('science')) {
+            actualSubjectId = 8;
+          } else if (subjectName.toLowerCase().includes('ethics')) {
+            actualSubjectId = 9;
+          } else if (subjectName.toLowerCase().includes('current')) {
+            actualSubjectId = 10;
+          } else if (subjectName.toLowerCase().includes('csat')) {
+            actualSubjectId = 11;
+          }
+
+          // Format question data for database storage
+          const questionData = {
+            quizId: 0, // Unassigned initially
+            subjectId: actualSubjectId,
+            topicId: parseInt(topicId) || null,
+            sectionId: null,
+            question: JSON.stringify({
+              english: question.question || '',
+              hindi: question.questionHindi || ''
+            }),
+            options: question.options || ['Option A', 'Option B', 'Option C', 'Option D'],
+            correctAnswer: Array.isArray(question.options) && question.correctAnswer !== undefined 
+              ? question.options[question.correctAnswer] || question.options[0]
+              : 'Option A',
+            explanation: question.explanation || 'Explanation will be provided after evaluation.',
+            difficulty: question.difficulty || 'medium',
+            tags: [question.subject, question.topic].filter(Boolean)
+          };
+
+          console.log('Saving manual question:', questionData.question, 'with options:', questionData.options);
+
+          const savedQuestion = await storage.createQuestion(questionData);
+          if (savedQuestion) {
+            savedQuestions.push(savedQuestion);
+            console.log(`Successfully saved manual question with ID: ${savedQuestion.id}`);
+          }
+        } catch (questionError) {
+          console.error('Error saving individual manual question:', questionError);
+          console.error('Question data that failed:', question);
+        }
+      }
+
+      console.log(`Successfully saved ${savedQuestions.length} manual questions to database`);
 
       res.json({ 
         message: "Questions added successfully", 
-        count: processedQuestions.length,
-        questions: processedQuestions 
+        count: savedQuestions.length,
+        questions: savedQuestions
       });
     } catch (error) {
       console.error("Error adding manual questions:", error);
