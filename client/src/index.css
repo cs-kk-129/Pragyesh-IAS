@@ -64,4 +64,22 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
+  
+  /* Custom scrollbar styles */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
 }

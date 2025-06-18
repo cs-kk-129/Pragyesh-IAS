@@ -834,46 +834,48 @@ export default function MockTests() {
               </p>
             </div>
 
-            <div className="flex gap-6">
+            <div className="flex gap-6 h-[calc(100vh-200px)]">
               {/* Vertical Tabs */}
-              <div className="w-80 min-w-[280px] max-w-[320px]">
-                <Tabs orientation="vertical" value={selectedTest} onValueChange={setSelectedTest}>
-                  <TabsList className="grid w-full h-auto space-y-1 bg-transparent">
-                    {mockTests.map((test) => (
-                      <TabsTrigger
-                        key={`test-${test.id}`}
-                        value={`test-${test.id}`}
-                        className="h-auto p-3 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground w-full bg-muted/50 hover:bg-muted border rounded-lg"
-                      >
-                        <div className="space-y-2 w-full min-w-0 overflow-hidden">
-                          <div className="space-y-1">
-                            <div className="font-medium text-sm leading-tight break-words whitespace-normal line-clamp-2">
-                              {test.title}
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <div className="text-xs text-muted-foreground truncate">
-                                {test.testDate || test.scheduledDate}
+              <div className="w-80 min-w-[280px] max-w-[320px] flex flex-col">
+                <Tabs orientation="vertical" value={selectedTest} onValueChange={setSelectedTest} className="flex flex-col h-full">
+                  <div className="overflow-y-auto flex-1 pr-2">
+                    <TabsList className="grid w-full h-auto space-y-1 bg-transparent">
+                      {mockTests.map((test) => (
+                        <TabsTrigger
+                          key={`test-${test.id}`}
+                          value={`test-${test.id}`}
+                          className="h-auto p-3 text-left justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground w-full bg-muted/50 hover:bg-muted border rounded-lg"
+                        >
+                          <div className="space-y-2 w-full min-w-0 overflow-hidden">
+                            <div className="space-y-1">
+                              <div className="font-medium text-sm leading-tight break-words whitespace-normal line-clamp-2">
+                                {test.title}
                               </div>
-                              {getStatusBadge(test.status)}
+                              <div className="flex justify-between items-center">
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {test.testDate || test.scheduledDate}
+                                </div>
+                                {getStatusBadge(test.status)}
+                              </div>
                             </div>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {test.totalQuestions} Q • {test.duration}min
-                          </div>
-                          {test.score && (
-                            <div className="text-xs font-medium text-green-600">
-                              Score: {test.score}%
+                            <div className="text-xs text-muted-foreground">
+                              {test.totalQuestions} Q • {test.duration}min
                             </div>
-                          )}
-                        </div>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                            {test.score && (
+                              <div className="text-xs font-medium text-green-600">
+                                Score: {test.score}%
+                              </div>
+                            )}
+                          </div>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </div>
                 </Tabs>
               </div>
 
               {/* Content Area */}
-              <div className="flex-1">
+              <div className="flex-1 overflow-y-auto">
                 {mockTests.map((test) => (
                   <div
                     key={test.id}
