@@ -284,37 +284,37 @@ export class DatabaseStorage implements IStorage {
   async createQuestion(question: InsertQuestion): Promise<Question> {
     try {
       console.log('DATABASE STORAGE: Creating question with data:', JSON.stringify(question, null, 2));
-      
+
       // Validate and clean the input data
       let cleanQuestionText = question.question || '';
       let cleanOptions: string[] = [];
       let cleanCorrectAnswer = question.correctAnswer || '';
       let cleanTags: string[] = [];
-      
+
       // Handle options - ensure it's a proper array of strings
       if (Array.isArray(question.options)) {
         cleanOptions = question.options.filter(opt => typeof opt === 'string' && opt.trim() !== '');
       } else if (question.options && typeof question.options === 'object') {
         cleanOptions = Object.values(question.options).filter(v => typeof v === 'string' && v.trim() !== '') as string[];
       }
-      
+
       // Validate we have at least some options
       if (cleanOptions.length === 0) {
         cleanOptions = ['Option A', 'Option B', 'Option C', 'Option D'];
         console.warn('No valid options provided, using default options');
       }
-      
+
       // Handle tags
       if (Array.isArray(question.tags)) {
         cleanTags = question.tags.filter(tag => typeof tag === 'string' && tag.trim() !== '');
       }
-      
+
       // Ensure question text is valid
       if (!cleanQuestionText || cleanQuestionText.trim() === '') {
         cleanQuestionText = 'Sample question text';
         console.warn('Empty question text provided, using default');
       }
-      
+
       // Use raw SQL to ensure proper insertion with proper UUID generation
       const questionId = crypto.randomUUID();
       const insertQuery = `
@@ -322,7 +322,7 @@ export class DatabaseStorage implements IStorage {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
       `;
-      
+
       const values = [
         questionId,
         question.quizId || 0,
@@ -338,21 +338,21 @@ export class DatabaseStorage implements IStorage {
         false,
         new Date()
       ];
-      
+
       console.log('DATABASE STORAGE: Executing raw SQL insert for question:', questionId);
       console.log('DATABASE STORAGE: Quiz ID:', question.quizId || 0);
       console.log('DATABASE STORAGE: Options length:', cleanOptions.length);
       console.log('DATABASE STORAGE: Insert values:', values.map((v, i) => `$${i+1}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(', '));
-      
+
       const result = await pool.query(insertQuery, values);
       const newQuestion = result.rows[0];
-      
+
       if (!newQuestion) {
         throw new Error('Question insertion returned no data');
       }
-      
+
       console.log('DATABASE STORAGE: Question created successfully with ID:', newQuestion.id);
-      
+
       // Parse tags safely
       let parsedTags = [];
       try {
@@ -424,8 +424,17 @@ export class DatabaseStorage implements IStorage {
 
   // QUIZ ATTEMPTS
   async createQuizAttempt(attempt: InsertQuizAttempt): Promise<QuizAttempt> {
-    const [newAttempt] = await db.insert(quizAttempts).values(attempt).returning();
-    return newAttempt;
+    try {
+      console.log('DatabaseStorage: Creating quiz attempt with data:', attempt);
+      const [quizAttempt] = await db.insert(quizAttempts)
+        .values(attempt)
+        .returning();
+      console.log('DatabaseStorage: Quiz attempt created successfully:', quizAttempt);
+      return quizAttempt;
+    } catch (error) {
+      console.error('DatabaseStorage: Error creating quiz attempt:', error);
+      throw error;
+    }
   }
 
   async getQuizAttemptsByUser(userId: number): Promise<QuizAttempt[]> {

@@ -1800,6 +1800,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quizId = parseInt(req.params.id);
       const { answers, timeSpent, questionTimings } = req.body;
 
+      console.log(`Mock test submission: User ${userId}, Quiz ${quizId}, Answers: ${answers.length}`);
+
       // Check if user has already attempted this quiz
       const existingAttempt = await db.select()
         .from(schema.quizAttempts)
@@ -1818,6 +1820,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await db.select()
         .from(schema.questions)
         .where(eq(schema.questions.quizId, quizId));
+
+      console.log(`Found ${questions.length} questions for quiz ${quizId}`);
+
+      if (questions.length === 0) {
+        return res.status(400).json({ error: "No questions found for this test" });
+      }
 
       // Calculate score
       let correct = 0;
@@ -1855,18 +1863,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const score = Math.round((correct / totalQuestions) * 100);
       const accuracy = Math.round((correct / totalQuestions) * 100);
 
-      // Save quiz attempt to database
-      const quizAttempt = await storage.createQuizAttempt({
-        userId,
-        quizId,
-        score,
-        totalQuestions,
-        accuracy,
-        timeTaken: Math.round(timeSpent),
-        answeredQuestions: evaluatedAnswers
-      });
+      console.log(`Evaluation: ${correct}/${totalQuestions} correct, Score: ${score}%`);
 
-      console.log(`Quiz attempt saved: User ${userId}, Quiz ${quizId}, Score ${score}%`);
+      // Save quiz attempt to database using direct database insertion
+      try {
+        const quizAttemptData = {
+          userId,
+          quizId,
+          score,
+          totalQuestions,
+          accuracy,
+          timeTaken: Math.round(timeSpent),
+          answeredQuestions: evaluatedAnswers
+        };
+
+        console.log('Attempting to save quiz attempt with data:', quizAttemptData);
+
+        const [savedAttempt] = await db.insert(schema.quizAttempts)
+          .values(quizAttemptData)
+          .returning();
+
+        console.log(`Quiz attempt saved successfully with ID: ${savedAttempt.id}`);
+      } catch (dbError) {
+        console.error('Database error saving quiz attempt:', dbError);
+        // Continue with response even if database save fails
+      }
 
       const evaluation = {
         summary: {

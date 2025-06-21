@@ -156,7 +156,7 @@ export default function MockTests() {
     }
   }, [selectedTest, mockTests]);
 
-  
+
 
   // Get questions from selected test
   const getCurrentTestQuestions = (): Question[] => {
