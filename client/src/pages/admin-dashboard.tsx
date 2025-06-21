@@ -1209,105 +1209,121 @@ Follow these UPSC formatting guidelines:
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {/* Show sections if they exist */}
+                        {/* Show sections if they exist, with topics listed under each section */}
                         {subjectSections.length > 0 ? (
                           subjectSections.map((section: any) => {
                             const sectionTopics = getSectionTopics(section.id);
                             
                             return (
                               <div key={section.id} className="border rounded-lg p-4 space-y-3">
-                                <h4 className="font-medium text-base">{section.name}</h4>
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-medium text-base text-blue-700">{section.name}</h4>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {sectionTopics.length} topics
+                                  </Badge>
+                                </div>
                                 
+                                {/* Display topics under this section */}
                                 {sectionTopics.length > 0 ? (
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-4">
-                                    {sectionTopics.map((topic: any) => {
-                                      const key = `${subject.name}-${section.name}-${topic.name}`;
-                                      const currentCount = selectedTopics[key]?.questionCount || 0;
-                                      
-                                      return (
-                                        <div key={topic.id} className="border rounded-lg p-3 space-y-2">
-                                          <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                              checked={currentCount > 0}
-                                              onCheckedChange={(checked) => {
-                                                if (!checked) {
-                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
-                                                } else {
-                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 5);
-                                                }
-                                              }}
-                                            />
-                                            <label className="text-sm font-medium">{topic.name}</label>
-                                          </div>
-                                          
-                                          {currentCount > 0 && (
-                                            <div className="space-y-1">
-                                              <label className="text-xs text-muted-foreground">Questions</label>
-                                              <Input
-                                                type="number"
-                                                min="1"
-                                                max="50"
-                                                value={currentCount}
-                                                onChange={(e) => {
-                                                  const count = parseInt(e.target.value) || 0;
-                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, count);
+                                  <div className="ml-4 space-y-2">
+                                    <div className="text-sm text-muted-foreground mb-3">
+                                      Topics in this section:
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {sectionTopics.map((topic: any) => {
+                                        const key = `${subject.name}-${section.name}-${topic.name}`;
+                                        const currentCount = selectedTopics[key]?.questionCount || 0;
+                                        
+                                        return (
+                                          <div key={topic.id} className="border rounded-lg p-3 space-y-2 bg-gray-50">
+                                            <div className="flex items-center space-x-2">
+                                              <Checkbox
+                                                checked={currentCount > 0}
+                                                onCheckedChange={(checked) => {
+                                                  if (!checked) {
+                                                    handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
+                                                  } else {
+                                                    handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 5);
+                                                  }
                                                 }}
-                                                className="h-8 text-sm"
                                               />
+                                              <label className="text-sm font-medium text-gray-700">{topic.name}</label>
                                             </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
+                                            
+                                            {currentCount > 0 && (
+                                              <div className="space-y-1 ml-6">
+                                                <label className="text-xs text-muted-foreground">Questions</label>
+                                                <Input
+                                                  type="number"
+                                                  min="1"
+                                                  max="50"
+                                                  value={currentCount}
+                                                  onChange={(e) => {
+                                                    const count = parseInt(e.target.value) || 0;
+                                                    handleTopicSelection(subject.name, `${section.name}-${topic.name}`, count);
+                                                  }}
+                                                  className="h-8 text-sm"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
                                 ) : (
-                                  <p className="text-sm text-muted-foreground ml-4">No topics available in this section</p>
+                                  <p className="text-sm text-muted-foreground ml-4 italic">No topics available in this section</p>
                                 )}
                               </div>
                             );
                           })
                         ) : (
-                          /* Show direct topics if no sections */
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {subjectTopics.map((topic: any) => {
-                              const key = `${subject.name}-${topic.name}`;
-                              const currentCount = selectedTopics[key]?.questionCount || 0;
-                              
-                              return (
-                                <div key={topic.id} className="border rounded-lg p-4 space-y-3">
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                      checked={currentCount > 0}
-                                      onCheckedChange={(checked) => {
-                                        if (!checked) {
-                                          handleTopicSelection(subject.name, topic.name, 0);
-                                        } else {
-                                          handleTopicSelection(subject.name, topic.name, 5);
-                                        }
-                                      }}
-                                    />
-                                    <label className="text-sm font-medium">{topic.name}</label>
-                                  </div>
-                                  
-                                  {currentCount > 0 && (
-                                    <div className="space-y-2">
-                                      <label className="text-xs text-muted-foreground">Questions</label>
-                                      <Input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={currentCount}
-                                        onChange={(e) => {
-                                          const count = parseInt(e.target.value) || 0;
-                                          handleTopicSelection(subject.name, topic.name, count);
+                          /* Show direct topics only when no sections exist */
+                          <div>
+                            <div className="text-sm text-muted-foreground mb-3">
+                              Direct topics (no sections):
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {subjectTopics.map((topic: any) => {
+                                const key = `${subject.name}-${topic.name}`;
+                                const currentCount = selectedTopics[key]?.questionCount || 0;
+                                
+                                return (
+                                  <div key={topic.id} className="border rounded-lg p-4 space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={currentCount > 0}
+                                        onCheckedChange={(checked) => {
+                                          if (!checked) {
+                                            handleTopicSelection(subject.name, topic.name, 0);
+                                          } else {
+                                            handleTopicSelection(subject.name, topic.name, 5);
+                                          }
                                         }}
-                                        className="h-8 text-sm"
                                       />
+                                      <label className="text-sm font-medium">{topic.name}</label>
                                     </div>
-                                  )}
-                                </div>
-                              );
-                            })}
+                                    
+                                    {currentCount > 0 && (
+                                      <div className="space-y-2">
+                                        <label className="text-xs text-muted-foreground">Questions</label>
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          max="50"
+                                          value={currentCount}
+                                          onChange={(e) => {
+                                            const count = parseInt(e.target.value) || 0;
+                                            handleTopicSelection(subject.name, topic.name, count);
+                                          }}
+                                          className="h-8 text-sm"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
