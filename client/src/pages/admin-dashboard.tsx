@@ -124,40 +124,46 @@ export default function AdminDashboard() {
   const [selectedTopics, setSelectedTopics] = useState<Record<string, {topicId: number, questionCount: number, subject: string}>>({});
   const [totalQuestions, setTotalQuestions] = useState(0);
 
-  // UPSC Subject and Topic structure with recommended distribution
-  const upscSubjects = {
-    "History": {
-      percentage: 15,
-      topics: ["Ancient India", "Medieval India", "Modern India", "Freedom Movement", "Post-Independence India"]
-    },
-    "Art and Culture": {
-      percentage: 5,
-      topics: ["Indian Art Forms", "Literature", "Music and Dance", "Festivals", "Cultural Heritage"]
-    },
-    "Geography": {
-      percentage: 10,
-      topics: ["Physical Geography", "Human Geography", "Indian Geography", "World Geography", "Economic Geography"]
-    },
-    "Indian Polity": {
-      percentage: 15,
-      topics: ["Constitution", "Fundamental Rights", "Governance", "Parliament", "Judiciary", "Federalism"]
-    },
-    "Economics": {
-      percentage: 15,
-      topics: ["Economic Development", "Planning", "Banking", "Public Finance", "International Trade"]
-    },
-    "Environment": {
-      percentage: 10,
-      topics: ["Ecology", "Biodiversity", "Climate Change", "Conservation", "Pollution"]
-    },
-    "Science & Technology": {
-      percentage: 10,
-      topics: ["Space Technology", "Defense Technology", "Biotechnology", "IT & Communication", "Energy"]
-    },
-    "Current Affairs": {
-      percentage: 20,
-      topics: ["National Affairs", "International Affairs", "Economy", "Science & Tech", "Sports", "Awards"]
+  // Fetch all subjects for topic selection
+  const { data: allSubjects = [] } = useQuery({
+    queryKey: ["/api/subjects"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/subjects");
+      return response.json();
     }
+  });
+
+  // Fetch all sections
+  const { data: allSections = [] } = useQuery({
+    queryKey: ["/api/sections"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/sections");
+      return response.json();
+    }
+  });
+
+  // Fetch all topics
+  const { data: allTopics = [] } = useQuery({
+    queryKey: ["/api/topics"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/topics");
+      return response.json();
+    }
+  });
+
+  // Helper function to get sections for a subject
+  const getSubjectSections = (subjectId: number) => {
+    return allSections.filter((section: any) => section.subjectId === subjectId);
+  };
+
+  // Helper function to get topics for a section
+  const getSectionTopics = (sectionId: number) => {
+    return allTopics.filter((topic: any) => topic.section_id === sectionId);
+  };
+
+  // Helper function to get direct topics for a subject (when no sections)
+  const getSubjectTopics = (subjectId: number) => {
+    return allTopics.filter((topic: any) => topic.subject_id === subjectId);
   };
 
   const [mockTestDetails, setMockTestDetails] = useState({
@@ -1181,59 +1187,134 @@ Follow these UPSC formatting guidelines:
 
             {/* Subject Selection */}
             <div className="space-y-6">
-              {Object.entries(upscSubjects).map(([subject, subjectData]) => (
-                <Card key={subject}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{subject}</span>
-                      <Badge variant="outline">{subjectData.percentage}% Recommended</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {subjectData.topics.map((topic) => {
-                        const key = `${subject}-${topic}`;
-                        const currentCount = selectedTopics[key]?.questionCount || 0;
-                        
-                        return (
-                          <div key={topic} className="border rounded-lg p-4 space-y-3">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={currentCount > 0}
-                                onCheckedChange={(checked) => {
-                                  if (!checked) {
-                                    handleTopicSelection(subject, topic, 0);
-                                  } else {
-                                    handleTopicSelection(subject, topic, 5);
-                                  }
-                                }}
-                              />
-                              <label className="text-sm font-medium">{topic}</label>
-                            </div>
+              {allSubjects.map((subject: any) => {
+                const subjectSections = getSubjectSections(subject.id);
+                const subjectTopics = getSubjectTopics(subject.id);
+                const hasContent = subjectSections.length > 0 || subjectTopics.length > 0;
+                
+                if (!hasContent) return null;
+
+                return (
+                  <Card key={subject.id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>{subject.name}</span>
+                        <Badge variant="outline">
+                          {subjectSections.length > 0 ? 
+                            `${subjectSections.length} Sections` : 
+                            `${subjectTopics.length} Topics`
+                          }
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Show sections if they exist */}
+                        {subjectSections.length > 0 ? (
+                          subjectSections.map((section: any) => {
+                            const sectionTopics = getSectionTopics(section.id);
                             
-                            {currentCount > 0 && (
-                              <div className="space-y-2">
-                                <label className="text-xs text-muted-foreground">Questions</label>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  max="50"
-                                  value={currentCount}
-                                  onChange={(e) => {
-                                    const count = parseInt(e.target.value) || 0;
-                                    handleTopicSelection(subject, topic, count);
-                                  }}
-                                  className="h-8 text-sm"
-                                />
+                            return (
+                              <div key={section.id} className="border rounded-lg p-4 space-y-3">
+                                <h4 className="font-medium text-base">{section.name}</h4>
+                                
+                                {sectionTopics.length > 0 ? (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-4">
+                                    {sectionTopics.map((topic: any) => {
+                                      const key = `${subject.name}-${section.name}-${topic.name}`;
+                                      const currentCount = selectedTopics[key]?.questionCount || 0;
+                                      
+                                      return (
+                                        <div key={topic.id} className="border rounded-lg p-3 space-y-2">
+                                          <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                              checked={currentCount > 0}
+                                              onCheckedChange={(checked) => {
+                                                if (!checked) {
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
+                                                } else {
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 5);
+                                                }
+                                              }}
+                                            />
+                                            <label className="text-sm font-medium">{topic.name}</label>
+                                          </div>
+                                          
+                                          {currentCount > 0 && (
+                                            <div className="space-y-1">
+                                              <label className="text-xs text-muted-foreground">Questions</label>
+                                              <Input
+                                                type="number"
+                                                min="1"
+                                                max="50"
+                                                value={currentCount}
+                                                onChange={(e) => {
+                                                  const count = parseInt(e.target.value) || 0;
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, count);
+                                                }}
+                                                className="h-8 text-sm"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground ml-4">No topics available in this section</p>
+                                )}
                               </div>
-                            )}
+                            );
+                          })
+                        ) : (
+                          /* Show direct topics if no sections */
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {subjectTopics.map((topic: any) => {
+                              const key = `${subject.name}-${topic.name}`;
+                              const currentCount = selectedTopics[key]?.questionCount || 0;
+                              
+                              return (
+                                <div key={topic.id} className="border rounded-lg p-4 space-y-3">
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      checked={currentCount > 0}
+                                      onCheckedChange={(checked) => {
+                                        if (!checked) {
+                                          handleTopicSelection(subject.name, topic.name, 0);
+                                        } else {
+                                          handleTopicSelection(subject.name, topic.name, 5);
+                                        }
+                                      }}
+                                    />
+                                    <label className="text-sm font-medium">{topic.name}</label>
+                                  </div>
+                                  
+                                  {currentCount > 0 && (
+                                    <div className="space-y-2">
+                                      <label className="text-xs text-muted-foreground">Questions</label>
+                                      <Input
+                                        type="number"
+                                        min="1"
+                                        max="50"
+                                        value={currentCount}
+                                        onChange={(e) => {
+                                          const count = parseInt(e.target.value) || 0;
+                                          handleTopicSelection(subject.name, topic.name, count);
+                                        }}
+                                        className="h-8 text-sm"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* Selected Topics Summary */}
