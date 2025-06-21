@@ -1212,123 +1212,161 @@ Follow these UPSC formatting guidelines:
                       <div className="space-y-4">
                         {/* Priority 1: Show sections if they exist */}
                         {subjectSections.length > 0 ? (
-                          <div>
-                            <div className="text-sm text-muted-foreground mb-4">
-                              Sections available in {subject.name}:
+                          <div className="space-y-4">
+                            <div className="text-sm text-muted-foreground mb-2">
+                              Select sections and topics from {subject.name}:
                             </div>
                             {subjectSections.map((section: any) => {
                               const sectionTopics = getSectionTopics(section.id);
                               
                               return (
-                                <div key={section.id} className="border rounded-lg p-4 space-y-3 bg-blue-50/30">
-                                  <div className="flex items-center justify-between">
-                                    <h4 className="font-semibold text-base text-blue-800">{section.name}</h4>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {sectionTopics.length} topics
+                                <div key={section.id} className="border rounded-lg p-4 space-y-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+                                  {/* Section Header with Question Count Input */}
+                                  <div className="flex items-center justify-between border-b pb-2">
+                                    <div className="flex items-center space-x-3">
+                                      <Checkbox
+                                        checked={sectionTopics.some((topic: any) => {
+                                          const key = `${subject.name}-${section.name}-${topic.name}`;
+                                          return selectedTopics[key]?.questionCount > 0;
+                                        })}
+                                        onCheckedChange={(checked) => {
+                                          // Select/deselect all topics in this section
+                                          sectionTopics.forEach((topic: any) => {
+                                            const key = `${subject.name}-${section.name}-${topic.name}`;
+                                            if (checked) {
+                                              handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 3);
+                                            } else {
+                                              handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
+                                            }
+                                          });
+                                        }}
+                                      />
+                                      <h4 className="text-lg font-semibold text-blue-900">{section.name}</h4>
+                                    </div>
+                                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                                      {sectionTopics.length} topics available
                                     </Badge>
                                   </div>
                                   
-                                  {/* Show topics under this section */}
-                                  {sectionTopics.length > 0 ? (
-                                    <div className="ml-2 space-y-3">
-                                      <div className="text-sm text-blue-700 font-medium">
-                                        Topics in this section:
-                                      </div>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {sectionTopics.map((topic: any) => {
-                                          const key = `${subject.name}-${section.name}-${topic.name}`;
-                                          const currentCount = selectedTopics[key]?.questionCount || 0;
-                                          
-                                          return (
-                                            <div key={topic.id} className="border rounded-lg p-3 space-y-2 bg-white">
-                                              <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                  checked={currentCount > 0}
-                                                  onCheckedChange={(checked) => {
-                                                    if (!checked) {
-                                                      handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
-                                                    } else {
-                                                      handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 5);
-                                                    }
-                                                  }}
-                                                />
-                                                <label className="text-sm font-medium text-gray-800 cursor-pointer">
-                                                  {topic.name}
-                                                </label>
-                                              </div>
-                                              
-                                              {currentCount > 0 && (
-                                                <div className="space-y-1 ml-6">
-                                                  <label className="text-xs text-muted-foreground">Questions</label>
-                                                  <Input
-                                                    type="number"
-                                                    min="1"
-                                                    max="50"
-                                                    value={currentCount}
-                                                    onChange={(e) => {
-                                                      const count = parseInt(e.target.value) || 0;
-                                                      handleTopicSelection(subject.name, `${section.name}-${topic.name}`, count);
-                                                    }}
-                                                    className="h-8 text-sm"
-                                                  />
-                                                </div>
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
+                                  {/* Topics as badges with individual selection */}
+                                  <div className="space-y-3">
+                                    <div className="text-sm font-medium text-blue-800">
+                                      Topics in this section:
                                     </div>
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground ml-4 italic">
-                                      No topics available in this section
-                                    </p>
-                                  )}
+                                    <div className="flex flex-wrap gap-2">
+                                      {sectionTopics.map((topic: any) => {
+                                        const key = `${subject.name}-${section.name}-${topic.name}`;
+                                        const currentCount = selectedTopics[key]?.questionCount || 0;
+                                        const isSelected = currentCount > 0;
+                                        
+                                        return (
+                                          <div key={topic.id} className="flex items-center space-x-2">
+                                            <Badge 
+                                              variant={isSelected ? "default" : "outline"}
+                                              className={`cursor-pointer transition-all ${
+                                                isSelected 
+                                                  ? "bg-blue-600 text-white shadow-md" 
+                                                  : "bg-white text-gray-700 hover:bg-blue-100 border-blue-200"
+                                              }`}
+                                              onClick={() => {
+                                                if (!isSelected) {
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 5);
+                                                } else {
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, 0);
+                                                }
+                                              }}
+                                            >
+                                              <span className="flex items-center space-x-1">
+                                                <span>{topic.name}</span>
+                                                {isSelected && (
+                                                  <span className="ml-1 text-xs bg-white bg-opacity-20 px-1 rounded">
+                                                    {currentCount}Q
+                                                  </span>
+                                                )}
+                                              </span>
+                                            </Badge>
+                                            
+                                            {isSelected && (
+                                              <Input
+                                                type="number"
+                                                min="1"
+                                                max="20"
+                                                value={currentCount}
+                                                onChange={(e) => {
+                                                  const count = parseInt(e.target.value) || 0;
+                                                  handleTopicSelection(subject.name, `${section.name}-${topic.name}`, count);
+                                                }}
+                                                className="w-16 h-6 text-xs border-blue-300 focus:border-blue-500"
+                                                placeholder="Q"
+                                              />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                    
+                                    {sectionTopics.length === 0 && (
+                                      <p className="text-sm text-muted-foreground italic">
+                                        No topics available in this section
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
                               );
                             })}
                           </div>
                         ) : (
                           /* Priority 2: Show direct topics only when NO sections exist */
-                          <div>
+                          <div className="space-y-3">
                             <div className="text-sm text-muted-foreground mb-3">
                               Direct topics (no sections defined):
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="flex flex-wrap gap-2">
                               {subjectTopics.map((topic: any) => {
                                 const key = `${subject.name}-${topic.name}`;
                                 const currentCount = selectedTopics[key]?.questionCount || 0;
+                                const isSelected = currentCount > 0;
                                 
                                 return (
-                                  <div key={topic.id} className="border rounded-lg p-4 space-y-3 bg-gray-50">
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={currentCount > 0}
-                                        onCheckedChange={(checked) => {
-                                          if (!checked) {
-                                            handleTopicSelection(subject.name, topic.name, 0);
-                                          } else {
-                                            handleTopicSelection(subject.name, topic.name, 5);
-                                          }
-                                        }}
-                                      />
-                                      <label className="text-sm font-medium cursor-pointer">{topic.name}</label>
-                                    </div>
+                                  <div key={topic.id} className="flex items-center space-x-2">
+                                    <Badge 
+                                      variant={isSelected ? "default" : "outline"}
+                                      className={`cursor-pointer transition-all ${
+                                        isSelected 
+                                          ? "bg-green-600 text-white shadow-md" 
+                                          : "bg-white text-gray-700 hover:bg-green-100 border-green-200"
+                                      }`}
+                                      onClick={() => {
+                                        if (!isSelected) {
+                                          handleTopicSelection(subject.name, topic.name, 5);
+                                        } else {
+                                          handleTopicSelection(subject.name, topic.name, 0);
+                                        }
+                                      }}
+                                    >
+                                      <span className="flex items-center space-x-1">
+                                        <span>{topic.name}</span>
+                                        {isSelected && (
+                                          <span className="ml-1 text-xs bg-white bg-opacity-20 px-1 rounded">
+                                            {currentCount}Q
+                                          </span>
+                                        )}
+                                      </span>
+                                    </Badge>
                                     
-                                    {currentCount > 0 && (
-                                      <div className="space-y-2">
-                                        <label className="text-xs text-muted-foreground">Questions</label>
-                                        <Input
-                                          type="number"
-                                          min="1"
-                                          max="50"
-                                          value={currentCount}
-                                          onChange={(e) => {
-                                            const count = parseInt(e.target.value) || 0;
-                                            handleTopicSelection(subject.name, topic.name, count);
-                                          }}
-                                          className="h-8 text-sm"
-                                        />
-                                      </div>
+                                    {isSelected && (
+                                      <Input
+                                        type="number"
+                                        min="1"
+                                        max="20"
+                                        value={currentCount}
+                                        onChange={(e) => {
+                                          const count = parseInt(e.target.value) || 0;
+                                          handleTopicSelection(subject.name, topic.name, count);
+                                        }}
+                                        className="w-16 h-6 text-xs border-green-300 focus:border-green-500"
+                                        placeholder="Q"
+                                      />
                                     )}
                                   </div>
                                 );
