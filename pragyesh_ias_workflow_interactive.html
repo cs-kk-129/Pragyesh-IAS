@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pragyesh IAS - Interactive Workflow Diagram</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .workflow-container {
+            padding: 30px;
+        }
+        .workflow-section {
+            margin-bottom: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: bold;
+            font-size: 1.3em;
+            cursor: pointer;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .section-header:hover {
+            background: #f1f5f9;
+        }
+        .section-content {
+            padding: 20px;
+            display: block;
+            transition: all 0.3s;
+        }
+        .section-content.collapsed {
+            display: none;
+        }
+        .flow-box {
+            display: inline-block;
+            padding: 15px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .flow-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .admin-box {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+        }
+        .student-box {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+        }
+        .ai-box {
+            background: #f3e8ff;
+            border: 2px solid #8b5cf6;
+            color: #6b21a8;
+        }
+        .db-box {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            color: #047857;
+        }
+        .process-box {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #dc2626;
+        }
+        .flow-arrow {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 1.5em;
+            color: #6b7280;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            background: #f1f5f9;
+            border-color: #3b82f6;
+        }
+        .feature-card h4 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 5px 0;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .tech-item {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #374151;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: #6b7280;
+            cursor: pointer;
+        }
+        .legend {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .legend h3 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+        }
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .download-section {
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+        @media (max-width: 768px) {
+            .flow-box {
+                display: block;
+                margin: 10px 0;
+            }
+            .flow-arrow {
+                display: block;
+                text-align: center;
+                transform: rotate(90deg);
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pragyesh IAS Workflow</h1>
+            <p>Complete System Architecture & Process Flow</p>
+        </div>
+        
+        <div class="workflow-container">
+            <!-- Authentication Section -->
+            <div class="workflow-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>🔐 Authentication & Authorization Layer</span>
+                    <button class="toggle-btn">▼</button>
+                </div>
+                <div class="section-content">
+                    <div class="flow-box student-box">User Login</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box db-box">Session Management</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box process-box">Role-Based Access</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box admin-box">Admin Dashboard</div>
+                    <div class="flow-box student-box">Student Dashboard</div>
+                </div>
+            </div>
+
+            <!-- Admin Workflow -->
+            <div class="workflow-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>👨‍💼 Admin Workflow - Content Management</span>
+                    <button class="toggle-btn">▼</button>
+                </div>
+                <div class="section-content">
+                    <div style="margin-bottom: 20px;">
+                        <div class="flow-box ai-box">AI Question Generation<br><small>(OpenAI GPT-4)</small></div>
+                        <div class="flow-box admin-box">Manual Question Input<br><small>(File Upload/Forms)</small></div>
+                        <div class="flow-box process-box">File Processing<br><small>(TXT, DOCX, PDF, CSV, JSON)</small></div>
+                    </div>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <span class="flow-arrow">↓</span>
+                    </div>
+                    <div class="flow-box db-box">Question Database<br><small>• UUID Primary Keys<br>• Subject Mapping<br>• Bilingual Support</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box admin-box">Mock Test Creation<br><small>• Test Configuration<br>• Question Selection<br>• Scheduling</small></div>
+                    
+                    <div class="feature-grid" style="margin-top: 30px;">
+                        <div class="feature-card">
+                            <h4>Content Management</h4>
+                            <ul class="feature-list">
+                                <li>AI-powered question generation</li>
+                                <li>Multi-format file upload</li>
+                                <li>UPSC curriculum coverage</li>
+                                <li>Bilingual support (EN/HI)</li>
+                                <li>Subject/topic organization</li>
+                            </ul>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Administrative Functions</h4>
+                            <ul class="feature-list">
+                                <li>User management interface</li>
+                                <li>Analytics dashboard</li>
+                                <li>Content moderation tools</li>
+                                <li>Test scheduling system</li>
+                                <li>Performance monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Workflow -->
+            <div class="workflow-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>🎓 Student Workflow - Learning Experience</span>
+                    <button class="toggle-btn">▼</button>
+                </div>
+                <div class="section-content">
+                    <div style="margin-bottom: 20px;">
+                        <div class="flow-box ai-box">AI Study Plan Generation<br><small>(Personalized)</small></div>
+                        <div class="flow-box student-box">Subject Browsing<br><small>• Hierarchical View<br>• Progress Tracking</small></div>
+                        <div class="flow-box student-box">Practice Quizzes<br><small>• Topic-wise<br>• Difficulty Levels</small></div>
+                    </div>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <span class="flow-arrow">↓</span>
+                    </div>
+                    <div class="flow-box student-box">Mock Tests<br><small>• Timed Tests<br>• Real Exam Format<br>• Date Restrictions</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box process-box">Test Taking Interface<br><small>• Timer Management<br>• Answer Recording</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box ai-box">AI Doubt Solving<br><small>• Chat Interface<br>• Context-Aware<br>• Instant Response</small></div>
+                    
+                    <div class="feature-grid" style="margin-top: 30px;">
+                        <div class="feature-card">
+                            <h4>Learning Features</h4>
+                            <ul class="feature-list">
+                                <li>Personalized study plans</li>
+                                <li>Progress tracking</li>
+                                <li>AI doubt solving</li>
+                                <li>Study streak monitoring</li>
+                                <li>Bookmark management</li>
+                            </ul>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Assessment System</h4>
+                            <ul class="feature-list">
+                                <li>Timed mock tests</li>
+                                <li>Real exam simulation</li>
+                                <li>Intelligent evaluation</li>
+                                <li>Performance analytics</li>
+                                <li>PDF report generation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluation System -->
+            <div class="workflow-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>📊 Evaluation & Assessment System</span>
+                    <button class="toggle-btn">▼</button>
+                </div>
+                <div class="section-content">
+                    <div class="flow-box process-box">Test Submission<br><small>• Answer Recording<br>• Time Tracking</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box ai-box">AI Evaluation<br><small>• Answer Analysis<br>• Performance Metrics</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box process-box">Python Backend<br><small>• FastAPI Service<br>• PDF Generation</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box ai-box">AI Recommendations<br><small>• Personalized Tips<br>• Study Guidance</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box db-box">Report Generation<br><small>• Detailed PDF<br>• Performance Insights</small></div>
+                    
+                    <div class="feature-grid" style="margin-top: 30px;">
+                        <div class="feature-card">
+                            <h4>Detailed Analytics</h4>
+                            <ul class="feature-list">
+                                <li>Subject-wise Performance</li>
+                                <li>Topic-wise Analysis</li>
+                                <li>Time Management Score</li>
+                                <li>Strength/Weakness Identification</li>
+                                <li>Comparative Performance</li>
+                            </ul>
+                        </div>
+                        <div class="feature-card">
+                            <h4>AI Recommendations</h4>
+                            <ul class="feature-list">
+                                <li>Weak Topic Focus</li>
+                                <li>Time Management Tips</li>
+                                <li>Practice Suggestions</li>
+                                <li>Revision Schedule</li>
+                                <li>Next Steps Planning</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="workflow-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>⚙️ Technology Stack & Architecture</span>
+                    <button class="toggle-btn">▼</button>
+                </div>
+                <div class="section-content">
+                    <div class="tech-stack">
+                        <div class="tech-item">React 18 + TypeScript</div>
+                        <div class="tech-item">Node.js + Express</div>
+                        <div class="tech-item">PostgreSQL + Drizzle ORM</div>
+                        <div class="tech-item">OpenAI GPT-4</div>
+                        <div class="tech-item">FastAPI + Python</div>
+                        <div class="tech-item">Shadcn/UI + Tailwind CSS</div>
+                        <div class="tech-item">Passport.js Authentication</div>
+                        <div class="tech-item">Vite Build Tool</div>
+                        <div class="tech-item">TanStack React Query</div>
+                        <div class="tech-item">ReportLab PDF Generation</div>
+                    </div>
+                    
+                    <div class="feature-grid" style="margin-top: 30px;">
+                        <div class="feature-card">
+                            <h4>Database Schema</h4>
+                            <ul class="feature-list">
+                                <li>Users (Students/Admins)</li>
+                                <li>Subjects/Topics/Subtopics</li>
+                                <li>Questions (UUID-based)</li>
+                                <li>Quizzes/Mock Tests</li>
+                                <li>Attempts & Results</li>
+                            </ul>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Integration Features</h4>
+                            <ul class="feature-list">
+                                <li>OpenAI GPT-4 Integration</li>
+                                <li>Bilingual Support (EN/HI)</li>
+                                <li>Real-time Analytics</li>
+                                <li>Session Management</li>
+                                <li>Responsive Design</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <h3>Legend</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-box admin-box"></div>
+                        <span>Admin Functions</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box student-box"></div>
+                        <span>Student Functions</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box ai-box"></div>
+                        <span>AI/ML Services</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box db-box"></div>
+                        <span>Database/Storage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box process-box"></div>
+                        <span>Processing/Logic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h3>Download Documentation</h3>
+            <p>Save this interactive workflow diagram and detailed documentation for offline reference</p>
+            <button class="download-btn" onclick="downloadMarkdown()">📄 Download Markdown</button>
+            <button class="download-btn" onclick="downloadHTML()">🌐 Download HTML</button>
+            <button class="download-btn" onclick="downloadSVG()">🎨 Download SVG</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggleBtn = header.querySelector('.toggle-btn');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggleBtn.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                toggleBtn.textContent = '▶';
+            }
+        }
+
+        function downloadMarkdown() {
+            fetch('/workflow_documentation.md')
+                .then(response => response.text())
+                .then(data => {
+                    const blob = new Blob([data], { type: 'text/markdown' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'pragyesh_ias_workflow_documentation.md';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(() => {
+                    // Fallback if file fetch fails
+                    const markdownContent = \`# Pragyesh IAS Workflow Documentation
+
+## Complete System Architecture & Process Flow
+
+This document provides a comprehensive overview of the Pragyesh IAS UPSC preparation platform workflow.
+
+### Key Components:
+1. Authentication & Authorization Layer
+2. Admin Workflow - Content Management  
+3. Student Workflow - Learning Experience
+4. Evaluation & Assessment System
+5. Technology Stack & Architecture
+
+For detailed information, please refer to the interactive HTML version of this document.\`;
+                    
+                    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'pragyesh_ias_workflow_documentation.md';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                });
+        }
+
+        function downloadHTML() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pragyesh_ias_workflow_interactive.html';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        function downloadSVG() {
+            fetch('/pragyesh_ias_workflow.svg')
+                .then(response => response.text())
+                .then(data => {
+                    const blob = new Blob([data], { type: 'image/svg+xml' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'pragyesh_ias_workflow.svg';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(() => {
+                    alert('SVG file not available. Please use the HTML or Markdown versions.');
+                });
+        }
+
+        // Initialize with all sections expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to flow boxes for interactivity
+            document.querySelectorAll('.flow-box').forEach(box => {
+                box.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

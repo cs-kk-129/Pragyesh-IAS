@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="1800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #2563eb; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #1e40af; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; fill: #374151; }
+      .small-text { font-family: Arial, sans-serif; font-size: 10px; fill: #6b7280; }
+      .admin-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; }
+      .student-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; }
+      .ai-box { fill: #f3e8ff; stroke: #8b5cf6; stroke-width: 2; }
+      .db-box { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; }
+      .process-box { fill: #fef2f2; stroke: #ef4444; stroke-width: 2; }
+      .arrow { fill: none; stroke: #374151; stroke-width: 2; marker-end: url(#arrowhead); }
+      .bi-arrow { fill: none; stroke: #374151; stroke-width: 2; marker-start: url(#arrowhead); marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="700" y="30" class="title" text-anchor="middle">Pragyesh IAS - UPSC Preparation Platform Workflow</text>
+  <text x="700" y="55" class="subtitle" text-anchor="middle">Complete System Architecture &amp; Process Flow</text>
+  
+  <!-- Authentication Layer -->
+  <rect x="50" y="80" width="1300" height="80" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2" rx="5"/>
+  <text x="700" y="105" class="subtitle" text-anchor="middle">Authentication &amp; Authorization Layer</text>
+  
+  <!-- User Login -->
+  <rect x="100" y="115" width="120" height="40" class="student-box" rx="5"/>
+  <text x="160" y="138" class="text" text-anchor="middle">User Login</text>
+  
+  <!-- Session Management -->
+  <rect x="250" y="115" width="140" height="40" class="db-box" rx="5"/>
+  <text x="320" y="138" class="text" text-anchor="middle">Session Management</text>
+  
+  <!-- Role Based Access -->
+  <rect x="420" y="115" width="160" height="40" class="process-box" rx="5"/>
+  <text x="500" y="138" class="text" text-anchor="middle">Role-Based Access</text>
+  
+  <!-- Admin Dashboard -->
+  <rect x="610" y="115" width="140" height="40" class="admin-box" rx="5"/>
+  <text x="680" y="138" class="text" text-anchor="middle">Admin Dashboard</text>
+  
+  <!-- Student Dashboard -->
+  <rect x="780" y="115" width="140" height="40" class="student-box" rx="5"/>
+  <text x="850" y="138" class="text" text-anchor="middle">Student Dashboard</text>
+  
+  <!-- Authentication Arrows -->
+  <line x1="220" y1="135" x2="250" y2="135" class="arrow"/>
+  <line x1="390" y1="135" x2="420" y2="135" class="arrow"/>
+  <line x1="580" y1="135" x2="610" y2="135" class="arrow"/>
+  <line x1="750" y1="135" x2="780" y2="135" class="arrow"/>
+  
+  <!-- Admin Workflow Section -->
+  <rect x="50" y="200" width="650" height="420" fill="#fffbeb" stroke="#f59e0b" stroke-width="3" rx="10"/>
+  <text x="375" y="225" class="subtitle" text-anchor="middle">Admin Workflow - Content Management</text>
+  
+  <!-- AI Question Generation -->
+  <rect x="80" y="250" width="140" height="60" class="ai-box" rx="5"/>
+  <text x="150" y="270" class="text" text-anchor="middle">AI Question</text>
+  <text x="150" y="285" class="text" text-anchor="middle">Generation</text>
+  <text x="150" y="300" class="text" text-anchor="middle">(OpenAI GPT-4)</text>
+  
+  <!-- Manual Question Input -->
+  <rect x="80" y="330" width="140" height="60" class="admin-box" rx="5"/>
+  <text x="150" y="350" class="text" text-anchor="middle">Manual Question</text>
+  <text x="150" y="365" class="text" text-anchor="middle">Input</text>
+  <text x="150" y="380" class="text" text-anchor="middle">(File Upload/Form)</text>
+  
+  <!-- File Processing -->
+  <rect x="80" y="410" width="140" height="60" class="process-box" rx="5"/>
+  <text x="150" y="430" class="text" text-anchor="middle">File Processing</text>
+  <text x="150" y="445" class="text" text-anchor="middle">(TXT, DOCX, PDF,</text>
+  <text x="150" y="460" class="text" text-anchor="middle">CSV, JSON)</text>
+  
+  <!-- Question Database -->
+  <rect x="280" y="320" width="140" height="80" class="db-box" rx="5"/>
+  <text x="350" y="345" class="text" text-anchor="middle">Question Database</text>
+  <text x="350" y="360" class="text" text-anchor="middle">• UUID Primary Keys</text>
+  <text x="350" y="375" class="text" text-anchor="middle">• Subject Mapping</text>
+  <text x="350" y="390" class="text" text-anchor="middle">• Bilingual Support</text>
+  
+  <!-- Mock Test Creation -->
+  <rect x="480" y="280" width="140" height="80" class="admin-box" rx="5"/>
+  <text x="550" y="305" class="text" text-anchor="middle">Mock Test Creation</text>
+  <text x="550" y="320" class="text" text-anchor="middle">• Test Configuration</text>
+  <text x="550" y="335" class="text" text-anchor="middle">• Question Selection</text>
+  <text x="550" y="350" class="text" text-anchor="middle">• Scheduling</text>
+  
+  <!-- Subject/Topic Management -->
+  <rect x="480" y="380" width="140" height="60" class="admin-box" rx="5"/>
+  <text x="550" y="400" class="text" text-anchor="middle">Subject/Topic</text>
+  <text x="550" y="415" class="text" text-anchor="middle">Management</text>
+  <text x="550" y="430" class="text" text-anchor="middle">(UPSC Curriculum)</text>
+  
+  <!-- User Management -->
+  <rect x="480" y="460" width="140" height="60" class="admin-box" rx="5"/>
+  <text x="550" y="480" class="text" text-anchor="middle">User Management</text>
+  <text x="550" y="495" class="text" text-anchor="middle">• Account Types</text>
+  <text x="550" y="510" class="text" text-anchor="middle">• Progress Analytics</text>
+  
+  <!-- Analytics Dashboard -->
+  <rect x="480" y="540" width="140" height="60" class="admin-box" rx="5"/>
+  <text x="550" y="560" class="text" text-anchor="middle">Analytics Dashboard</text>
+  <text x="550" y="575" class="text" text-anchor="middle">• Test Performance</text>
+  <text x="550" y="590" class="text" text-anchor="middle">• User Statistics</text>
+  
+  <!-- Admin Workflow Arrows -->
+  <line x1="220" y1="280" x2="280" y2="350" class="arrow"/>
+  <line x1="220" y1="360" x2="280" y2="360" class="arrow"/>
+  <line x1="220" y1="440" x2="280" y2="370" class="arrow"/>
+  <line x1="420" y1="360" x2="480" y2="320" class="arrow"/>
+  <line x1="550" y1="360" x2="550" y2="380" class="arrow"/>
+  <line x1="550" y1="440" x2="550" y2="460" class="arrow"/>
+  <line x1="550" y1="520" x2="550" y2="540" class="arrow"/>
+  
+  <!-- Student Workflow Section -->
+  <rect x="720" y="200" width="630" height="700" fill="#eff6ff" stroke="#3b82f6" stroke-width="3" rx="10"/>
+  <text x="1035" y="225" class="subtitle" text-anchor="middle">Student Workflow - Learning Experience</text>
+  
+  <!-- Study Plan Generation -->
+  <rect x="750" y="250" width="140" height="60" class="ai-box" rx="5"/>
+  <text x="820" y="270" class="text" text-anchor="middle">AI Study Plan</text>
+  <text x="820" y="285" class="text" text-anchor="middle">Generation</text>
+  <text x="820" y="300" class="text" text-anchor="middle">(Personalized)</text>
+  
+  <!-- Subject Browsing -->
+  <rect x="920" y="250" width="140" height="60" class="student-box" rx="5"/>
+  <text x="990" y="270" class="text" text-anchor="middle">Subject Browsing</text>
+  <text x="990" y="285" class="text" text-anchor="middle">• Hierarchical View</text>
+  <text x="990" y="300" class="text" text-anchor="middle">• Progress Tracking</text>
+  
+  <!-- Practice Quizzes -->
+  <rect x="1090" y="250" width="140" height="60" class="student-box" rx="5"/>
+  <text x="1160" y="270" class="text" text-anchor="middle">Practice Quizzes</text>
+  <text x="1160" y="285" class="text" text-anchor="middle">• Topic-wise</text>
+  <text x="1160" y="300" class="text" text-anchor="middle">• Difficulty Levels</text>
+  
+  <!-- Mock Tests -->
+  <rect x="750" y="340" width="140" height="80" class="student-box" rx="5"/>
+  <text x="820" y="365" class="text" text-anchor="middle">Mock Tests</text>
+  <text x="820" y="380" class="text" text-anchor="middle">• Timed Tests</text>
+  <text x="820" y="395" class="text" text-anchor="middle">• Real Exam Format</text>
+  <text x="820" y="410" class="text" text-anchor="middle">• Date Restrictions</text>
+  
+  <!-- Test Taking Interface -->
+  <rect x="920" y="340" width="140" height="80" class="process-box" rx="5"/>
+  <text x="990" y="365" class="text" text-anchor="middle">Test Taking</text>
+  <text x="990" y="380" class="text" text-anchor="middle">Interface</text>
+  <text x="990" y="395" class="text" text-anchor="middle">• Timer Management</text>
+  <text x="990" y="410" class="text" text-anchor="middle">• Answer Recording</text>
+  
+  <!-- AI Doubt Solving -->
+  <rect x="1090" y="340" width="140" height="80" class="ai-box" rx="5"/>
+  <text x="1160" y="365" class="text" text-anchor="middle">AI Doubt Solving</text>
+  <text x="1160" y="380" class="text" text-anchor="middle">• Chat Interface</text>
+  <text x="1160" y="395" class="text" text-anchor="middle">• Context-Aware</text>
+  <text x="1160" y="410" class="text" text-anchor="middle">• Instant Response</text>
+  
+  <!-- Progress Tracking -->
+  <rect x="750" y="450" width="140" height="80" class="db-box" rx="5"/>
+  <text x="820" y="475" class="text" text-anchor="middle">Progress Tracking</text>
+  <text x="820" y="490" class="text" text-anchor="middle">• Study Streaks</text>
+  <text x="820" y="505" class="text" text-anchor="middle">• Subject Progress</text>
+  <text x="820" y="520" class="text" text-anchor="middle">• Weak Areas</text>
+  
+  <!-- Bookmarks -->
+  <rect x="920" y="450" width="140" height="80" class="student-box" rx="5"/>
+  <text x="990" y="475" class="text" text-anchor="middle">Bookmarks</text>
+  <text x="990" y="490" class="text" text-anchor="middle">• Save Questions</text>
+  <text x="990" y="505" class="text" text-anchor="middle">• Review Later</text>
+  <text x="990" y="520" class="text" text-anchor="middle">• Quick Access</text>
+  
+  <!-- Performance Analytics -->
+  <rect x="1090" y="450" width="140" height="80" class="process-box" rx="5"/>
+  <text x="1160" y="475" class="text" text-anchor="middle">Performance</text>
+  <text x="1160" y="490" class="text" text-anchor="middle">Analytics</text>
+  <text x="1160" y="505" class="text" text-anchor="middle">• Score Trends</text>
+  <text x="1160" y="520" class="text" text-anchor="middle">• Time Analysis</text>
+  
+  <!-- Student Workflow Arrows -->
+  <line x1="820" y1="310" x2="820" y2="340" class="arrow"/>
+  <line x1="890" y1="380" x2="920" y2="380" class="arrow"/>
+  <line x1="1060" y1="380" x2="1090" y2="380" class="arrow"/>
+  <line x1="820" y1="420" x2="820" y2="450" class="arrow"/>
+  <line x1="890" y1="490" x2="920" y2="490" class="arrow"/>
+  <line x1="1060" y1="490" x2="1090" y2="490" class="arrow"/>
+  
+  <!-- Cross-workflow connections -->
+  <line x1="620" y1="320" x2="750" y2="380" class="bi-arrow"/>
+  
+  <!-- Evaluation & Assessment Section -->
+  <rect x="50" y="940" width="1300" height="300" fill="#f0fdf4" stroke="#10b981" stroke-width="3" rx="10"/>
+  <text x="700" y="965" class="subtitle" text-anchor="middle">Evaluation &amp; Assessment System</text>
+  
+  <!-- Test Submission -->
+  <rect x="100" y="990" width="140" height="60" class="process-box" rx="5"/>
+  <text x="170" y="1010" class="text" text-anchor="middle">Test Submission</text>
+  <text x="170" y="1025" class="text" text-anchor="middle">• Answer Recording</text>
+  <text x="170" y="1040" class="text" text-anchor="middle">• Time Tracking</text>
+  
+  <!-- AI Evaluation -->
+  <rect x="280" y="990" width="140" height="60" class="ai-box" rx="5"/>
+  <text x="350" y="1010" class="text" text-anchor="middle">AI Evaluation</text>
+  <text x="350" y="1025" class="text" text-anchor="middle">• Answer Analysis</text>
+  <text x="350" y="1040" class="text" text-anchor="middle">• Performance Metrics</text>
+  
+  <!-- Python Backend -->
+  <rect x="460" y="990" width="140" height="60" class="process-box" rx="5"/>
+  <text x="530" y="1010" class="text" text-anchor="middle">Python Backend</text>
+  <text x="530" y="1025" class="text" text-anchor="middle">• FastAPI Service</text>
+  <text x="530" y="1040" class="text" text-anchor="middle">• PDF Generation</text>
+  
+  <!-- Recommendations -->
+  <rect x="640" y="990" width="140" height="60" class="ai-box" rx="5"/>
+  <text x="710" y="1010" class="text" text-anchor="middle">AI Recommendations</text>
+  <text x="710" y="1025" class="text" text-anchor="middle">• Personalized Tips</text>
+  <text x="710" y="1040" class="text" text-anchor="middle">• Study Guidance</text>
+  
+  <!-- Report Generation -->
+  <rect x="820" y="990" width="140" height="60" class="db-box" rx="5"/>
+  <text x="890" y="1010" class="text" text-anchor="middle">Report Generation</text>
+  <text x="890" y="1025" class="text" text-anchor="middle">• Detailed PDF</text>
+  <text x="890" y="1040" class="text" text-anchor="middle">• Performance Insights</text>
+  
+  <!-- Database Storage -->
+  <rect x="1000" y="990" width="140" height="60" class="db-box" rx="5"/>
+  <text x="1070" y="1010" class="text" text-anchor="middle">Result Storage</text>
+  <text x="1070" y="1025" class="text" text-anchor="middle">• Evaluation Data</text>
+  <text x="1070" y="1040" class="text" text-anchor="middle">• Historical Records</text>
+  
+  <!-- Evaluation Arrows -->
+  <line x1="240" y1="1020" x2="280" y2="1020" class="arrow"/>
+  <line x1="420" y1="1020" x2="460" y2="1020" class="arrow"/>
+  <line x1="600" y1="1020" x2="640" y2="1020" class="arrow"/>
+  <line x1="780" y1="1020" x2="820" y2="1020" class="arrow"/>
+  <line x1="960" y1="1020" x2="1000" y2="1020" class="arrow"/>
+  
+  <!-- Detailed Analytics -->
+  <rect x="100" y="1080" width="200" height="120" class="process-box" rx="5"/>
+  <text x="200" y="1105" class="text" text-anchor="middle">Detailed Analytics</text>
+  <text x="200" y="1125" class="small-text" text-anchor="middle">• Subject-wise Performance</text>
+  <text x="200" y="1140" class="small-text" text-anchor="middle">• Topic-wise Analysis</text>
+  <text x="200" y="1155" class="small-text" text-anchor="middle">• Time Management Score</text>
+  <text x="200" y="1170" class="small-text" text-anchor="middle">• Strength/Weakness Identification</text>
+  <text x="200" y="1185" class="small-text" text-anchor="middle">• Comparative Performance</text>
+  
+  <!-- Study Recommendations -->
+  <rect x="320" y="1080" width="200" height="120" class="ai-box" rx="5"/>
+  <text x="420" y="1105" class="text" text-anchor="middle">Study Recommendations</text>
+  <text x="420" y="1125" class="small-text" text-anchor="middle">• Weak Topic Focus</text>
+  <text x="420" y="1140" class="small-text" text-anchor="middle">• Time Management Tips</text>
+  <text x="420" y="1155" class="small-text" text-anchor="middle">• Practice Suggestions</text>
+  <text x="420" y="1170" class="small-text" text-anchor="middle">• Revision Schedule</text>
+  <text x="420" y="1185" class="small-text" text-anchor="middle">• Next Steps Planning</text>
+  
+  <!-- PDF Report Features -->
+  <rect x="540" y="1080" width="200" height="120" class="db-box" rx="5"/>
+  <text x="640" y="1105" class="text" text-anchor="middle">PDF Report Features</text>
+  <text x="640" y="1125" class="small-text" text-anchor="middle">• Comprehensive Score Analysis</text>
+  <text x="640" y="1140" class="small-text" text-anchor="middle">• Visual Performance Charts</text>
+  <text x="640" y="1155" class="small-text" text-anchor="middle">• Question-wise Breakdown</text>
+  <text x="640" y="1170" class="small-text" text-anchor="middle">• Time Pattern Analysis</text>
+  <text x="640" y="1185" class="small-text" text-anchor="middle">• Downloadable Format</text>
+  
+  <!-- Database Schema -->
+  <rect x="760" y="1080" width="200" height="120" class="db-box" rx="5"/>
+  <text x="860" y="1105" class="text" text-anchor="middle">Database Schema</text>
+  <text x="860" y="1125" class="small-text" text-anchor="middle">• Users (Students/Admins)</text>
+  <text x="860" y="1140" class="small-text" text-anchor="middle">• Subjects/Topics/Subtopics</text>
+  <text x="860" y="1155" class="small-text" text-anchor="middle">• Questions (UUID-based)</text>
+  <text x="860" y="1170" class="small-text" text-anchor="middle">• Quizzes/Mock Tests</text>
+  <text x="860" y="1185" class="small-text" text-anchor="middle">• Attempts & Results</text>
+  
+  <!-- Integration Features -->
+  <rect x="980" y="1080" width="200" height="120" class="ai-box" rx="5"/>
+  <text x="1080" y="1105" class="text" text-anchor="middle">Integration Features</text>
+  <text x="1080" y="1125" class="small-text" text-anchor="middle">• OpenAI GPT-4 Integration</text>
+  <text x="1080" y="1140" class="small-text" text-anchor="middle">• Bilingual Support (EN/HI)</text>
+  <text x="1080" y="1155" class="small-text" text-anchor="middle">• Real-time Analytics</text>
+  <text x="1080" y="1170" class="small-text" text-anchor="middle">• Session Management</text>
+  <text x="1080" y="1185" class="small-text" text-anchor="middle">• Responsive Design</text>
+  
+  <!-- Technology Stack -->
+  <rect x="50" y="1280" width="1300" height="120" fill="#faf5ff" stroke="#8b5cf6" stroke-width="3" rx="10"/>
+  <text x="700" y="1305" class="subtitle" text-anchor="middle">Technology Stack &amp; Architecture</text>
+  
+  <!-- Frontend -->
+  <rect x="100" y="1330" width="200" height="60" class="student-box" rx="5"/>
+  <text x="200" y="1350" class="text" text-anchor="middle">Frontend</text>
+  <text x="200" y="1365" class="small-text" text-anchor="middle">React 18 + TypeScript + Vite</text>
+  <text x="200" y="1380" class="small-text" text-anchor="middle">Shadcn/UI + Tailwind CSS</text>
+  
+  <!-- Backend -->
+  <rect x="320" y="1330" width="200" height="60" class="process-box" rx="5"/>
+  <text x="420" y="1350" class="text" text-anchor="middle">Backend</text>
+  <text x="420" y="1365" class="small-text" text-anchor="middle">Node.js + Express + TypeScript</text>
+  <text x="420" y="1380" class="small-text" text-anchor="middle">Passport.js Authentication</text>
+  
+  <!-- Database -->
+  <rect x="540" y="1330" width="200" height="60" class="db-box" rx="5"/>
+  <text x="640" y="1350" class="text" text-anchor="middle">Database</text>
+  <text x="640" y="1365" class="small-text" text-anchor="middle">PostgreSQL + Drizzle ORM</text>
+  <text x="640" y="1380" class="small-text" text-anchor="middle">UUID-based Questions</text>
+  
+  <!-- AI Services -->
+  <rect x="760" y="1330" width="200" height="60" class="ai-box" rx="5"/>
+  <text x="860" y="1350" class="text" text-anchor="middle">AI Services</text>
+  <text x="860" y="1365" class="small-text" text-anchor="middle">OpenAI GPT-4 + FastAPI</text>
+  <text x="860" y="1380" class="small-text" text-anchor="middle">Python PDF Generation</text>
+  
+  <!-- Deployment -->
+  <rect x="980" y="1330" width="200" height="60" class="process-box" rx="5"/>
+  <text x="1080" y="1350" class="text" text-anchor="middle">Deployment</text>
+  <text x="1080" y="1365" class="small-text" text-anchor="middle">Replit Platform</text>
+  <text x="1080" y="1380" class="small-text" text-anchor="middle">Multi-language Support</text>
+  
+  <!-- Technology Stack Arrows -->
+  <line x1="300" y1="1360" x2="320" y2="1360" class="arrow"/>
+  <line x1="520" y1="1360" x2="540" y2="1360" class="arrow"/>
+  <line x1="740" y1="1360" x2="760" y2="1360" class="arrow"/>
+  <line x1="960" y1="1360" x2="980" y2="1360" class="arrow"/>
+  
+  <!-- Key Features Summary -->
+  <rect x="50" y="1430" width="1300" height="150" fill="#f1f5f9" stroke="#64748b" stroke-width="2" rx="10"/>
+  <text x="700" y="1455" class="subtitle" text-anchor="middle">Key Features &amp; Capabilities</text>
+  
+  <!-- Feature columns -->
+  <text x="150" y="1485" class="text">Content Management:</text>
+  <text x="150" y="1505" class="small-text">• AI-powered question generation</text>
+  <text x="150" y="1520" class="small-text">• Multi-format file upload</text>
+  <text x="150" y="1535" class="small-text">• UPSC curriculum coverage</text>
+  <text x="150" y="1550" class="small-text">• Bilingual support (EN/HI)</text>
+  <text x="150" y="1565" class="small-text">• Subject/topic organization</text>
+  
+  <text x="400" y="1485" class="text">Assessment System:</text>
+  <text x="400" y="1505" class="small-text">• Timed mock tests</text>
+  <text x="400" y="1520" class="small-text">• Real exam simulation</text>
+  <text x="400" y="1535" class="small-text">• Intelligent evaluation</text>
+  <text x="400" y="1550" class="small-text">• Performance analytics</text>
+  <text x="400" y="1565" class="small-text">• PDF report generation</text>
+  
+  <text x="650" y="1485" class="text">Learning Features:</text>
+  <text x="650" y="1505" class="small-text">• Personalized study plans</text>
+  <text x="650" y="1520" class="small-text">• Progress tracking</text>
+  <text x="650" y="1535" class="small-text">• AI doubt solving</text>
+  <text x="650" y="1550" class="small-text">• Study streak monitoring</text>
+  <text x="650" y="1565" class="small-text">• Bookmark management</text>
+  
+  <text x="900" y="1485" class="text">Admin Tools:</text>
+  <text x="900" y="1505" class="small-text">• User management</text>
+  <text x="900" y="1520" class="small-text">• Analytics dashboard</text>
+  <text x="900" y="1535" class="small-text">• Content moderation</text>
+  <text x="900" y="1550" class="small-text">• Test scheduling</text>
+  <text x="900" y="1565" class="small-text">• Performance monitoring</text>
+  
+  <text x="1150" y="1485" class="text">Technical Features:</text>
+  <text x="1150" y="1505" class="small-text">• Session-based auth</text>
+  <text x="1150" y="1520" class="small-text">• Real-time updates</text>
+  <text x="1150" y="1535" class="small-text">• Responsive design</text>
+  <text x="1150" y="1550" class="small-text">• Database optimization</text>
+  <text x="1150" y="1565" class="small-text">• API integration</text>
+  
+  <!-- Footer -->
+  <text x="700" y="1620" class="small-text" text-anchor="middle">Generated: January 2025 | Pragyesh IAS UPSC Preparation Platform</text>
+  <text x="700" y="1640" class="small-text" text-anchor="middle">Complete AI-powered learning ecosystem for competitive examination preparation</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="1660" width="1300" height="80" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" rx="5"/>
+  <text x="700" y="1680" class="text" text-anchor="middle">Legend</text>
+  
+  <rect x="100" y="1690" width="30" height="20" class="admin-box" rx="3"/>
+  <text x="140" y="1705" class="small-text">Admin Functions</text>
+  
+  <rect x="250" y="1690" width="30" height="20" class="student-box" rx="3"/>
+  <text x="290" y="1705" class="small-text">Student Functions</text>
+  
+  <rect x="400" y="1690" width="30" height="20" class="ai-box" rx="3"/>
+  <text x="440" y="1705" class="small-text">AI/ML Services</text>
+  
+  <rect x="550" y="1690" width="30" height="20" class="db-box" rx="3"/>
+  <text x="590" y="1705" class="small-text">Database/Storage</text>
+  
+  <rect x="700" y="1690" width="30" height="20" class="process-box" rx="3"/>
+  <text x="740" y="1705" class="small-text">Processing/Logic</text>
+  
+  <line x1="850" y1="1700" x2="880" y2="1700" class="arrow"/>
+  <text x="890" y="1705" class="small-text">Data Flow</text>
+  
+  <line x1="1000" y1="1700" x2="1030" y2="1700" class="bi-arrow"/>
+  <text x="1040" y="1705" class="small-text">Bidirectional</text>
+</svg>
