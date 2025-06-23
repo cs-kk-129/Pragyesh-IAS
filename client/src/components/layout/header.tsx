@@ -82,12 +82,12 @@ export default function Header() {
                   e.currentTarget.nextElementSibling.style.display = 'flex';
                 }}
               />
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hidden items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
+              {/* <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hidden items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
                 P
-              </div>
-              <span className="font-bold text-2xl bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">
+              </div> */}
+              {/* <span className="font-bold text-2xl bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">
                 Pragyesh IAS
-              </span>
+              </span> */}
             </div>
           </Link>
         </div>
