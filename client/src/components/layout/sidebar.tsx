@@ -91,8 +91,8 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden md:block border-r bg-background h-screen sticky top-0 w-[250px] transition-all">
-      <div className="h-full py-4 flex flex-col">
-        <div className="flex h-14 items-center border-b px-6">
+      <div className="h-full flex flex-col">
+        <div className="flex h-16 items-center border-b px-6">
           <Link href="/">
             <div className="flex items-center cursor-pointer space-x-2">
               <img src="/src/assets/pragyesh-logo.png" alt="Pragyesh IAS" className="h-8 w-8" />

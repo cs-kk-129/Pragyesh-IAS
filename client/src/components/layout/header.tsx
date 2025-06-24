@@ -16,7 +16,6 @@ import { useTheme } from "next-themes";
 
 export default function Header() {
   const { user, logoutMutation } = useAuth();
-  const [mounted, setMounted] = useState(false);
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -76,18 +75,7 @@ export default function Header() {
                 src="/attached_assets/Logo_Transparent_v1.png" 
                 alt="Pragyesh IAS Logo" 
                 className="h-10 w-10 transition-transform duration-300 group-hover:rotate-12"
-                onError={(e) => {
-                  // Fallback to text logo if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'flex';
-                }}
               />
-               {/* <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hidden items-center justify-center text-white font-bold text-lg transition-transform duration-300 group-hover:rotate-12">
-                P
-              </div>  */}
-               {/* <span className="font-bold text-2xl bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">
-                Pragyesh IAS
-              </span>  */}
             </div>
           </Link>
         </div>
@@ -175,7 +163,7 @@ export default function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                
+
                 {/* Profile Section */}
                 <div className="p-3 space-y-2">
                   <h4 className="text-sm font-medium text-muted-foreground">Profile Information</h4>
@@ -208,27 +196,27 @@ export default function Header() {
                 </div>
 
                 <DropdownMenuSeparator />
-                
+
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
                   <span>View Profile</span>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuItem>
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Change Password</span>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuItem>
                   <HelpCircle className="mr-2 h-4 w-4" />
                   <span>Support & Help</span>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
