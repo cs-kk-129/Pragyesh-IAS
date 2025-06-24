@@ -44,13 +44,6 @@ export default function Header() {
   ]);
   const { theme, setTheme } = useTheme();
 
-  // Wait until component is mounted to avoid hydration issues
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
   const handleLogout = () => {
     logoutMutation.mutate();
   };
