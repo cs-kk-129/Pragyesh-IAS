@@ -871,7 +871,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attempted,
         overallScore,
         accuracy,
-        timeSpent
+        ```text
+timeSpent
       },
       advancedScores: {
         criticalThinkingScore,
@@ -952,7 +953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Map subject using the same logic as AI generation
           let actualSubjectId = parseInt(subjectId) || 1;
           const subjectName = question.subject || '';
-          
+
           if (subjectName.toLowerCase().includes('art') && subjectName.toLowerCase().includes('culture')) {
             actualSubjectId = 2;
           } else if (subjectName.toLowerCase().includes('geography')) {
@@ -1596,7 +1597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Quiz ${quiz.id} ("${quiz.title}") has ${questions.length} questions`);
 
           const hasQuestions = questions.length > 0;
-          
+
           // Extract unique subjects from question tags
           const subjects = hasQuestions ? Array.from(new Set(
             questions.map(q => {
@@ -1717,13 +1718,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check if test date allows access (only for today's date)
           const testDate = quiz.testDate ? new Date(quiz.testDate) : new Date();
           testDate.setHours(0, 0, 0, 0);
-          
+
           const isScheduledForToday = testDate.getTime() === today.getTime();
-          
-          // Determine test status based on questions, date, and attempt status
-          let testStatus = 'not_started';
+
+          // Determine test status based on questions, date, and attempt status```text
+        let testStatus = 'not_started';
           let isActive = false;
-          
+
           if (isAlreadyAttempted) {
             testStatus = 'completed';
             isActive = false;
@@ -1746,7 +1747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (isAlreadyAttempted && existingAttempt.length > 0) {
             attemptScore = existingAttempt[0].score;
           }
-          
+
           mockTests.push({
               id: quiz.id,
               title: quiz.title,
@@ -1773,14 +1774,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       mockTests.sort((a, b) => {
         const aDate = new Date(a.testDate);
         const bDate = new Date(b.testDate);
-        
+
         // If one is today and other is not, prioritize today's test
         const aIsToday = aDate.getTime() === today.getTime();
         const bIsToday = bDate.getTime() === today.getTime();
-        
+
         if (aIsToday && !bIsToday) return -1;
         if (!aIsToday && bIsToday) return 1;
-        
+
         // Otherwise sort by date (newest first)
         return bDate.getTime() - aDate.getTime();
       });
@@ -1885,10 +1886,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
 
         console.log(`Quiz attempt saved successfully with ID: ${savedAttempt.id}`);
-        
-        // Also invalidate the admin evaluations cache to show the new submission immediately
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/evaluations"] });
-        
+
+        // Note: Cache invalidation happens on client-side when admin refetches
+
       } catch (dbError) {
         console.error('Database error saving quiz attempt:', dbError);
         console.error('Error details:', JSON.stringify(dbError, null, 2));
@@ -1919,7 +1919,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/evaluations", async (req, res) => {
     try {
       console.log("Fetching admin evaluations...");
-      
+
       // Get quiz attempts directly from database using Drizzle
       const dbAttempts = await db.select()
         .from(schema.quizAttempts)

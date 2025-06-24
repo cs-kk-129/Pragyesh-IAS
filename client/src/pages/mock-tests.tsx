@@ -339,28 +339,67 @@ export default function MockTests() {
     setCurrentQuestionIndex(index);
   };
 
-  const handleTestSubmit = () => {
+  const handleTestSubmit = async () => {
     setIsTestStarted(false);
-    setIsTestCompleted(true);
+    
+    try {
+      // Prepare submission data
+      const submissionAnswers = questionStates.map((state, index) => ({
+        answer: state.selectedAnswer !== undefined ? 
+          (mockQuestions[index]?.options?.[state.selectedAnswer] || null) : null,
+        isAnswered: state.isAnswered
+      }));
 
-    // Calculate results
-    const answeredQuestions = questionStates.filter(state => state.isAnswered).length;
-    const correctAnswers = questionStates.filter((state, index) => 
-      state.isAnswered && state.selectedAnswer === mockQuestions[index]?.correctAnswer
-    ).length;
+      const submissionData = {
+        answers: submissionAnswers,
+        timeSpent: selectedTestData ? (selectedTestData.duration * 60 - timeLeft) : 0,
+        questionTimings: questionStates.map(() => 90) // Default timing per question
+      };
 
-    const results = {
-      totalQuestions: mockQuestions.length,
-      attempted: answeredQuestions,
-      correct: correctAnswers,
-      incorrect: answeredQuestions - correctAnswers,
-      notAttempted: mockQuestions.length - answeredQuestions,
-      score: Math.round((correctAnswers / mockQuestions.length) * 100),
-      timeSpent: selectedTestData ? (selectedTestData.duration * 60 - timeLeft) : 0,
-    };
+      console.log('Submitting mock test:', {
+        testId: selectedTestData?.id,
+        answersCount: submissionAnswers.length,
+        timeSpent: submissionData.timeSpent
+      });
 
-    setTestResults(results);
-    setShowSubmitDialog(false);
+      // Submit to backend
+      const response = await apiRequest("POST", `/api/student/submit-mock-test/${selectedTestData?.id}`, submissionData);
+      const evaluationResult = await response.json();
+
+      console.log('Evaluation result:', evaluationResult);
+
+      if (evaluationResult.summary) {
+        setTestResults(evaluationResult.summary);
+        setIsTestCompleted(true);
+        setShowSubmitDialog(false);
+      } else {
+        throw new Error('Invalid evaluation response');
+      }
+
+    } catch (error) {
+      console.error('Failed to submit mock test:', error);
+      
+      // Fallback to local calculation
+      const answeredQuestions = questionStates.filter(state => state.isAnswered).length;
+      const correctAnswers = questionStates.filter((state, index) => 
+        state.isAnswered && state.selectedAnswer === mockQuestions[index]?.correctAnswer
+      ).length;
+
+      const results = {
+        totalQuestions: mockQuestions.length,
+        attempted: answeredQuestions,
+        correct: correctAnswers,
+        incorrect: answeredQuestions - correctAnswers,
+        notAttempted: mockQuestions.length - answeredQuestions,
+        overallScore: Math.round((correctAnswers / mockQuestions.length) * 100),
+        accuracy: answeredQuestions > 0 ? Math.round((correctAnswers / answeredQuestions) * 100) : 0,
+        timeSpent: selectedTestData ? (selectedTestData.duration * 60 - timeLeft) : 0,
+      };
+
+      setTestResults(results);
+      setIsTestCompleted(true);
+      setShowSubmitDialog(false);
+    }
   };
 
   const getQuestionStatusIcon = (index: number) => {
