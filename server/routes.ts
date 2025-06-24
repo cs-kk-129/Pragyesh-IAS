@@ -871,8 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attempted,
         overallScore,
         accuracy,
-        ```text
-timeSpent
+        timeSpent
       },
       advancedScores: {
         criticalThinkingScore,
