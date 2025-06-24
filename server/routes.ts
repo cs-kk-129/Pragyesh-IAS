@@ -1865,16 +1865,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Evaluation: ${correct}/${totalQuestions} correct, Score: ${score}%`);
 
-      // Save quiz attempt to database using direct database insertion
+      // Save quiz attempt to database with proper error handling and validation
       try {
         const quizAttemptData = {
-          userId,
-          quizId,
-          score,
-          totalQuestions,
-          accuracy,
+          userId: userId,
+          quizId: quizId,
+          score: score,
+          totalQuestions: totalQuestions,
+          accuracy: accuracy,
           timeTaken: Math.round(timeSpent),
-          answeredQuestions: evaluatedAnswers
+          completedAt: new Date(),
+          answeredQuestions: JSON.stringify(evaluatedAnswers)
         };
 
         console.log('Attempting to save quiz attempt with data:', quizAttemptData);
@@ -1884,9 +1885,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
 
         console.log(`Quiz attempt saved successfully with ID: ${savedAttempt.id}`);
+        
+        // Also invalidate the admin evaluations cache to show the new submission immediately
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/evaluations"] });
+        
       } catch (dbError) {
         console.error('Database error saving quiz attempt:', dbError);
-        // Continue with response even if database save fails
+        console.error('Error details:', JSON.stringify(dbError, null, 2));
+        return res.status(500).json({ error: "Failed to save quiz attempt to database" });
       }
 
       const evaluation = {
@@ -1912,15 +1918,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin evaluations endpoint (database-driven)
   app.get("/api/admin/evaluations", async (req, res) => {
     try {
-      const dbAttempts = await storage.getAllQuizAttempts();
+      console.log("Fetching admin evaluations...");
+      
+      // Get quiz attempts directly from database using Drizzle
+      const dbAttempts = await db.select()
+        .from(schema.quizAttempts)
+        .orderBy(desc(schema.quizAttempts.completedAt));
+
+      console.log(`Found ${dbAttempts.length} quiz attempts in database`);
 
       const evaluations = await Promise.all(dbAttempts.map(async (attempt) => {
         let user = null;
         let quiz = null;
 
         try {
-          user = await storage.getUser(attempt.userId);
-          quiz = await storage.getQuizById(attempt.quizId);
+          // Get user details
+          const userResult = await db.select()
+            .from(schema.users)
+            .where(eq(schema.users.id, attempt.userId))
+            .limit(1);
+          user = userResult[0] || null;
+
+          // Get quiz details
+          const quizResult = await db.select()
+            .from(schema.quizzes)
+            .where(eq(schema.quizzes.id, attempt.quizId))
+            .limit(1);
+          quiz = quizResult[0] || null;
         } catch (err) {
           console.error("Error getting user/quiz details:", err);
         }
@@ -1950,6 +1974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ evaluations: sortedEvaluations });
     } catch (error) {
       console.error("Error fetching evaluations:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       res.json({ evaluations: [] });
     }
   });
