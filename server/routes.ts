@@ -1978,6 +1978,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat API endpoints for AI-powered doubt solving
+  app.post("/api/chat", isAuthenticated, async (req, res) => {
+    try {
+      const { message } = req.body;
+      const userId = (req as any).user.id;
+
+      if (!message || typeof message !== 'string' || message.trim().length === 0) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      console.log(`Processing chat message from user ${userId}: ${message.substring(0, 100)}...`);
+
+      // Use OpenAI to generate intelligent response
+      const { performIntelligentSearch } = await import("./openai");
+      const aiResponse = await performIntelligentSearch(message.trim());
+
+      // Save chat message to database
+      const chatMessage = await storage.createChatMessage({
+        userId,
+        message: message.trim(),
+        response: aiResponse
+      });
+
+      console.log(`AI response generated for user ${userId}, length: ${aiResponse.length} characters`);
+
+      res.json(chatMessage);
+    } catch (error) {
+      console.error("Error processing chat message:", error);
+      
+      // Provide fallback response
+      const fallbackResponse = "I apologize, but I'm experiencing technical difficulties. Please try asking your question again, or contact support if the issue persists.";
+      
+      try {
+        const chatMessage = await storage.createChatMessage({
+          userId: (req as any).user.id,
+          message: req.body.message || "Error processing message",
+          response: fallbackResponse
+        });
+        res.json(chatMessage);
+      } catch (dbError) {
+        console.error("Error saving fallback message:", dbError);
+        res.status(500).json({ error: "Failed to process chat message" });
+      }
+    }
+  });
+
+  // Get chat history for authenticated user
+  app.get("/api/chat/history", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user.id;
+      const limit = parseInt(req.query.limit as string) || 50;
+
+      console.log(`Fetching chat history for user ${userId}, limit: ${limit}`);
+
+      const chatHistory = await storage.getChatMessagesByUser(userId, limit);
+
+      console.log(`Retrieved ${chatHistory.length} chat messages for user ${userId}`);
+
+      res.json(chatHistory);
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      res.status(500).json({ error: "Failed to fetch chat history" });
+    }
+  });
+
+  // Enhanced search endpoint for intelligent query processing
+  app.post("/api/search", isAuthenticated, async (req, res) => {
+    try {
+      const { query } = req.body;
+      const userId = (req as any).user.id;
+
+      if (!query || typeof query !== 'string' || query.trim().length === 0) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+
+      console.log(`Processing search query from user ${userId}: ${query.substring(0, 100)}...`);
+
+      // Use OpenAI for intelligent search
+      const { performIntelligentSearch } = await import("./openai");
+      const searchResults = await performIntelligentSearch(query.trim());
+
+      // Optionally save search query as chat message for history
+      await storage.createChatMessage({
+        userId,
+        message: `Search: ${query.trim()}`,
+        response: searchResults
+      });
+
+      console.log(`Search results generated for user ${userId}, length: ${searchResults.length} characters`);
+
+      res.json({ 
+        query: query.trim(),
+        results: searchResults,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error processing search query:", error);
+      res.status(500).json({ error: "Failed to process search query" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -158,26 +158,102 @@ export async function generateStudyPlan(
   }
 }
 
-// Answer a doubt from a user
+// Answer a doubt from a user with enhanced search capabilities
 export async function answerDoubt(question: string): Promise<string> {
   try {
     const prompt = `
-      You are a UPSC exam expert assistant. Provide a clear, detailed, and accurate answer to the following UPSC-related question:
+      You are an expert UPSC exam preparation assistant with comprehensive knowledge of the entire UPSC syllabus. 
+      Provide a detailed, accurate, and exam-focused answer to the following question:
       
       ${question}
       
-      Your answer should:
-      1. Be comprehensive yet concise
-      2. Include relevant facts, dates, and figures when applicable
-      3. Provide context for better understanding
-      4. Highlight key points to remember
-      5. Follow UPSC syllabus guidelines
+      Your response should:
+      1. Be comprehensive yet focused on UPSC exam requirements
+      2. Include relevant facts, dates, figures, and examples
+      3. Provide clear context and background information
+      4. Highlight key points and important concepts to remember
+      5. Connect the topic to other related UPSC subjects when relevant
+      6. Include exam tips or mnemonics if applicable
+      7. Structure the answer with clear headings or bullet points for better readability
+      8. Provide both English and Hindi terminology where relevant
       
-      Your expertise is specifically in UPSC exam preparation, so focus your answer accordingly.
+      Focus specifically on UPSC Civil Services Examination preparation across all papers:
+      - General Studies Paper I (History, Geography, Polity, Economy)
+      - General Studies Paper II (Governance, Constitution, Social Justice)
+      - General Studies Paper III (Technology, Environment, Security, Economy)
+      - General Studies Paper IV (Ethics, Integrity, Aptitude)
+      - CSAT Paper (Comprehension, Reasoning, Mental Ability)
+      
+      Make your answer exam-oriented and practical for UPSC aspirants.
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert UPSC Civil Services examination preparation assistant with comprehensive knowledge of Indian history, geography, polity, economy, environment, science & technology, ethics, and current affairs. Provide detailed, accurate, and exam-focused responses that help aspirants understand concepts thoroughly."
+        },
+        {
+          role: "user", 
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    return response.choices[0].message.content || "I apologize, but I couldn't generate a response at this time. Please try asking your question again.";
+  } catch (error) {
+    console.error("Error answering doubt:", error);
+    throw new Error("Failed to answer doubt");
+  }
+}
+
+// Enhanced AI search function for intelligent query processing
+export async function performIntelligentSearch(query: string): Promise<string> {
+  try {
+    const searchPrompt = `
+      You are an intelligent search assistant specializing in UPSC Civil Services examination content.
+      
+      User Query: "${query}"
+      
+      Analyze this query and provide a comprehensive response that includes:
+      
+      1. **Direct Answer**: Address the specific question or topic requested
+      2. **Related Concepts**: Mention interconnected topics that are relevant for UPSC
+      3. **Exam Relevance**: Explain how this topic appears in UPSC papers
+      4. **Key Points**: Bullet points of essential information to remember
+      5. **Study Tips**: Practical advice for mastering this topic
+      6. **Cross-References**: Related topics in other UPSC subjects
+      
+      Make your response structured, comprehensive, and optimized for UPSC preparation.
+      Include both theoretical knowledge and practical exam strategies.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an advanced AI search engine specialized in UPSC Civil Services examination preparation. Your knowledge spans across all UPSC subjects including History, Geography, Polity, Economy, Environment, Science & Technology, Ethics, and Current Affairs. Provide comprehensive, well-structured, and exam-oriented responses."
+        },
+        {
+          role: "user",
+          content: searchPrompt
+        }
+      ],
+      temperature: 0.6,
+      max_tokens: 2500,
+    });
+
+    return response.choices[0].message.content || "I apologize, but I couldn't process your search query at this time. Please try with a different question.";
+  } catch (error) {
+    console.error("Error performing intelligent search:", error);
+    throw new Error("Failed to perform intelligent search");
+  }
+}
+}
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5,
       max_tokens: 1000,

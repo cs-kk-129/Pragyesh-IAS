@@ -45,51 +45,63 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
     };
   }, []);
 
-  // Send message mutation
+  // Send message mutation with enhanced AI processing
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       const res = await apiRequest("POST", "/api/chat", { message });
       return res.json();
     },
     onSuccess: (newMessage: ChatMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
+      // Update the temporary message with the AI response
+      setMessages((prev) => 
+        prev.map(msg => 
+          msg.id === Date.now() - 1000 ? newMessage : msg
+        ).filter(msg => msg.response !== "") // Remove temporary message if not updated
+      );
+      
+      // Add the new message if not already present
+      setMessages((prev) => {
+        const exists = prev.some(msg => msg.id === newMessage.id);
+        return exists ? prev : [...prev, newMessage];
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/chat/history"] });
     },
     onError: (error) => {
       console.error("Failed to send message:", error);
-      // Add a failed message indicator
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          userId: user?.id || 0,
-          message,
-          response: "Sorry, I couldn't process your request. Please try again.",
-          createdAt: new Date(),
-        } as ChatMessage,
-      ]);
+      
+      // Update temporary message with error response
+      setMessages((prev) => 
+        prev.map(msg => 
+          msg.id === Date.now() - 1000 
+            ? { ...msg, response: "I apologize, but I'm experiencing technical difficulties. Please try asking your question again." }
+            : msg
+        )
+      );
     },
   });
 
   const handleSendMessage = () => {
-    if (!message.trim() || !user) return;
+    if (!message.trim() || !user || sendMessageMutation.isPending) return;
     
-    // Add user message to state immediately for UI feedback
-    const tempMessage: ChatMessage = {
+    const userMessage = message.trim();
+    
+    // Add user message and temporary AI response for immediate feedback
+    const tempUserMessage: ChatMessage = {
       id: Date.now(),
       userId: user.id,
-      message: message.trim(),
-      response: "",
+      message: userMessage,
+      response: "🤔 Thinking...",
       createdAt: new Date(),
     };
     
-    setMessages((prev) => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempUserMessage]);
     
     // Clear input
     setMessage("");
     
     // Send to API
-    sendMessageMutation.mutate(tempMessage.message);
+    sendMessageMutation.mutate(userMessage);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -121,12 +133,36 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
             </div>
           ) : (
             messages.map((msg, index) => (
-              <div key={msg.id || index} className="space-y-2">
+              <div key={msg.id || index} className="space-y-3">
+                {/* User Message */}
                 <div className="flex justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-tl-xl rounded-tr-xl rounded-bl-xl p-3 max-w-[80%]">
+                  <div className="bg-primary text-primary-foreground rounded-tl-xl rounded-tr-xl rounded-bl-xl p-3 max-w-[80%] shadow-sm">
                     <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                    <div className="text-xs opacity-75 mt-1">
+                      {new Date(msg.createdAt).toLocaleTimeString()}
+                    </div>
                   </div>
                 </div>
+                
+                {/* AI Response */}
+                {msg.response && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-tr-xl rounded-tl-xl rounded-br-xl p-3 max-w-[80%] shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-xs font-bold text-primary-foreground">AI</span>
+                        </div>
+                        <span className="text-xs font-medium text-muted-foreground">UPSC Assistant</span>
+                        {msg.response === "🤔 Thinking..." && (
+                          <Loader2 className="h-3 w-3 animate-spin ml-1" />
+                        )}
+                      </div>
+                      <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {msg.response}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex">
                   {sendMessageMutation.isPending && index === messages.length - 1 ? (
