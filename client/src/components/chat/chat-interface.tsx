@@ -187,19 +187,32 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
         </div>
       </ScrollArea>
       
-      <div className="p-4 border-t">
+      <div className="border-t p-4 bg-background">
         <div className="flex space-x-2">
-          <textarea
-            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[60px]"
-            placeholder="Type your question here..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={sendMessageMutation.isPending}
-          />
-          <Button 
-            onClick={handleSendMessage} 
+          <div className="flex-1">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask any UPSC-related question or search for topics..."
+              className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              rows={2}
+              disabled={sendMessageMutation.isPending}
+            />
+            <div className="flex items-center justify-between mt-2">
+              <div className="text-xs text-muted-foreground">
+                Press Enter to send, Shift+Enter for new line
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {sendMessageMutation.isPending ? "Processing..." : "Ready"}
+              </div>
+            </div>
+          </div>
+          <Button
+            onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
+            size="icon"
+            className="h-12 w-12 self-start"
           >
             {sendMessageMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

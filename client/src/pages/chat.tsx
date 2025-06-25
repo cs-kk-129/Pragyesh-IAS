@@ -21,9 +21,13 @@ export default function Chat() {
     "What were the major causes and impacts of the 1857 revolt?",
     "How does the monsoon system affect Indian agriculture?",
     "Explain the structure and functions of the NITI Aayog.",
-    "What are the main features of India's New Education Policy?",
+    "What are the main features of India's New Education Policy 2020?",
     "Discuss the importance of the Goods and Services Tax (GST) reform.",
     "What are the key environmental challenges facing India today?",
+    "Explain the concept of federalism in the Indian context.",
+    "What is the significance of the Green Revolution in India?",
+    "Discuss the role of the Election Commission of India.",
+    "Explain the importance of the Right to Information Act.",
   ];
 
   return (
