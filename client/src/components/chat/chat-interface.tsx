@@ -52,18 +52,12 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
       return res.json();
     },
     onSuccess: (newMessage: ChatMessage) => {
-      // Update the temporary message with the AI response
+      // Replace the temporary message with the actual response
       setMessages((prev) => 
         prev.map(msg => 
-          msg.id === Date.now() - 1000 ? newMessage : msg
-        ).filter(msg => msg.response !== "") // Remove temporary message if not updated
+          msg.response === "🤔 Thinking..." ? newMessage : msg
+        )
       );
-      
-      // Add the new message if not already present
-      setMessages((prev) => {
-        const exists = prev.some(msg => msg.id === newMessage.id);
-        return exists ? prev : [...prev, newMessage];
-      });
       
       queryClient.invalidateQueries({ queryKey: ["/api/chat/history"] });
     },
@@ -73,7 +67,7 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
       // Update temporary message with error response
       setMessages((prev) => 
         prev.map(msg => 
-          msg.id === Date.now() - 1000 
+          msg.response === "🤔 Thinking..." 
             ? { ...msg, response: "I apologize, but I'm experiencing technical difficulties. Please try asking your question again." }
             : msg
         )
@@ -86,7 +80,7 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
     
     const userMessage = message.trim();
     
-    // Add user message and temporary AI response for immediate feedback
+    // Add user message with temporary AI response for immediate feedback
     const tempUserMessage: ChatMessage = {
       id: Date.now(),
       userId: user.id,
