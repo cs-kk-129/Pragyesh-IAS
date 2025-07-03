@@ -157,23 +157,6 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
                     </div>
                   </div>
                 )}
-                
-                <div className="flex">
-                  {sendMessageMutation.isPending && index === messages.length - 1 ? (
-                    <div className="bg-muted rounded-tl-xl rounded-tr-xl rounded-br-xl p-3 max-w-[80%]">
-                      <div className="flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <p className="text-sm text-muted-foreground">Generating response...</p>
-                      </div>
-                    </div>
-                  ) : (
-                    msg.response && (
-                      <div className="bg-muted rounded-tl-xl rounded-tr-xl rounded-br-xl p-3 max-w-[80%]">
-                        <p className="text-sm whitespace-pre-wrap">{msg.response}</p>
-                      </div>
-                    )
-                  )}
-                </div>
               </div>
             ))
           )}
