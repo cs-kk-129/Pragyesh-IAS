@@ -107,8 +107,11 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 p-4 max-h-[calc(100%-8rem)] overflow-y-auto">
-        <div className="space-y-4">
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full p-4">
+          <div className="space-y-4"></div>
+        </ScrollArea>
+      </div>
           {messages.length === 0 ? (
             <div className="text-center py-10">
               <h3 className="text-lg font-medium mb-2">Welcome to the AI Doubt Assistant</h3>
@@ -161,8 +164,9 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
             ))
           )}
           <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
+      </div>
       
       <div className="border-t p-4 bg-background flex-shrink-0">
         <div className="flex space-x-2">
