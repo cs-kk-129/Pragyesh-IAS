@@ -6,7 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import { ChatMessage } from "@shared/schema";
+import type { ChatMessage } from "@shared/schema";
 
 interface ChatInterfaceProps {
   chatHistory: ChatMessage[];
@@ -20,8 +20,12 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
   
   // Initialize with chat history
   useEffect(() => {
-    if (chatHistory.length > 0) {
-      setMessages(chatHistory.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
+    if (chatHistory && chatHistory.length > 0) {
+      setMessages(chatHistory.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      }));
     }
   }, [chatHistory]);
 
@@ -109,61 +113,59 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
     <div className="flex flex-col h-full">
       <div className="flex-1 min-h-0">
         <ScrollArea className="h-full p-4">
-          <div className="space-y-4"></div>
-        </ScrollArea>
-      </div>
-          {messages.length === 0 ? (
-            <div className="text-center py-10">
-              <h3 className="text-lg font-medium mb-2">Welcome to the AI Doubt Assistant</h3>
-              <p className="text-muted-foreground mb-6">
-                Ask any question related to UPSC preparation, and I'll provide detailed answers to help you.
-              </p>
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-1">Example questions you can ask:</p>
-                <ul className="space-y-1 list-disc pl-5">
-                  <li>Explain the key features of the Indian Constitution</li>
-                  <li>What were the major causes of the 1857 revolt?</li>
-                  <li>How does the monsoon system affect Indian agriculture?</li>
-                  <li>Explain the structure and functions of the NITI Aayog</li>
-                </ul>
-              </div>
-            </div>
-          ) : (
-            messages.map((msg, index) => (
-              <div key={msg.id || index} className="space-y-3">
-                {/* User Message */}
-                <div className="flex justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-tl-xl rounded-tr-xl rounded-bl-xl p-3 max-w-[80%] shadow-sm">
-                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                    <div className="text-xs opacity-75 mt-1">
-                      {new Date(msg.createdAt).toLocaleTimeString()}
-                    </div>
-                  </div>
+          <div className="space-y-4">
+            {messages.length === 0 ? (
+              <div className="text-center py-10">
+                <h3 className="text-lg font-medium mb-2">Welcome to the AI Doubt Assistant</h3>
+                <p className="text-muted-foreground mb-6">
+                  Ask any question related to UPSC preparation, and I'll provide detailed answers to help you.
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-1">Example questions you can ask:</p>
+                  <ul className="space-y-1 list-disc pl-5">
+                    <li>Explain the key features of the Indian Constitution</li>
+                    <li>What were the major causes of the 1857 revolt?</li>
+                    <li>How does the monsoon system affect Indian agriculture?</li>
+                    <li>Explain the structure and functions of the NITI Aayog</li>
+                  </ul>
                 </div>
-                
-                {/* AI Response */}
-                {msg.response && (
-                  <div className="flex justify-start">
-                    <div className="bg-muted rounded-tr-xl rounded-tl-xl rounded-br-xl p-3 max-w-[80%] shadow-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-primary-foreground">AI</span>
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">UPSC Assistant</span>
-                        {msg.response === "🤔 Thinking..." && (
-                          <Loader2 className="h-3 w-3 animate-spin ml-1" />
-                        )}
-                      </div>
-                      <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                        {msg.response}
+              </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div key={msg.id || index} className="space-y-3">
+                  {/* User Message */}
+                  <div className="flex justify-end">
+                    <div className="bg-primary text-primary-foreground rounded-tl-xl rounded-tr-xl rounded-bl-xl p-3 max-w-[80%] shadow-sm">
+                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                      <div className="text-xs opacity-75 mt-1">
+                        {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : ""}
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
+                  
+                  {/* AI Response */}
+                  {msg.response && (
+                    <div className="flex justify-start">
+                      <div className="bg-muted rounded-tr-xl rounded-tl-xl rounded-br-xl p-3 max-w-[80%] shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-primary-foreground">AI</span>
+                          </div>
+                          <span className="text-xs font-medium text-muted-foreground">UPSC Assistant</span>
+                          {msg.response === "🤔 Thinking..." && (
+                            <Loader2 className="h-3 w-3 animate-spin ml-1" />
+                          )}
+                        </div>
+                        <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                          {msg.response}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </div>
