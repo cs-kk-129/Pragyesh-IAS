@@ -110,10 +110,10 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full p-4">
-          <div className="space-y-4">
+    <div className="flex flex-col h-full max-h-screen overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-4">
             {messages.length === 0 ? (
               <div className="text-center py-10">
                 <h3 className="text-lg font-medium mb-2">Welcome to the AI Doubt Assistant</h3>
@@ -170,7 +170,7 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
         </ScrollArea>
       </div>
       
-      <div className="border-t p-4 bg-background flex-shrink-0">
+      <div className="border-t p-4 bg-background flex-shrink-0 sticky bottom-0">
         <div className="flex space-x-2">
           <div className="flex-1">
             <textarea
@@ -178,7 +178,7 @@ export default function ChatInterface({ chatHistory }: ChatInterfaceProps) {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask any UPSC-related question or search for topics..."
-              className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm max-h-24"
               rows={2}
               disabled={sendMessageMutation.isPending}
             />

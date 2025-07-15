@@ -158,33 +158,26 @@ export async function generateStudyPlan(
   }
 }
 
-// Answer a doubt from a user with enhanced search capabilities
+// Answer a doubt from a user with conversational approach
 export async function answerDoubt(question: string): Promise<string> {
   try {
     const prompt = `
-      You are an expert UPSC exam preparation assistant with comprehensive knowledge of the entire UPSC syllabus. 
-      Provide a detailed, accurate, and exam-focused answer to the following question:
+      A UPSC aspirant just asked you: "${question}"
       
-      ${question}
+      Respond as a supportive mentor would - naturally and conversationally. Think of this as sitting with a student and explaining the concept in a way that makes sense to them.
       
       Your response should:
-      1. Be comprehensive yet focused on UPSC exam requirements
-      2. Include relevant facts, dates, figures, and examples
-      3. Provide clear context and background information
-      4. Highlight key points and important concepts to remember
-      5. Connect the topic to other related UPSC subjects when relevant
-      6. Include exam tips or mnemonics if applicable
-      7. Structure the answer with clear headings or bullet points for better readability
-      8. Provide both English and Hindi terminology where relevant
+      - Feel like a natural conversation, not a formal lecture
+      - Be encouraging and supportive in tone
+      - Explain things clearly with examples and analogies
+      - Share useful tips and insights naturally within your explanation
+      - Connect to exam context organically, not forcefully
+      - Use simple, clear language that's easy to understand
+      - Be comprehensive but conversational
+      - Avoid bullet points, numbered lists, or formal headings
+      - Flow naturally like you're speaking to them
       
-      Focus specifically on UPSC Civil Services Examination preparation across all papers:
-      - General Studies Paper I (History, Geography, Polity, Economy)
-      - General Studies Paper II (Governance, Constitution, Social Justice)
-      - General Studies Paper III (Technology, Environment, Security, Economy)
-      - General Studies Paper IV (Ethics, Integrity, Aptitude)
-      - CSAT Paper (Comprehension, Reasoning, Mental Ability)
-      
-      Make your answer exam-oriented and practical for UPSC aspirants.
+      Remember, you're helping a friend prepare for one of India's toughest exams. Be warm, knowledgeable, and encouraging.
     `;
 
     const response = await openai.chat.completions.create({
@@ -192,43 +185,44 @@ export async function answerDoubt(question: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are an expert UPSC Civil Services examination preparation assistant with comprehensive knowledge of Indian history, geography, polity, economy, environment, science & technology, ethics, and current affairs. Provide detailed, accurate, and exam-focused responses that help aspirants understand concepts thoroughly."
+          content: "You are a caring, experienced UPSC mentor with deep subject knowledge across history, geography, polity, economy, environment, science & technology, ethics, and current affairs. You communicate warmly and naturally, like a friend helping another friend succeed. You explain complex concepts simply and always encourage students in their preparation."
         },
         {
           role: "user", 
           content: prompt
         }
       ],
-      temperature: 0.7,
+      temperature: 0.8,
       max_tokens: 2000,
     });
 
-    return response.choices[0].message.content || "I apologize, but I couldn't generate a response at this time. Please try asking your question again.";
+    return response.choices[0].message.content || "I'm sorry, I'm having trouble responding right now. Could you try asking your question again?";
   } catch (error) {
     console.error("Error answering doubt:", error);
     throw new Error("Failed to answer doubt");
   }
 }
 
-// Enhanced AI search function for intelligent query processing
+// Enhanced AI search function for conversational query processing
 export async function performIntelligentSearch(query: string): Promise<string> {
   try {
     const searchPrompt = `
-      You are an intelligent search assistant specializing in UPSC Civil Services examination content.
+      You are a friendly and knowledgeable UPSC mentor having a conversation with a student. 
       
-      User Query: "${query}"
+      The student asked: "${query}"
       
-      Analyze this query and provide a comprehensive response that includes:
+      Respond naturally and conversationally, as if you're explaining this to a friend who's preparing for UPSC. Your response should:
       
-      1. **Direct Answer**: Address the specific question or topic requested
-      2. **Related Concepts**: Mention interconnected topics that are relevant for UPSC
-      3. **Exam Relevance**: Explain how this topic appears in UPSC papers
-      4. **Key Points**: Bullet points of essential information to remember
-      5. **Study Tips**: Practical advice for mastering this topic
-      6. **Cross-References**: Related topics in other UPSC subjects
+      - Be warm, encouraging, and human-like in tone
+      - Explain concepts clearly without being overly formal or structured
+      - Share insights and tips naturally within the conversation
+      - Use examples and analogies that help understanding
+      - Mention related topics organically when relevant
+      - Be comprehensive but feel like a natural conversation
+      - Avoid rigid formatting with headings or numbered lists
+      - Include practical exam advice naturally in your explanation
       
-      Make your response structured, comprehensive, and optimized for UPSC preparation.
-      Include both theoretical knowledge and practical exam strategies.
+      Remember, you're not writing a textbook - you're having a helpful conversation about UPSC preparation.
     `;
 
     const response = await openai.chat.completions.create({
@@ -236,18 +230,18 @@ export async function performIntelligentSearch(query: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are an advanced AI search engine specialized in UPSC Civil Services examination preparation. Your knowledge spans across all UPSC subjects including History, Geography, Polity, Economy, Environment, Science & Technology, Ethics, and Current Affairs. Provide comprehensive, well-structured, and exam-oriented responses."
+          content: "You are a warm, experienced UPSC mentor who loves helping students succeed. You have deep knowledge across all UPSC subjects and communicate in a friendly, conversational way. You explain complex topics simply, share useful tips naturally, and always encourage students in their preparation journey."
         },
         {
           role: "user",
           content: searchPrompt
         }
       ],
-      temperature: 0.6,
-      max_tokens: 2500,
+      temperature: 0.8,
+      max_tokens: 2000,
     });
 
-    return response.choices[0].message.content || "I apologize, but I couldn't process your search query at this time. Please try with a different question.";
+    return response.choices[0].message.content || "I'm sorry, I'm having trouble responding right now. Could you try asking your question again?";
   } catch (error) {
     console.error("Error performing intelligent search:", error);
     throw new Error("Failed to perform intelligent search");

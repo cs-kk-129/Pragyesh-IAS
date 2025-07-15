@@ -42,9 +42,9 @@ export default function Chat() {
 
           <div className="grid gap-6 md:grid-cols-12">
             <div className="md:col-span-8 lg:col-span-9">
-              <Card className="h-[calc(100vh-12rem)]">
-                <Tabs defaultValue="chat" value={activeTab} onValueChange={setActiveTab}>
-                  <CardHeader className="pb-0">
+              <Card className="h-[calc(100vh-12rem)] flex flex-col">
+                <Tabs defaultValue="chat" value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+                  <CardHeader className="pb-0 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <CardTitle>Doubt Solver</CardTitle>
                       <TabsList>
@@ -56,7 +56,7 @@ export default function Chat() {
                       Ask any UPSC-related questions and get instant answers
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-6 h-[calc(100%-5rem)]">
+                  <CardContent className="pt-6 flex-1 min-h-0 overflow-hidden">
                     <TabsContent value="chat" className="h-full mt-0 p-0">
                       <ChatInterface chatHistory={chatHistory || []} />
                     </TabsContent>
@@ -75,7 +75,7 @@ export default function Chat() {
                                   <p className="text-sm whitespace-pre-line">{chat.response}</p>
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-2">
-                                  {new Date(chat.createdAt).toLocaleString()}
+                                  {chat.createdAt ? new Date(chat.createdAt).toLocaleString() : ""}
                                 </div>
                               </div>
                             ))
