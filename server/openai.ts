@@ -161,6 +161,11 @@ export async function generateStudyPlan(
 // Answer a doubt from a user with conversational approach
 export async function answerDoubt(question: string): Promise<string> {
   try {
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "your-api-key-here") {
+      throw new Error("OpenAI API key not configured");
+    }
+
     const prompt = `
       A UPSC aspirant just asked you: "${question}"
       
@@ -199,6 +204,18 @@ export async function answerDoubt(question: string): Promise<string> {
     return response.choices[0].message.content || "I'm sorry, I'm having trouble responding right now. Could you try asking your question again?";
   } catch (error) {
     console.error("Error answering doubt:", error);
+    
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('billing_not_active') || error.message.includes('rate_limit_exceeded')) {
+        throw new Error("OpenAI API billing issue - please check your API key and billing status");
+      } else if (error.message.includes('invalid_api_key') || error.message.includes('authentication')) {
+        throw new Error("Invalid OpenAI API key - please check your API key configuration");
+      } else if (error.message.includes('OpenAI API key not configured')) {
+        throw new Error("OpenAI API key not configured - please add your API key to Replit Secrets");
+      }
+    }
+    
     throw new Error("Failed to answer doubt");
   }
 }
@@ -206,6 +223,11 @@ export async function answerDoubt(question: string): Promise<string> {
 // Enhanced AI search function for conversational query processing
 export async function performIntelligentSearch(query: string): Promise<string> {
   try {
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "your-api-key-here") {
+      throw new Error("OpenAI API key not configured");
+    }
+
     const searchPrompt = `
       You are a friendly and knowledgeable UPSC mentor having a conversation with a student. 
       
@@ -244,6 +266,18 @@ export async function performIntelligentSearch(query: string): Promise<string> {
     return response.choices[0].message.content || "I'm sorry, I'm having trouble responding right now. Could you try asking your question again?";
   } catch (error) {
     console.error("Error performing intelligent search:", error);
+    
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('billing_not_active') || error.message.includes('rate_limit_exceeded')) {
+        throw new Error("OpenAI API billing issue - please check your API key and billing status");
+      } else if (error.message.includes('invalid_api_key') || error.message.includes('authentication')) {
+        throw new Error("Invalid OpenAI API key - please check your API key configuration");
+      } else if (error.message.includes('OpenAI API key not configured')) {
+        throw new Error("OpenAI API key not configured - please add your API key to Replit Secrets");
+      }
+    }
+    
     throw new Error("Failed to perform intelligent search");
   }
 }

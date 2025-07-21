@@ -2007,8 +2007,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing chat message:", error);
       
-      // Provide fallback response
-      const fallbackResponse = "I apologize, but I'm experiencing technical difficulties. Please try asking your question again, or contact support if the issue persists.";
+      // Provide specific error messages based on the error type
+      let fallbackResponse = "I apologize, but I'm experiencing technical difficulties. Please try asking your question again, or contact support if the issue persists.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('OpenAI API key not configured')) {
+          fallbackResponse = "The AI chat service is not properly configured. Please contact the administrator to set up the OpenAI API key.";
+        } else if (error.message.includes('OpenAI API billing issue')) {
+          fallbackResponse = "The AI chat service is temporarily unavailable due to billing issues. Please contact the administrator or try again later.";
+        } else if (error.message.includes('Invalid OpenAI API key')) {
+          fallbackResponse = "The AI chat service is not properly configured. Please contact the administrator to update the API key.";
+        }
+      }
       
       try {
         const chatMessage = await storage.createChatMessage({
