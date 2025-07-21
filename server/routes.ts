@@ -867,7 +867,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userAnswer: userAnswer?.answer,
         correctAnswer,
         isCorrect,
-```text
         isAttempted,
         timeSpent: questionTime,
         timeCategory,
