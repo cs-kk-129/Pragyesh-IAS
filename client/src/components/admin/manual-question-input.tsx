@@ -244,7 +244,7 @@ export default function ManualQuestionInput() {
       setCurrentPage(1); // Reset to first page
       toast({
         title: "File Processed Successfully",
-        description: `Extracted ${processedQuestions.length} bilingual questions from file. ${processedQuestions.length > MAX_QUESTIONS ? `Showing first ${MAX_QUESTIONS} questions. ` : ''}Select questions to create mock test.`
+        description: `Extracted ${processedQuestions.length} bilingual questions from file${data.chunksProcessed ? ` (processed in ${data.chunksProcessed} chunks)` : ''}. ${processedQuestions.length > MAX_QUESTIONS ? `Showing first ${MAX_QUESTIONS} questions. ` : ''}Select questions to create mock test.`
       });
     } catch (error) {
       console.error('Error processing file:', error);

@@ -336,78 +336,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: `Unsupported file format: ${fileExtension}. Supported formats: .txt, .csv, .json, .pdf, .docx` });
       }
 
-      // Use OpenAI to extract and structure questions from the text with bilingual support
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert at extracting and structuring UPSC exam questions from various text formats with bilingual capability.
-
-            IMPORTANT INSTRUCTIONS:
-            1. Extract ALL questions from the provided text - do not limit the number
-            2. For EACH question, provide BOTH English and Hindi versions
-            3. If questions are only in English, translate them to Hindi
-            4. If questions are only in Hindi, translate them to English
-            5. If no subject/topic is mentioned, leave as null - DO NOT assign default values
-            6. Maintain accuracy and context in translations
-
-            Format your response as a JSON object with this structure:
-            {
-              "questions": [
-                {
-                  "question": {
-                    "english": "Question text in English",
-                    "hindi": "प्रश्न का हिंदी अनुवाद"
-                  },
-                  "options": {
-                    "english": ["Option A", "Option B", "Option C", "Option D"],
-                    "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
-                  },
-                  "correctAnswer": {
-                    "english": "Correct option text in English",
-                    "hindi": "सही विकल्प का हिंदी अनुवाद"
-                  },
-                  "explanation": {
-                    "english": "Explanation in English",
-                    "hindi": "हिंदी में व्याख्या"
-                  },
-                  "subject": "Subject name if mentioned, otherwise null",
-                  "topic": "Topic name if mentioned, otherwise null",
-                  "difficulty": "easy/medium/hard",
-                  "marks": 2
-                }
-              ]
-            }
-
-            CRITICAL: 
-            - Extract ALL questions, not just a subset
-            - Always provide bilingual content
-            - Use null for subject/topic if not clearly specified in the text
-            - Ensure translations are accurate and contextually appropriate for UPSC preparation`
-          },
-          {
-            role: "user",
-            content: `Please extract ALL questions from this text and provide them in bilingual format:\n\n${extractedText}`
+      // Process large documents in chunks to handle all questions
+      console.log(`Text length: ${extractedText.length} characters. Processing in chunks for complete extraction.`);
+      
+      const allQuestions = [];
+      const CHUNK_SIZE = 15000; // Characters per chunk to stay within token limits
+      const textChunks = [];
+      
+      // Split text into manageable chunks while trying to preserve question boundaries
+      for (let i = 0; i < extractedText.length; i += CHUNK_SIZE) {
+        let chunk = extractedText.substring(i, i + CHUNK_SIZE);
+        
+        // Try to end chunk at a question boundary to avoid cutting questions in half
+        if (i + CHUNK_SIZE < extractedText.length) {
+          const lastQuestionEnd = chunk.lastIndexOf('\n\n');
+          if (lastQuestionEnd > CHUNK_SIZE * 0.8) { // Only adjust if we're not cutting too much
+            chunk = chunk.substring(0, lastQuestionEnd);
           }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 8000  // Increased token limit to handle more questions
-      });
+        }
+        
+        if (chunk.trim()) {
+          textChunks.push(chunk.trim());
+        }
+      }
+      
+      console.log(`Split document into ${textChunks.length} chunks for processing`);
+      
+      // Process each chunk
+      for (let chunkIndex = 0; chunkIndex < textChunks.length; chunkIndex++) {
+        const chunk = textChunks[chunkIndex];
+        console.log(`Processing chunk ${chunkIndex + 1}/${textChunks.length} (${chunk.length} characters)`);
+        
+        try {
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: `You are an expert at extracting and structuring UPSC exam questions from text with bilingual capability.
 
-      const result = JSON.parse(response.choices[0].message.content || "{}");
+                IMPORTANT INSTRUCTIONS:
+                1. Extract ALL questions from this text chunk - do not limit the number
+                2. For EACH question, provide BOTH English and Hindi versions
+                3. If questions are only in English, translate them to Hindi
+                4. If questions are only in Hindi, translate them to English
+                5. If no subject/topic is mentioned, leave as null - DO NOT assign default values
+                6. Maintain accuracy and context in translations
+                7. This is chunk ${chunkIndex + 1} of ${textChunks.length} - extract ALL questions in this chunk
 
-      if (!result.questions || !Array.isArray(result.questions)) {
-        throw new Error("Could not extract valid questions from file");
+                Format your response as a JSON object with this structure:
+                {
+                  "questions": [
+                    {
+                      "question": {
+                        "english": "Question text in English",
+                        "hindi": "प्रश्न का हिंदी अनुवाद"
+                      },
+                      "options": {
+                        "english": ["Option A", "Option B", "Option C", "Option D"],
+                        "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
+                      },
+                      "correctAnswer": {
+                        "english": "Correct option text in English",
+                        "hindi": "सही विकल्प का हिंदी अनुवाद"
+                      },
+                      "explanation": {
+                        "english": "Explanation in English",
+                        "hindi": "हिंदी में व्याख्या"
+                      },
+                      "subject": "Subject name if mentioned, otherwise null",
+                      "topic": "Topic name if mentioned, otherwise null",
+                      "difficulty": "easy/medium/hard",
+                      "marks": 2
+                    }
+                  ]
+                }
+
+                CRITICAL: Extract ALL questions in this chunk, provide bilingual content for each`
+              },
+              {
+                role: "user",
+                content: `Please extract ALL questions from this text chunk and provide them in bilingual format:\n\n${chunk}`
+              }
+            ],
+            response_format: { type: "json_object" },
+            max_tokens: 8000
+          });
+
+          const result = JSON.parse(response.choices[0].message.content || "{}");
+          
+          if (result.questions && Array.isArray(result.questions)) {
+            allQuestions.push(...result.questions);
+            console.log(`Extracted ${result.questions.length} questions from chunk ${chunkIndex + 1}`);
+          } else {
+            console.warn(`No valid questions extracted from chunk ${chunkIndex + 1}`);
+          }
+          
+          // Add small delay between requests to avoid rate limiting
+          if (chunkIndex < textChunks.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+        } catch (chunkError) {
+          console.error(`Error processing chunk ${chunkIndex + 1}:`, chunkError);
+          // Continue with other chunks even if one fails
+        }
       }
 
-      console.log(`Successfully processed ${fileExtension} file and extracted ${result.questions.length} questions`);
+      if (allQuestions.length === 0) {
+        throw new Error("Could not extract any valid questions from file");
+      }
+
+      console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
 
       res.json({ 
         success: true, 
-        questions: result.questions,
-        count: result.questions.length,
-        fileType: fileExtension
+        questions: allQuestions,
+        count: allQuestions.length,
+        fileType: fileExtension,
+        chunksProcessed: textChunks.length
       });
 
     } catch (error) {

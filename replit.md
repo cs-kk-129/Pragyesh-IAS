@@ -118,3 +118,4 @@ Changelog:
   * Enhanced pagination display with 15 questions per page and improved UI for bilingual content
   * Updated OpenAI prompts to extract complete question sets with proper translation
   * Fixed AI chat responses to be conversational and natural instead of structured format
+  * Implemented chunked processing for large documents to handle 150+ questions without limitations
