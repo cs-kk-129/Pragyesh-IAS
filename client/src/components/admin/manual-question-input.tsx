@@ -173,6 +173,10 @@ export default function ManualQuestionInput() {
     enabled: !!selectedSubject
   });
 
+  const maxQuestions = 300;
+  const questionsPerPage = 15;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Handle file upload processing
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -216,7 +220,7 @@ export default function ManualQuestionInput() {
       setFileQuestions(processedQuestions);
       toast({
         title: "File Processed Successfully",
-        description: `Extracted ${processedQuestions.length} questions from file. Select questions to create mock test.`
+        description: `Extracted ${processedQuestions.length} questions from file. ${processedQuestions.length > maxQuestions ? `Showing first ${maxQuestions} questions. ` : ''}Select questions to create mock test.`
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -344,7 +348,7 @@ export default function ManualQuestionInput() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <h4 className="font-medium">Questions from File ({fileQuestions.length} extracted)</h4>
+                  <h4 className="font-medium">Questions from File ({fileQuestions.length} extracted{fileQuestions.length > maxQuestions ? `, showing first ${maxQuestions}` : ''})</h4>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       checked={selectAllFile}
@@ -358,7 +362,7 @@ export default function ManualQuestionInput() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">
-                    {fileQuestions.filter(q => q.isSelected).length} of {fileQuestions.length} selected
+                    {fileQuestions.slice(0, maxQuestions).filter(q => q.isSelected).length} of {Math.min(fileQuestions.length, maxQuestions)} selected
                   </span>
                   <Button
                     onClick={createMockTestFromSelected}
@@ -370,64 +374,160 @@ export default function ManualQuestionInput() {
                 </div>
               </div>
 
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {fileQuestions.map((question, index) => (
-                  <Card key={index} className={question.isSelected ? "ring-2 ring-primary" : ""}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          checked={question.isSelected}
-                          onCheckedChange={(checked) => {
-                            setFileQuestions(prev => prev.map((q, i) => 
-                              i === index ? { ...q, isSelected: checked as boolean } : q
-                            ));
-                          }}
-                        />
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline">{question.subject}</Badge>
-                              <Badge variant="outline">{question.difficulty}</Badge>
-                              <span className="text-sm text-muted-foreground">
-                                {question.marks} marks
-                              </span>
-                            </div>
+              {/* Paginated Questions Display */}
+              <div className="space-y-4">
+                {(() => {
+                  const displayQuestions = fileQuestions.slice(0, maxQuestions);
+                  const totalPages = Math.ceil(displayQuestions.length / questionsPerPage);
+                  const startIndex = (currentPage - 1) * questionsPerPage;
+                  const endIndex = startIndex + questionsPerPage;
+                  const currentQuestions = displayQuestions.slice(startIndex, endIndex);
+
+                  return (
+                    <>
+                      {/* Questions Grid */}
+                      <div className="space-y-4">
+                        {currentQuestions.map((question, index) => {
+                          const actualIndex = startIndex + index;
+                          return (
+                            <Card key={actualIndex} className={question.isSelected ? "ring-2 ring-primary" : ""}>
+                              <CardContent className="p-4">
+                                <div className="flex items-start space-x-3">
+                                  <Checkbox
+                                    checked={question.isSelected}
+                                    onCheckedChange={(checked) => {
+                                      setFileQuestions(prev => prev.map((q, i) => 
+                                        i === actualIndex ? { ...q, isSelected: checked as boolean } : q
+                                      ));
+                                    }}
+                                  />
+                                  <div className="flex-1 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-sm font-medium text-gray-500">#{actualIndex + 1}</span>
+                                        <Badge variant="outline">{question.subject}</Badge>
+                                        <Badge variant="outline">{question.difficulty}</Badge>
+                                        <span className="text-sm text-muted-foreground">
+                                          {question.marks} marks
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <p className="font-medium">{question.question}</p>
+
+                                    {question.options && question.options.length > 0 && (
+                                      <div className="grid grid-cols-2 gap-2">
+                                        {question.options.map((option: string, optIndex: number) => (
+                                          <div
+                                            key={optIndex}
+                                            className={`p-2 rounded border ${
+                                              optIndex === question.correctAnswer
+                                                ? "bg-green-50 border-green-200"
+                                                : "bg-gray-50"
+                                            }`}
+                                          >
+                                            <span className="text-sm">
+                                              {String.fromCharCode(65 + optIndex)}. {option}
+                                              {optIndex === question.correctAnswer && (
+                                                <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
+                                              )}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {question.explanation && (
+                                      <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
+                                        <strong>Explanation:</strong> {question.explanation}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t pt-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-muted-foreground">
+                              Page {currentPage} of {totalPages} | Showing {startIndex + 1}-{Math.min(endIndex, displayQuestions.length)} of {displayQuestions.length} questions
+                            </span>
                           </div>
 
-                          <p className="font-medium">{question.question}</p>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(1)}
+                              disabled={currentPage === 1}
+                            >
+                              First
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentPage === 1}
+                            >
+                              Previous
+                            </Button>
 
-                          {question.options && question.options.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2">
-                              {question.options.map((option: string, optIndex: number) => (
-                                <div
-                                  key={optIndex}
-                                  className={`p-2 rounded border ${
-                                    optIndex === question.correctAnswer
-                                      ? "bg-green-50 border-green-200"
-                                      : "bg-gray-50"
-                                  }`}
-                                >
-                                  <span className="text-sm">
-                                    {String.fromCharCode(65 + optIndex)}. {option}
-                                    {optIndex === question.correctAnswer && (
-                                      <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
-                                    )}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                            {/* Page Numbers */}
+                            <div className="flex items-center space-x-1">
+                              {(() => {
+                                const pageNumbers = [];
+                                const maxVisiblePages = 7;
+                                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-                          {question.explanation && (
-                            <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
-                              <strong>Explanation:</strong> {question.explanation}
+                                if (endPage - startPage < maxVisiblePages - 1) {
+                                  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                }
+
+                                for (let i = startPage; i <= endPage; i++) {
+                                  pageNumbers.push(
+                                    <Button
+                                      key={i}
+                                      variant={currentPage === i ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => setCurrentPage(i)}
+                                      className="w-8 h-8 p-0"
+                                    >
+                                      {i}
+                                    </Button>
+                                  );
+                                }
+                                return pageNumbers;
+                              })()}
                             </div>
-                          )}
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(totalPages)}
+                              disabled={currentPage === totalPages}
+                            >
+                              Last
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}

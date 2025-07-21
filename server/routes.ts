@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Limit to reasonable number for API constraints
-      const questionCount = requestedCount && requestedCount <= 50 ? requestedCount : 10;
+      const questionCount = requestedCount && requestedCount <= 300 ? requestedCount : 10;
 
       console.log(`Question generation: Requested ${requestedCount}, Using ${questionCount}`);
 
@@ -289,14 +289,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case '.pdf':
           try {
             console.log('Processing PDF file...');
-            
+
             // For now, we'll prompt the user to convert PDF to text
             // This avoids the pdf-parse library issue while maintaining functionality
             return res.status(400).json({ 
               error: "PDF processing is temporarily unavailable. Please convert your PDF to a .txt or .docx file and upload again.",
               details: "PDF text extraction is being updated for better reliability"
             });
-            
+
           } catch (pdfError) {
             console.error('PDF processing error:', pdfError);
             return res.status(400).json({ 
@@ -311,18 +311,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log('Processing DOCX file...');
             const docxResult = await mammoth.extractRawText({ buffer: file.buffer });
             extractedText = docxResult.value;
-            
+
             if (!extractedText.trim()) {
               throw new Error("Could not extract text from DOCX file");
             }
-            
+
             console.log(`Successfully extracted ${extractedText.length} characters from DOCX`);
-            
+
             // Log any conversion warnings
             if (docxResult.messages && docxResult.messages.length > 0) {
               console.log('DOCX conversion warnings:', docxResult.messages);
             }
-            
+
           } catch (docxError) {
             console.error('DOCX processing error:', docxError);
             return res.status(400).json({ 
@@ -867,6 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userAnswer: userAnswer?.answer,
         correctAnswer,
         isCorrect,
+```text
         isAttempted,
         timeSpent: questionTime,
         timeCategory,
@@ -1770,8 +1771,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           const isScheduledForToday = testDate.getTime() === today.getTime();
 
-          // Determine test status based on questions, date, and attempt status```text
-        let testStatus = 'not_started';
+          // Determine test status based on questions, date, and attempt status
+          let testStatus = 'not_started';
           let isActive = false;
 
           if (isAlreadyAttempted) {
@@ -2056,10 +2057,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(chatMessage);
     } catch (error) {
       console.error("Error processing chat message:", error);
-      
+
       // Provide specific error messages based on the error type
       let fallbackResponse = "I apologize, but I'm experiencing technical difficulties. Please try asking your question again, or contact support if the issue persists.";
-      
+
       if (error instanceof Error) {
         if (error.message.includes('OpenAI API key not configured')) {
           fallbackResponse = "The AI chat service is not properly configured. Please contact the administrator to set up the OpenAI API key.";
@@ -2069,7 +2070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fallbackResponse = "The AI chat service is not properly configured. Please contact the administrator to update the API key.";
         }
       }
-      
+
       try {
         const chatMessage = await storage.createChatMessage({
           userId: (req as any).user.id,
