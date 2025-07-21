@@ -253,24 +253,7 @@ export default function ManualQuestionInput() {
     }
   };
 
-  const createMockTestFromSelected = async () => {
-    const selectedQuestions = fileQuestions.filter(q => q.isSelected);
-    if (selectedQuestions.length === 0) {
-      toast({
-        title: "No Questions Selected",
-        description: "Please select at least one question to create a mock test."
-      });
-      return;
-    }
-
-    // Handle mock test creation with selected questions
-    console.log("Creating mock test with selected questions:", selectedQuestions);
-
-    toast({
-      title: "Mock Test Created",
-      description: `Mock test created with ${selectedQuestions.length} questions.`
-    });
-  };
+  
 
   const submitAllQuestions = () => {
     if (questions.length === 0 && fileQuestions.length === 0) {
@@ -389,7 +372,17 @@ export default function ManualQuestionInput() {
                     {fileQuestions.filter(q => q.isSelected).length} of {totalDisplayed} selected
                   </span>
                   <Button
-                    onClick={createMockTestFromSelected}
+                    onClick={() => {
+                      const selectedQuestions = fileQuestions.filter(q => q.isSelected);
+                      if (selectedQuestions.length === 0) {
+                        toast({
+                          title: "No Questions Selected",
+                          description: "Please select at least one question to create a mock test."
+                        });
+                        return;
+                      }
+                      setShowMockTestDialog(true);
+                    }}
                     disabled={fileQuestions.filter(q => q.isSelected).length === 0}
                     className="bg-gradient-to-r from-blue-500 to-blue-600"
                   >
@@ -794,7 +787,7 @@ export default function ManualQuestionInput() {
               Cancel
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 const allQuestions = [
                   ...questions,
                   ...fileQuestions.filter(q => selectAllFile || q.isSelected)
@@ -818,14 +811,58 @@ export default function ManualQuestionInput() {
                   return;
                 }
 
-                // Use createMockTestMutation for consistency
-                createMockTestMutation.mutate({
-                  title: mockTestData.title,
-                  description: mockTestData.description,
-                  duration: mockTestData.duration,
-                  scheduledDate: mockTestData.scheduledDate,
-                  questions: allQuestions
-                });
+                try {
+                  // First save questions to get their IDs
+                  const response = await apiRequest("POST", "/api/admin/questions/manual", {
+                    questions: allQuestions,
+                    subjectId: selectedSubject || "1",
+                    topicId: selectedTopic || "1"
+                  });
+                  
+                  const savedQuestionsData = await response.json();
+                  const questionIds = savedQuestionsData.questions?.map((q: any) => q.id) || [];
+
+                  if (questionIds.length === 0) {
+                    throw new Error("Failed to save questions");
+                  }
+
+                  // Then create mock test with question IDs
+                  const mockTestResponse = await apiRequest("POST", "/api/admin/create-mock-test", {
+                    title: mockTestData.title,
+                    description: mockTestData.description,
+                    duration: mockTestData.duration,
+                    testDate: mockTestData.scheduledDate,
+                    selectedQuestionIds: questionIds
+                  });
+
+                  const mockTestResult = await mockTestResponse.json();
+
+                  if (mockTestResult.success) {
+                    toast({
+                      title: "Mock Test Created Successfully",
+                      description: `Mock test "${mockTestData.title}" has been created with ${questionIds.length} questions.`
+                    });
+                    setShowMockTestDialog(false);
+                    setQuestions([]);
+                    setFileQuestions([]);
+                    setMockTestData({
+                      title: "",
+                      description: "",
+                      duration: 120,
+                      scheduledDate: new Date().toISOString().split('T')[0],
+                      difficulty: "medium"
+                    });
+                  } else {
+                    throw new Error(mockTestResult.error || "Failed to create mock test");
+                  }
+                } catch (error) {
+                  console.error("Mock test creation error:", error);
+                  toast({
+                    title: "Error",
+                    description: error instanceof Error ? error.message : "Failed to create mock test",
+                    variant: "destructive"
+                  });
+                }
               }}
               disabled={createMockTestMutation.isPending}
               className="bg-gradient-to-r from-blue-500 to-blue-600"

@@ -1526,6 +1526,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { title, description, duration, testDate, selectedQuestionIds } = req.body;
 
+      if (!title || !title.trim()) {
+        return res.status(400).json({ error: "Title is required" });
+      }
+
       if (!selectedQuestionIds || selectedQuestionIds.length === 0) {
         return res.status(400).json({ error: "No questions selected" });
       }
@@ -1539,16 +1543,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No valid questions selected" });
       }
 
-      console.log(`Creating mock test with ${validQuestionIds.length} valid selected questions:`, validQuestionIds);
+      console.log(`Creating mock test "${title}" with ${validQuestionIds.length} valid selected questions`);
 
       // Create quiz record in database first
       const quiz = await storage.createQuiz({
-        title,
+        title: title.trim(),
         quizType: 'mock_test',
         difficulty: 'medium',
-        timeLimit: duration,
-        testDate: new Date(testDate),
-        description: description || '',
+        timeLimit: duration || 120,
+        testDate: testDate ? new Date(testDate) : new Date(),
+        description: description?.trim() || '',
         language: 'both',
         subjectId: 1, // Default subject
         topicId: null,
@@ -1593,14 +1597,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Verification: Quiz ${quiz.id} now has ${assignedQuestions.length} questions assigned`);
 
-      // Don't delete unassigned questions immediately - give admin a chance to create more tests
-      // Clean up will happen later if needed
+      // Add to in-memory storage for immediate visibility
+      const mockTestForMemory = {
+        id: quiz.id,
+        title: quiz.title,
+        description: quiz.description || '',
+        duration: quiz.timeLimit || 120,
+        scheduledDate: quiz.testDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+        questions: assignedQuestions.map((q, index) => ({
+          id: q.id,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          subject: 'General Studies',
+          topic: 'Mixed Topics',
+          difficulty: q.difficulty || 'medium',
+          marks: 2
+        })),
+        totalQuestions: assignedQuestions.length,
+        difficulty: 'medium',
+        subjects: ['General Studies'],
+        isActive: true,
+        isAttempted: false,
+        status: 'not_started',
+        createdAt: new Date().toISOString()
+      };
+
+      // Add to global mockTests array for immediate visibility
+      const mockTestsIndex = mockTests.findIndex(test => test.id === quiz.id);
+      if (mockTestsIndex >= 0) {
+        mockTests[mockTestsIndex] = mockTestForMemory;
+      } else {
+        mockTests.push(mockTestForMemory);
+      }
+
+      console.log(`Mock test "${title}" created successfully with ${assignedQuestions.length} questions and added to memory`);
 
       res.json({ 
         success: true, 
-        mockTest: quiz,
-        questionsAssigned: updatedCount,
-        verifiedQuestions: assignedQuestions.length
+        mockTest: {
+          ...quiz,
+          questionsAssigned: updatedCount,
+          verifiedQuestions: assignedQuestions.length
+        }
       });
     } catch (error) {
       console.error("Mock test creation error:", error);
