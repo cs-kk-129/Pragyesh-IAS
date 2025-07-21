@@ -111,3 +111,10 @@ Preferred communication style: Simple, everyday language.
 
 Changelog:
 - June 17, 2025. Initial setup
+- July 21, 2025. Enhanced file upload processing with comprehensive bilingual support:
+  * Fixed question extraction to capture ALL questions from uploaded files (not just subset)
+  * Added automatic translation capability for monolingual content to bilingual format
+  * Implemented proper null handling for unspecified subjects/topics instead of default assignment
+  * Enhanced pagination display with 15 questions per page and improved UI for bilingual content
+  * Updated OpenAI prompts to extract complete question sets with proper translation
+  * Fixed AI chat responses to be conversational and natural instead of structured format

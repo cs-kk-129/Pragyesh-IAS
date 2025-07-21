@@ -203,22 +203,40 @@ export default function ManualQuestionInput() {
 
       const data = await response.json();
 
-      // Convert processed file data to question format with selection capability
-      const processedQuestions: Question[] = data.questions.map((q: any, index: number) => ({
-        question: q.question || q.text || '',
-        questionHindi: q.questionHindi || '',
-        options: Array.isArray(q.options) ? q.options : [],
-        optionsHindi: q.optionsHindi || [],
-        correctAnswer: Array.isArray(q.options) ?
-          (q.options.indexOf(q.correctAnswer) !== -1 ? q.options.indexOf(q.correctAnswer) : 0) : 0,
-        explanation: q.explanation || '',
-        explanationHindi: q.explanationHindi || '',
-        difficulty: q.difficulty || 'medium',
-        marks: q.marks || 2,
-        subject: q.subject || 'General Knowledge',
-        topic: q.topic || 'Mixed Topics',
-        isSelected: false
-      }));
+      // Convert processed file data to question format with bilingual support
+      const processedQuestions: Question[] = data.questions.map((q: any, index: number) => {
+        // Handle bilingual question structure
+        const questionText = typeof q.question === 'object' ? q.question.english : (q.question || q.text || '');
+        const questionHindi = typeof q.question === 'object' ? q.question.hindi : (q.questionHindi || '');
+        
+        // Handle bilingual options
+        const optionsEnglish = typeof q.options === 'object' ? q.options.english : (Array.isArray(q.options) ? q.options : []);
+        const optionsHindi = typeof q.options === 'object' ? q.options.hindi : (q.optionsHindi || []);
+        
+        // Handle bilingual correct answer
+        const correctAnswerText = typeof q.correctAnswer === 'object' ? q.correctAnswer.english : q.correctAnswer;
+        const correctAnswerIndex = Array.isArray(optionsEnglish) ? 
+          (optionsEnglish.indexOf(correctAnswerText) !== -1 ? optionsEnglish.indexOf(correctAnswerText) : 0) : 0;
+        
+        // Handle bilingual explanation
+        const explanationText = typeof q.explanation === 'object' ? q.explanation.english : (q.explanation || '');
+        const explanationHindi = typeof q.explanation === 'object' ? q.explanation.hindi : (q.explanationHindi || '');
+        
+        return {
+          question: questionText,
+          questionHindi: questionHindi,
+          options: optionsEnglish,
+          optionsHindi: optionsHindi,
+          correctAnswer: correctAnswerIndex,
+          explanation: explanationText,
+          explanationHindi: explanationHindi,
+          difficulty: q.difficulty || 'medium',
+          marks: q.marks || 2,
+          subject: q.subject || '', // Leave empty if not specified
+          topic: q.topic || '',     // Leave empty if not specified
+          isSelected: false
+        };
+      });
 
       // Limit to maximum 300 questions
       const limitedQuestions = processedQuestions.slice(0, MAX_QUESTIONS);
@@ -226,7 +244,7 @@ export default function ManualQuestionInput() {
       setCurrentPage(1); // Reset to first page
       toast({
         title: "File Processed Successfully",
-        description: `Extracted ${processedQuestions.length} questions from file. ${processedQuestions.length > MAX_QUESTIONS ? `Showing first ${MAX_QUESTIONS} questions. ` : ''}Select questions to create mock test.`
+        description: `Extracted ${processedQuestions.length} bilingual questions from file. ${processedQuestions.length > MAX_QUESTIONS ? `Showing first ${MAX_QUESTIONS} questions. ` : ''}Select questions to create mock test.`
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -416,7 +434,15 @@ export default function ManualQuestionInput() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-medium text-gray-500">#{startIndex + index + 1}</span>
-                              <Badge variant="outline">{question.subject}</Badge>
+                              {question.subject && (
+                                <Badge variant="outline">{question.subject}</Badge>
+                              )}
+                              {question.topic && (
+                                <Badge variant="secondary">{question.topic}</Badge>
+                              )}
+                              {!question.subject && !question.topic && (
+                                <Badge variant="destructive">No Category</Badge>
+                              )}
                               <Badge variant="outline">{question.difficulty}</Badge>
                               <span className="text-sm text-muted-foreground">
                                 {question.marks} marks
@@ -424,33 +450,83 @@ export default function ManualQuestionInput() {
                             </div>
                           </div>
 
-                          <p className="font-medium">{question.question}</p>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-xs text-muted-foreground">English:</span>
+                              <p className="font-medium">{question.question}</p>
+                            </div>
+                            {question.questionHindi && (
+                              <div>
+                                <span className="text-xs text-muted-foreground">Hindi:</span>
+                                <p className="font-medium">{question.questionHindi}</p>
+                              </div>
+                            )}
+                          </div>
 
                           {question.options && question.options.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2">
-                              {question.options.map((option: string, optIndex: number) => (
-                                <div
-                                  key={optIndex}
-                                  className={`p-2 rounded border ${
-                                    optIndex === question.correctAnswer
-                                      ? "bg-green-50 border-green-200"
-                                      : "bg-gray-50"
-                                  }`}
-                                >
-                                  <span className="text-sm">
-                                    {String.fromCharCode(65 + optIndex)}. {option}
-                                    {optIndex === question.correctAnswer && (
-                                      <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
-                                    )}
-                                  </span>
+                            <div className="space-y-3">
+                              <div>
+                                <span className="text-xs text-muted-foreground">Options (English):</span>
+                                <div className="grid grid-cols-2 gap-2 mt-1">
+                                  {question.options.map((option: string, optIndex: number) => (
+                                    <div
+                                      key={optIndex}
+                                      className={`p-2 rounded border ${
+                                        optIndex === question.correctAnswer
+                                          ? "bg-green-50 border-green-200"
+                                          : "bg-gray-50"
+                                      }`}
+                                    >
+                                      <span className="text-sm">
+                                        {String.fromCharCode(65 + optIndex)}. {option}
+                                        {optIndex === question.correctAnswer && (
+                                          <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
+                                        )}
+                                      </span>
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              </div>
+                              
+                              {question.optionsHindi && question.optionsHindi.length > 0 && (
+                                <div>
+                                  <span className="text-xs text-muted-foreground">Options (Hindi):</span>
+                                  <div className="grid grid-cols-2 gap-2 mt-1">
+                                    {question.optionsHindi.map((option: string, optIndex: number) => (
+                                      <div
+                                        key={optIndex}
+                                        className={`p-2 rounded border ${
+                                          optIndex === question.correctAnswer
+                                            ? "bg-green-50 border-green-200"
+                                            : "bg-gray-50"
+                                        }`}
+                                      >
+                                        <span className="text-sm">
+                                          {String.fromCharCode(65 + optIndex)}. {option}
+                                          {optIndex === question.correctAnswer && (
+                                            <CheckCircle className="inline h-4 w-4 ml-2 text-green-600" />
+                                          )}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
 
-                          {question.explanation && (
-                            <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
-                              <strong>Explanation:</strong> {question.explanation}
+                          {(question.explanation || question.explanationHindi) && (
+                            <div className="space-y-2">
+                              {question.explanation && (
+                                <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
+                                  <strong>Explanation (English):</strong> {question.explanation}
+                                </div>
+                              )}
+                              {question.explanationHindi && (
+                                <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
+                                  <strong>Explanation (Hindi):</strong> {question.explanationHindi}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>

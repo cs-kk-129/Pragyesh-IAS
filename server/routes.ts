@@ -336,51 +336,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: `Unsupported file format: ${fileExtension}. Supported formats: .txt, .csv, .json, .pdf, .docx` });
       }
 
-      // Use OpenAI to extract and structure questions from the text
+      // Use OpenAI to extract and structure questions from the text with bilingual support
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are an expert at extracting and structuring UPSC exam questions from various text formats. 
+            content: `You are an expert at extracting and structuring UPSC exam questions from various text formats with bilingual capability.
 
-            Analyze the provided text and extract/create well-structured multiple choice questions.
-
-            For each question, provide:
-            1. A clear, well-structured question
-            2. Four answer options (A, B, C, D) 
-            3. The correct answer
-            4. Subject classification
-            5. Topic classification
-            6. Difficulty level (easy/medium/hard)
-            7. Marks (usually 2 for UPSC)
-            8. Brief explanation
+            IMPORTANT INSTRUCTIONS:
+            1. Extract ALL questions from the provided text - do not limit the number
+            2. For EACH question, provide BOTH English and Hindi versions
+            3. If questions are only in English, translate them to Hindi
+            4. If questions are only in Hindi, translate them to English
+            5. If no subject/topic is mentioned, leave as null - DO NOT assign default values
+            6. Maintain accuracy and context in translations
 
             Format your response as a JSON object with this structure:
             {
               "questions": [
                 {
-                  "question": "Your question here",
-                  "options": ["Option A", "Option B", "Option C", "Option D"],
-                  "correctAnswer": "Option A",
-                  "subject": "Subject name",
-                  "topic": "Topic name",
-                  "difficulty": "medium",
-                  "marks": 2,
-                  "explanation": "Brief explanation"
+                  "question": {
+                    "english": "Question text in English",
+                    "hindi": "प्रश्न का हिंदी अनुवाद"
+                  },
+                  "options": {
+                    "english": ["Option A", "Option B", "Option C", "Option D"],
+                    "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
+                  },
+                  "correctAnswer": {
+                    "english": "Correct option text in English",
+                    "hindi": "सही विकल्प का हिंदी अनुवाद"
+                  },
+                  "explanation": {
+                    "english": "Explanation in English",
+                    "hindi": "हिंदी में व्याख्या"
+                  },
+                  "subject": "Subject name if mentioned, otherwise null",
+                  "topic": "Topic name if mentioned, otherwise null",
+                  "difficulty": "easy/medium/hard",
+                  "marks": 2
                 }
               ]
             }
 
-            If the text contains existing questions, extract them. If it's content/notes, create relevant questions from it.
-            Ensure all questions are factually accurate and appropriate for UPSC preparation.`
+            CRITICAL: 
+            - Extract ALL questions, not just a subset
+            - Always provide bilingual content
+            - Use null for subject/topic if not clearly specified in the text
+            - Ensure translations are accurate and contextually appropriate for UPSC preparation`
           },
           {
             role: "user",
-            content: `Please extract/create UPSC questions from this text:\n\n${extractedText}`
+            content: `Please extract ALL questions from this text and provide them in bilingual format:\n\n${extractedText}`
           }
         ],
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
+        max_tokens: 8000  // Increased token limit to handle more questions
       });
 
       const result = JSON.parse(response.choices[0].message.content || "{}");
