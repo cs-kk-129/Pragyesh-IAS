@@ -15,6 +15,8 @@ import multer from "multer";
 import path from "path";
 import crypto from "crypto";
 import OpenAI from "openai";
+import * as pdfParse from "pdf-parse";
+import * as mammoth from "mammoth";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -260,6 +262,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileExtension = path.extname(file.originalname).toLowerCase();
       let extractedText = '';
 
+      console.log(`Processing file: ${file.originalname}, Type: ${fileExtension}, Size: ${file.size} bytes`);
+
       // Process different file types
       switch (fileExtension) {
         case '.txt':
@@ -282,8 +286,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           break;
 
+        case '.pdf':
+          try {
+            console.log('Processing PDF file...');
+            const pdfData = await pdfParse(file.buffer);
+            extractedText = pdfData.text;
+            
+            if (!extractedText.trim()) {
+              throw new Error("Could not extract text from PDF - the document may be image-based or encrypted");
+            }
+            
+            console.log(`Successfully extracted ${extractedText.length} characters from PDF`);
+            
+          } catch (pdfError) {
+            console.error('PDF processing error:', pdfError);
+            return res.status(400).json({ 
+              error: "Failed to process PDF file. Please ensure the PDF contains readable text (not just images) and try again.",
+              details: pdfError instanceof Error ? pdfError.message : "Unknown error"
+            });
+          }
+          break;
+
+        case '.docx':
+          try {
+            console.log('Processing DOCX file...');
+            const docxResult = await mammoth.extractRawText({ buffer: file.buffer });
+            extractedText = docxResult.value;
+            
+            if (!extractedText.trim()) {
+              throw new Error("Could not extract text from DOCX file");
+            }
+            
+            console.log(`Successfully extracted ${extractedText.length} characters from DOCX`);
+            
+            // Log any conversion warnings
+            if (docxResult.messages && docxResult.messages.length > 0) {
+              console.log('DOCX conversion warnings:', docxResult.messages);
+            }
+            
+          } catch (docxError) {
+            console.error('DOCX processing error:', docxError);
+            return res.status(400).json({ 
+              error: "Failed to process DOCX file. Please ensure the document is a valid Word document and try again.",
+              details: docxError instanceof Error ? docxError.message : "Unknown error"
+            });
+          }
+          break;
+
         default:
-          return res.status(400).json({ error: "Unsupported file format" });
+          return res.status(400).json({ error: `Unsupported file format: ${fileExtension}. Supported formats: .txt, .csv, .json, .pdf, .docx` });
       }
 
       // Use OpenAI to extract and structure questions from the text
