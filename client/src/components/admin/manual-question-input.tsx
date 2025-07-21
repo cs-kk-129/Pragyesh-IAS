@@ -401,7 +401,7 @@ export default function ManualQuestionInput() {
               {/* Pagination Info */}
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
-                  Showing {startIndex + 1} to {endIndex} of {totalDisplayed} questions (Page {currentPage} of {totalPages})
+                  Showing {startIndex + 1} to {endIndex} of {fileQuestions.length} questions (Page {currentPage} of {totalPages})
                 </span>
               </div>
 
@@ -469,7 +469,7 @@ export default function ManualQuestionInput() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center space-x-2 pt-4 border-t">
+                <div className="flex items-center justify-between pt-4 border-t">
                   <Button
                     variant="outline"
                     size="sm"
