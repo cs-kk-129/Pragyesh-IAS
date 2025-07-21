@@ -339,6 +339,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process large documents in chunks to handle all questions
       console.log(`Text length: ${extractedText.length} characters. Processing in chunks for complete extraction.`);
       
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OpenAI API key not configured");
+      }
+      
       const allQuestions = [];
       const CHUNK_SIZE = 15000; // Characters per chunk to stay within token limits
       const textChunks = [];
@@ -439,6 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         } catch (chunkError) {
           console.error(`Error processing chunk ${chunkIndex + 1}:`, chunkError);
+          console.error(`Chunk error details:`, chunkError instanceof Error ? chunkError.message : String(chunkError));
           // Continue with other chunks even if one fails
         }
       }
@@ -459,6 +464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Error processing file:", error);
+      console.error("Full error details:", error instanceof Error ? error.stack : String(error));
       res.status(500).json({ 
         error: "Failed to process file",
         details: error instanceof Error ? error.message : "Unknown error"
