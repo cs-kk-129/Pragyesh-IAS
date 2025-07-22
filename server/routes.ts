@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const allQuestions = [];
-      const CHUNK_SIZE = 15000; // Characters per chunk to stay within token limits
+      const CHUNK_SIZE = 8000; // Reduced chunk size for better token management
       const textChunks = [];
       
       // Split text into manageable chunks while trying to preserve question boundaries
@@ -354,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try to end chunk at a question boundary to avoid cutting questions in half
         if (i + CHUNK_SIZE < extractedText.length) {
           const lastQuestionEnd = chunk.lastIndexOf('\n\n');
-          if (lastQuestionEnd > CHUNK_SIZE * 0.8) { // Only adjust if we're not cutting too much
+          if (lastQuestionEnd > CHUNK_SIZE * 0.7) { // More conservative boundary adjustment
             chunk = chunk.substring(0, lastQuestionEnd);
           }
         }
@@ -365,6 +365,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`Split document into ${textChunks.length} chunks for processing`);
+      console.log(`Chunk sizes: ${textChunks.map(chunk => chunk.length).join(', ')} characters`);
+      
+      // Estimate expected questions per chunk for validation
+      const avgQuestionLength = extractedText.length / 150; // Assuming 150 questions
+      const expectedQuestionsPerChunk = Math.ceil(CHUNK_SIZE / avgQuestionLength);
+      console.log(`Expected ~${expectedQuestionsPerChunk} questions per chunk based on text length`);
       
       // Process each chunk
       for (let chunkIndex = 0; chunkIndex < textChunks.length; chunkIndex++) {
@@ -377,68 +383,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
             messages: [
               {
                 role: "system",
-                content: `You are an expert at extracting and structuring UPSC exam questions from text with bilingual capability.
-
-                IMPORTANT INSTRUCTIONS:
-                1. Extract ALL questions from this text chunk - do not limit the number
-                2. For EACH question, provide BOTH English and Hindi versions
-                3. If questions are only in English, translate them to Hindi
-                4. If questions are only in Hindi, translate them to English
-                5. If no subject/topic is mentioned, leave as null - DO NOT assign default values
-                6. Maintain accuracy and context in translations
-                7. This is chunk ${chunkIndex + 1} of ${textChunks.length} - extract ALL questions in this chunk
-
-                Format your response as a JSON object with this structure:
+                content: `Extract ALL UPSC exam questions from the provided text chunk. 
+                
+                RULES:
+                1. Extract EVERY question in this chunk - no limits
+                2. Provide bilingual format (English + Hindi)
+                3. If only one language provided, translate to the other
+                4. Use null for unknown subjects/topics - never assign defaults
+                5. Ensure complete extraction - this is chunk ${chunkIndex + 1}/${textChunks.length}
+                
+                JSON format:
                 {
                   "questions": [
                     {
-                      "question": {
-                        "english": "Question text in English",
-                        "hindi": "प्रश्न का हिंदी अनुवाद"
-                      },
-                      "options": {
-                        "english": ["Option A", "Option B", "Option C", "Option D"],
-                        "hindi": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"]
-                      },
-                      "correctAnswer": {
-                        "english": "Correct option text in English",
-                        "hindi": "सही विकल्प का हिंदी अनुवाद"
-                      },
-                      "explanation": {
-                        "english": "Explanation in English",
-                        "hindi": "हिंदी में व्याख्या"
-                      },
-                      "subject": "Subject name if mentioned, otherwise null",
-                      "topic": "Topic name if mentioned, otherwise null",
-                      "difficulty": "easy/medium/hard",
+                      "question": {"english": "text", "hindi": "हिंदी"},
+                      "options": {"english": ["A","B","C","D"], "hindi": ["अ","ब","स","द"]},
+                      "correctAnswer": {"english": "text", "hindi": "हिंदी"},
+                      "explanation": {"english": "text", "hindi": "हिंदी"},
+                      "subject": null,
+                      "topic": null,
+                      "difficulty": "medium",
                       "marks": 2
                     }
                   ]
-                }
-
-                CRITICAL: Extract ALL questions in this chunk, provide bilingual content for each`
+                }`
               },
               {
                 role: "user",
-                content: `Please extract ALL questions from this text chunk and provide them in bilingual format:\n\n${chunk}`
+                content: `Extract ALL questions from this text chunk:\n\n${chunk}`
               }
             ],
             response_format: { type: "json_object" },
-            max_tokens: 8000
+            max_tokens: 4000, // Reduced to prevent truncation
+            temperature: 0.1 // Lower temperature for more consistent extraction
           });
 
-          const result = JSON.parse(response.choices[0].message.content || "{}");
+          const responseContent = response.choices[0].message.content;
+          
+          // Check if response was truncated
+          if (response.choices[0].finish_reason === 'length') {
+            console.warn(`Response truncated for chunk ${chunkIndex + 1} - may have missed questions`);
+          }
+
+          const result = JSON.parse(responseContent || "{}");
           
           if (result.questions && Array.isArray(result.questions)) {
+            const chunkQuestionCount = result.questions.length;
             allQuestions.push(...result.questions);
-            console.log(`Extracted ${result.questions.length} questions from chunk ${chunkIndex + 1}`);
+            console.log(`✓ Chunk ${chunkIndex + 1}/${textChunks.length}: Extracted ${chunkQuestionCount} questions (${chunk.length} chars)`);
+            
+            // Log first question as sample
+            if (chunkQuestionCount > 0) {
+              const firstQ = result.questions[0];
+              console.log(`  Sample: "${firstQ.question?.english?.substring(0, 60)}..."`);
+            }
           } else {
-            console.warn(`No valid questions extracted from chunk ${chunkIndex + 1}`);
+            console.error(`✗ Chunk ${chunkIndex + 1}/${textChunks.length}: No valid questions extracted`);
+            console.error(`  Response format: ${JSON.stringify(Object.keys(result))}`);
+            console.error(`  Raw response preview: ${responseContent?.substring(0, 300)}...`);
           }
           
-          // Add small delay between requests to avoid rate limiting
+          // Add delay between requests to avoid rate limiting
           if (chunkIndex < textChunks.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay for stability
           }
           
         } catch (chunkError) {
@@ -452,6 +459,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Could not extract any valid questions from file");
       }
 
+      // Calculate extraction efficiency
+      const extractionEfficiency = (allQuestions.length / 150) * 100;
+      
+      console.log(`=== EXTRACTION SUMMARY ===`);
+      console.log(`Total questions extracted: ${allQuestions.length} out of expected ~150`);
+      console.log(`Extraction efficiency: ${extractionEfficiency.toFixed(1)}%`);
+      console.log(`Chunks processed: ${textChunks.length}`);
+      console.log(`Questions per chunk: ${textChunks.map((_, i) => `C${i+1}:?`).join(' ')}`);
+      
+      if (allQuestions.length < 100) {
+        console.warn(`⚠️  Low extraction rate - may need different chunking strategy`);
+      }
+      
       console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
 
       res.json({ 
