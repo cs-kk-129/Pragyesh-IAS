@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           model: "gpt-4o",
           messages: [{ 
             role: "user", 
-            content: enhancedPrompt + `\n\nGenerate questions with timestamp: ${Date.now()}` 
+            content: enhancedPrompt + `\n\nGenerate questions with timestamp: ${Date.now()}. Return response in JSON format only.` 
           }],
           response_format: { type: "json_object" },
           temperature: 1.0,
@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 4. Each question must be self-contained and answerable
                 5. This is chunk ${chunkIndex + 1}/${textChunks.length}
                 
-                Return format:
+                Return your response as JSON format:
                 {
                   "questions": [
                     {
@@ -408,11 +408,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ]
                 }
                 
-                IMPORTANT: Only extract complete, independent questions with 4 options.`
+                IMPORTANT: Only extract complete, independent questions with 4 options. Return JSON only.`
               },
               {
                 role: "user",
-                content: `Extract ONLY complete, standalone questions from this text chunk. Ignore headings, fragments, or incomplete text:\n\n${chunk}`
+                content: `Extract ONLY complete, standalone questions from this text chunk. Ignore headings, fragments, or incomplete text. Return the extracted questions in JSON format:\n\n${chunk}`
               }
             ],
             response_format: { type: "json_object" },
@@ -567,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   role: "system",
                   content: `Translate these UPSC questions from English to Hindi. Maintain technical accuracy and UPSC terminology.
                   
-                  Return JSON format:
+                  Return your response as JSON format:
                   {
                     "translations": [
                       {
@@ -577,7 +577,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         "explanation": "व्याख्या"
                       }
                     ]
-                  }`
+                  }
+                  
+                  Provide only JSON response.`
                 },
                 {
                   role: "user",
@@ -1600,7 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               role: "system", 
               content: "You are an expert UPSC question generator. Generate high-quality multiple choice questions for competitive exam preparation. Always return valid JSON format with bilingual content." 
             },
-            { role: "user", content: enhancedPrompt }
+            { role: "user", content: enhancedPrompt + " Return your response as JSON format only." }
           ],
           response_format: { type: "json_object" },
           temperature: 1.0,

@@ -1,0 +1,1073 @@
+Processing file: Test-13.docx, Type: .docx, Size: 75887 bytes
+Processing DOCX file...
+Successfully extracted 89666 characters from DOCX
+Text length: 89666 characters. Processing in chunks for complete extraction.
+Split document into 23 chunks for processing
+Chunk sizes: 3967, 3965, 3895, 3820, 3962, 3769, 3995, 3721, 3909, 3950, 3873, 3854, 3970, 3980, 3989, 3880, 3955, 3987, 3963, 3918, 3920, 3907, 1658 characters
+Estimated total questions in document: ~149
+Expected ~7 questions per 4000-char chunk
+Processing chunk 1/23 (3967 characters)
+Error processing chunk 1: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf72f795a61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:08 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '23',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=u12M6N4UROZ.1C_6VSsNVUUGxQ6qEWeAzcV0zyJy0sY-1753281968-1.0.1.1-pcPgq2czVgb4DrUC.isL8EO_P433EmwzmpL3ock8D9CiQhetMXiV81KCBC6EPNPpSE20ltNo9F3XmXy.w_ASNG_k66W2_J6gqxsnnDNAYb4; path=/; expires=Wed, 23-Jul-25 15:16:08 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=rOQP4f3zR87NgnM7eG3WcK9KmqDkaYLjdYv9hCxDCLA-1753281968937-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '25',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '28718',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '2.564s',
+    'x-request-id': 'req_f2d7520af8569d08a7b75cdee7f8d87b'
+  },
+  request_id: 'req_f2d7520af8569d08a7b75cdee7f8d87b',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 2/23 (3965 characters)
+Error processing chunk 2: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf7321c9461de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:11 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '120',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=ZM8O6roY.5ZPp7FViodWg9dCwmynezo4GxIDkc1a6GQ-1753281971-1.0.1.1-6n2EWLIpgGtKl3hT372Z.gXnX1oAvR2d6Ao70D1Z2K87kxeu6YzhDTPXoyd59h90._jmRz.m0SqC2KaMEcs1Hfhmiw6IGca68psAAzsql0c; path=/; expires=Wed, 23-Jul-25 15:16:11 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=JRYXdV7N7TgdzyowlUVgzxr71lP68ftJws.PZrebSrg-1753281971054-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '1628',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '27697',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '4.604s',
+    'x-request-id': 'c39247da-f5c2-4bdc-b8f1-f542cb77d3dc'
+  },
+  request_id: 'c39247da-f5c2-4bdc-b8f1-f542cb77d3dc',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 3/23 (3895 characters)
+Error processing chunk 3: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf73f29cf61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:11 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '11',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=MB1bcXkuoDgTgzURtONKw7IecGzMcWmKjLFlpO2oORA-1753281971-1.0.1.1-oDpZwTuL3JlruSGldWmas_WDV.UNEpB7JybqhAsDrwK4.cpGLsZUp2fv_8L4dAhf_PfhJjZWUX7ajXCWiqs7ey3dyaIhR_K71z4z5Ue1gkM; path=/; expires=Wed, 23-Jul-25 15:16:11 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=xCObvaT072i6eqWIVC8kLbLpciuQrl6knY6hhNdIkYw-1753281971572-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '13',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '27499',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '5.001s',
+    'x-request-id': 'req_0df0c0d23780e3407ebb4341930049d0'
+  },
+  request_id: 'req_0df0c0d23780e3407ebb4341930049d0',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 4/23 (3820 characters)
+Error processing chunk 4: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf7426cf061de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:12 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '47',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=3FTcFXAArD4YPwsE2Ke8t.fMXZWFbEQxy.Rj0mwxBnw-1753281972-1.0.1.1-vj1wyThPpcbWtXUlOEAuMQCM1PC0cHulQHwJuNsXOl0DcJcxAA7Joj.GNJrOLgTiF1Fk9uirjXCfvKdhf_sDDmsfkkVHjfr7eK6xQUSpoOQ; path=/; expires=Wed, 23-Jul-25 15:16:12 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=csiMKpBxx2IUfeVjmo4V0JOpwtRmAG9PHzTo997NnTE-1753281972163-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '487',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '27575',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '4.849s',
+    'x-request-id': 'req_2418217be4402a8a7abc718007a880a9'
+  },
+  request_id: 'req_2418217be4402a8a7abc718007a880a9',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 5/23 (3962 characters)
+Error processing chunk 5: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf746185561de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:12 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '13',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=CS0wOeeTZtMmy3_w3eaVNPd32Vn1_HVz0GkSs4aB7zw-1753281972-1.0.1.1-xB4MDORc9Ia6b_2wJhuktpZkONH1LP7rC0ZlQPWFUJ3dls5SJzj9apMUUQLQGOY4QND6MOkffpeVkjuwDlrvEYOZ1EPKJsv96u3Eeson6lQ; path=/; expires=Wed, 23-Jul-25 15:16:12 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=zgQMCRCWvBqV5YFU68mEx43WAncs7tdqMOwZkKApykI-1753281972259-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '15',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '25308',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '9.382s',
+    'x-request-id': 'req_3d8a17d08c986b29b81ab033274328c5'
+  },
+  request_id: 'req_3d8a17d08c986b29b81ab033274328c5',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 6/23 (3769 characters)
+Error processing chunk 6: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf746b8bf61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:12 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '232',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=YrrcysQnMxVWOH.n5jyDPw.hRNpHLPJ6yHaV0ROVlDw-1753281972-1.0.1.1-OTtTsk_MM7rsioxd6Q0B_FpZAs6AIfe5f9EdNiAtuXfib_HJ4I7g9uZQMAKBcfeOPTcBDkxrNC6VB91smuvz3O4ddmbc6ye6F_.bgM3c8qg; path=/; expires=Wed, 23-Jul-25 15:16:12 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=VVrltSVkE0I7MDeLHJvpUMKb6s9LCIM0Omx2k._sYIs-1753281972873-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '496',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '25407',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '9.185s',
+    'x-request-id': 'req_636bb768899ec64bc67dec6ef14d4719'
+  },
+  request_id: 'req_636bb768899ec64bc67dec6ef14d4719',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 7/23 (3995 characters)
+Error processing chunk 7: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf74a8c8c61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:13 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '95',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=pEOlQrSVIjaEoxWJh8lARCfshHp18xLHHUPylxq_lgU-1753281973-1.0.1.1-fyEFb5_QbDfhoNKnvsQyqoZ5_lcjsDxSO.Astyd2DgMqqSq78XhGftIw5H4fE5RKYywjuWhYG2R3JfyuBK1DJ0n0iMKCZVkEgJWvs8jXgQE; path=/; expires=Wed, 23-Jul-25 15:16:13 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=Lon0uVIJjvPWYDGgCVyFTqyf6FD0731mlhxUVg8DE.Q-1753281973059-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '108',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '23129',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '13.741s',
+    'x-request-id': 'bd118b18-84bc-466a-855b-07f6bca0d5aa'
+  },
+  request_id: 'bd118b18-84bc-466a-855b-07f6bca0d5aa',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 8/23 (3721 characters)
+Error processing chunk 8: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf74bbd9861de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:13 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '23',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=HWqx329j0tmn0fa4kcoeM4OCE1bJ6Jc.rxJy3NwhkHE-1753281973-1.0.1.1-Jghv.4HLfvFsjSorVkI6Vn9vNIXb.PNYVlGTLgrVnk1f66kSdSsgcUJBq7dCmmVd7GUcfKfwI73jYgQ9K9tUFCcClEIRdEiQ9lg9EDnnmr8; path=/; expires=Wed, 23-Jul-25 15:16:13 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=zO0nISaMSiLu6ehH_gMxaW7egnqis6P9dIEHFBO6rc0-1753281973187-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '37',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '22003',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '15.993s',
+    'x-request-id': 'req_55014fc8b466cc5466d062a43796c9da'
+  },
+  request_id: 'req_55014fc8b466cc5466d062a43796c9da',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 9/23 (3909 characters)
+Error processing chunk 9: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf74c8e7061de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:13 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '14',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=B2M4sU3tib.7CZNNEShxZ6YjtnzBVrpcchYCJmyUPpQ-1753281973-1.0.1.1-1o556LNGvK9qAMV6PeDnEeFRp4EZ_Ojzv084kKDXWzlBo8LubPGlUUHfpNuzYsJQBK5wvizHE0P.f8I0c2RRlAxxHD4yIzqBGh4YIEsrztk; path=/; expires=Wed, 23-Jul-25 15:16:13 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=R5oHpLl7SbXQQJe3QyqMxPv4jbOalfN91pZJlsfTebE-1753281973530-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '16',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '20912',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '18.175s',
+    'x-request-id': 'req_4838c5c8007800558cdfb95fcaf5dc27'
+  },
+  request_id: 'req_4838c5c8007800558cdfb95fcaf5dc27',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 10/23 (3950 characters)
+Error processing chunk 10: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf74ea87561de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:13 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '20',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=r8RvjdQVuq1JU_ebnmbh.7hQbX55dK7yW.G6Mu7KOjE-1753281973-1.0.1.1-kSntCr3DOLmR2MxIk01q1yAJc9kYyaHB6WJ8sCKIqckCaAWyE9HCz1h3X7O6y.Mn7.U7VPY5aESi_HdxVbbOu4b3WzI0mAskPdHpVc95iIM; path=/; expires=Wed, 23-Jul-25 15:16:13 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=ZcAYGN60.W7Ulhm07G1w3OCeGmyjYi3oQXavFgIUBMc-1753281973638-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '23',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '20953',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '18.092s',
+    'x-request-id': '0ece473d-dfce-4864-890b-8fdbc83e09cb'
+  },
+  request_id: '0ece473d-dfce-4864-890b-8fdbc83e09cb',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 11/23 (3873 characters)
+Error processing chunk 11: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf74f593161de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:14 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '11',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=QTi3FMAUEyG242XAY3JI0HVpDLDYe1cW_EeYsJgES7U-1753281974-1.0.1.1-h4w6DIetRN4GAfH6XjjlAOV_USQXrmmVJd3OdA2Nx4YR6EoGwqegxyqlNxYogI3O7DoxQXO8YyoMCYf6zwAI.PFYUgmFTBJmz9vZf4AeXWI; path=/; expires=Wed, 23-Jul-25 15:16:14 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=eO3s9_OGE8vaGlL_Svv4ZHrfbpIbZ_zkL2RB5sG7iuk-1753281974058-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '13',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '18642',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '22.714s',
+    'x-request-id': 'req_2849b4c7ec8ad50edf9187a837b96e6c'
+  },
+  request_id: 'req_2849b4c7ec8ad50edf9187a837b96e6c',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 12/23 (3854 characters)
+Error processing chunk 12: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf751fb8f61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:14 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '16',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=hjKpgQ.muRcup0wP8H50atNj5E.w6NmJgAaJsew.BXE-1753281974-1.0.1.1-1Jmv9dSwpYMShuEZYjvXGu7OI6eEULbwDddCz7ti7Vd5BwTfjfPWYU_WMrYzhDOv2WZXrmfig.gxw5N_unSDvWd8pcxHGXxl.hMFQNPQdHI; path=/; expires=Wed, 23-Jul-25 15:16:14 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=MtbZXTaLfFZOw4sYrwyt25F_BG2GzyaYCVvkcimDkyQ-1753281974150-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '18',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '498',
+    'x-ratelimit-remaining-tokens': '17431',
+    'x-ratelimit-reset-requests': '151ms',
+    'x-ratelimit-reset-tokens': '25.137s',
+    'x-request-id': 'req_0d81cda1db32d49af028543718a0855a'
+  },
+  request_id: 'req_0d81cda1db32d49af028543718a0855a',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 13/23 (3970 characters)
+Error processing chunk 13: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf7528c2561de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:14 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '11',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=I4aWhYeS5_q7nZpCd19Xc51ZyJWyhlHZd63_4YDTsSY-1753281974-1.0.1.1-nA4G.uHV4TKxd6tker01ZhYtWmFP0Mqz6eFPeDaDN1qbAmqScekgxMgDle938WefQllpgF6FeQRDoDXxm8_Ec8MelDJ9LAyYBtMrdVcMqX0; path=/; expires=Wed, 23-Jul-25 15:16:14 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=r63dFMYuuo9ZsS8JFuiIAOEU6yKeDYabbzoLyiJHoBk-1753281974958-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '13',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '16551',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '26.897s',
+    'x-request-id': 'req_bfa213e52e961fbfa4503779db2b52a0'
+  },
+  request_id: 'req_bfa213e52e961fbfa4503779db2b52a0',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 14/23 (3980 characters)
+Error processing chunk 14: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf75798f461de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '10',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=lR8zCTTsc1UQORcSAi3Xh2M9fqHRj_naK4fhzNZze9k-1753281975-1.0.1.1-x7KlqZYtapfkb2qOJPyvfmvn6HJrQtG26d2dOURjBBSC_Myq7a8tuwIG09OUvOSpmBztM6b5N3XsTaC00.XngGztMw4f4t4g0zQNRGCh08Q; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=YIMqxDK0m1kdYUFFj3YCNCRlnjSNiC0CcbvTIweIS7k-1753281975062-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '12',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '498',
+    'x-ratelimit-remaining-tokens': '15306',
+    'x-ratelimit-reset-requests': '135ms',
+    'x-ratelimit-reset-tokens': '29.387s',
+    'x-request-id': 'req_45f190af1908d3eee0654762680a16b6'
+  },
+  request_id: 'req_45f190af1908d3eee0654762680a16b6',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 15/23 (3989 characters)
+Error processing chunk 15: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf758398261de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '13',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=9j9h6cn2CZPR3CQyviHURA.Ix8iiXmP68Z9gb0n2whk-1753281975-1.0.1.1-dBG83AMm2JpmEAtUTMy4_K3Db_8lPutCirPaBok3FmuBC.hNMUNVulb9pSUT5jJIm.Dzhzvz9azzqyVPxIgdsDAFmYRRuUFLxe2pFnhDptc; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=RVJa8vl1nZ4q9PPoxAj3OYtmXD6oX3UHxC1_I8dCQxI-1753281975156-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '16',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '497',
+    'x-ratelimit-remaining-tokens': '13977',
+    'x-ratelimit-reset-requests': '269ms',
+    'x-ratelimit-reset-tokens': '32.044s',
+    'x-request-id': 'req_112f4d0f4471154660e725996a2434c2'
+  },
+  request_id: 'req_112f4d0f4471154660e725996a2434c2',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 16/23 (3880 characters)
+Error processing chunk 16: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf758da1161de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '9',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=l6X__kc81vo.Nb1KWTCK3XRCn_y2ohQG2cOG81S0ul0-1753281975-1.0.1.1-42CegFbcgFEuK_lZ6fceyV1ue1je99X1GHYsx4ZbBwdCYhEdV1HXHp2JfsoTBFHTerrC.Ixj0.EY5GziD7NvzlnnKMUU15oGWvvj_wb6P.Y; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=D0vJI0j66UPGFNQw379qPBoRLSHHhT_Mke7vpgWfeNc-1753281975255-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '11',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '14070',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '31.859s',
+    'x-request-id': 'req_442914209e0ecad5258877091b22ae47'
+  },
+  request_id: 'req_442914209e0ecad5258877091b22ae47',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 17/23 (3955 characters)
+Error processing chunk 17: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf7597a8261de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '23',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=9mdiZf39vRyyXGEKedBuaB7nKTKvqDIA72wnR1OvRJk-1753281975-1.0.1.1-k3vDh6T5YVQyyax0OtdvjKG78GOe_9BaUB1eWHE3.NtD8F292RN8IIMBhjC4WAXsHbE3E.zoTPTZUMLq_X8K9_UXbmAMfXvrJC005Sf9LfQ; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=BQu3sMlVVto6mh2KztZAQDof1jK637NQDJHZwfBysWc-1753281975785-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '33',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '11596',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '36.806s',
+    'x-request-id': 'req_9efb3aab2ef4168d65e5cd98c1c3b4e4'
+  },
+  request_id: 'req_9efb3aab2ef4168d65e5cd98c1c3b4e4',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 18/23 (3987 characters)
+Error processing chunk 18: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf75cbda861de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '12',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=ieCV1qWuhw0YcTI7RelgBBetpB4a3WWF6y.cwRidh5I-1753281975-1.0.1.1-_ZXr0_7TsK30aH4Sj8392I61zNFeZmKj2CBTMOKZmaUNnckJb9OxOeZLR63PocKGzH7Z1HcvT1qoBjnK2.HwBE6M._NwHfzCOPG3Z4t1M2I; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=u.1UU1_Q6WYM6jKDZy02aAVW9RVrR0z2KK_koutWNeQ-1753281975877-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '15',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '11612',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '36.774s',
+    'x-request-id': 'req_67f241394d3adafe9a4e25b329833465'
+  },
+  request_id: 'req_67f241394d3adafe9a4e25b329833465',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 19/23 (3963 characters)
+Error processing chunk 19: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf75d5e3c61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:15 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '12',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=1oxhdTBCnL8A0.Q3RfbXHx4VS4e8Gw.LijOWObnXjqw-1753281975-1.0.1.1-od2gvDeUlZY4bnr_j6WQMqIb86IdfUnmkuMWarNlaD_2j2Mezr0v0mhb.HFVflGbdP_.3uaGAltyiN5oHMXSf2S0cE0.xHWcPST3u3qCnvs; path=/; expires=Wed, 23-Jul-25 15:16:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=FCSXvusySqIu0c637BcZ9hQ_KJmqysvV1py8S1RZVSs-1753281975974-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '15',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '498',
+    'x-ratelimit-remaining-tokens': '10296',
+    'x-ratelimit-reset-requests': '144ms',
+    'x-ratelimit-reset-tokens': '39.406s',
+    'x-request-id': 'req_ae6dbd6f2e5e0142687eb0b4904acad8'
+  },
+  request_id: 'req_ae6dbd6f2e5e0142687eb0b4904acad8',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 20/23 (3918 characters)
+Error processing chunk 20: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf75dfed461de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:16 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '18',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=zYnNT2HG2SNbqM.CwP1_NV78vntQFalq01RwD_T76Vg-1753281976-1.0.1.1-3_a7MJe_Zkq9vW3i0gfEVU1C4CNexXzBd8.FePjFocub29JDGS4USWhMOn3ErUWMq2GwJ9GGPi8vlgGh9Cr6om.XFgAAL9R7SadU9sy70AQ; path=/; expires=Wed, 23-Jul-25 15:16:16 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=FauFldg9eOovwa9IAgKBTWE0UM.NkgJ5ghs0pI2prGE-1753281976076-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '27',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '10352',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '39.295s',
+    'x-request-id': 'req_fdf21909937e362afbc5283334063cfb'
+  },
+  request_id: 'req_fdf21909937e362afbc5283334063cfb',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 21/23 (3920 characters)
+Error processing chunk 21: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf75e9f6e61de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:16 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '27',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=wtk17KhzsPTaVA58sFEFy3hKlI2KGglsP_dmIMNDao8-1753281976-1.0.1.1-g210fC2N_FPwnoJ2gu6PTxlb2j399sZMADf_wTsf2_DQ_vbkTZnIDbp.2AwRcb8W0javV8Zf.2pfQNyfayJ5YaxeDK5Zw6U6o3YXyBOF5Oo; path=/; expires=Wed, 23-Jul-25 15:16:16 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=PJdol9l8O63rKeelevALPU8eTh0QJimhUwDSrXNhUpI-1753281976497-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '62',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '6441',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '47.116s',
+    'x-request-id': 'req_839b2b225ddc618b0c574aa6483a5591'
+  },
+  request_id: 'req_839b2b225ddc618b0c574aa6483a5591',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 22/23 (3907 characters)
+Error processing chunk 22: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf76139d361de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:16 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '29',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=nJG.9J6YWNIpVGrHC0jGQ.TaxbMZS0ikR1yzNhR4wkc-1753281976-1.0.1.1-NBfGlQWF9.N2t.LuvdQQDDVijUFU9h_HyBE36rJsAst88im7XbUuGmvcDcPodlEzIH2qJG603_f4yoKl.Bd8ZtvyQoXP6zoafFRTHa2EtVU; path=/; expires=Wed, 23-Jul-25 15:16:16 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=Z9JaYXDZRb1XF3LEuxSvQp2gNH2_3wKQe2bSvj75A9s-1753281976620-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '34',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '6549',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '46.9s',
+    'x-request-id': 'req_f8a8bbc56bb884708f17b8d61bb84629'
+  },
+  request_id: 'req_f8a8bbc56bb884708f17b8d61bb84629',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Processing chunk 23/23 (1658 characters)
+Error processing chunk 23: BadRequestError: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:72:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:383:28) {
+  status: 400,
+  headers: {
+    'access-control-expose-headers': 'X-Request-ID',
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '963bf761fad761de-ORD',
+    connection: 'keep-alive',
+    'content-length': '219',
+    'content-type': 'application/json',
+    date: 'Wed, 23 Jul 2025 14:46:16 GMT',
+    'openai-organization': 'pragyesh-ias',
+    'openai-processing-ms': '10',
+    'openai-project': 'proj_sMhfR6wosSXkdplFDmCK5LDq',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=9A4WbE9.c7918YjJ.FXHTMuHvU2g0uAJlQSGqYJ1E_Q-1753281976-1.0.1.1-Y8EUyoIKda3EF.p2Ctba4ewDV5Cwj4JM4eMi57bOGmBgdoZSmAKc2DXOh3Y_PPR57VldcfpDPKKR1tVGMFGEVIZxA2kckZCAHCb4wJ3DA4k; path=/; expires=Wed, 23-Jul-25 15:16:16 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=sjmiT9amXzFUNhMYEfBw4jbk0ZvJzaR341WuD_ZiQnk-1753281976737-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '12',
+    'x-ratelimit-limit-requests': '500',
+    'x-ratelimit-limit-tokens': '30000',
+    'x-ratelimit-remaining-requests': '499',
+    'x-ratelimit-remaining-tokens': '5889',
+    'x-ratelimit-reset-requests': '120ms',
+    'x-ratelimit-reset-tokens': '48.221s',
+    'x-request-id': 'req_be5bb25ee4a9c4aa3e6009027d43c2ab'
+  },
+  request_id: 'req_be5bb25ee4a9c4aa3e6009027d43c2ab',
+  error: {
+    message: "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+    type: 'invalid_request_error',
+    param: 'messages',
+    code: null
+  },
+  code: null,
+  param: 'messages',
+  type: 'invalid_request_error'
+}
+Chunk error details: 400 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+Error processing file: Error: Could not extract any valid questions from file
+    at <anonymous> (/home/runner/workspace/server/routes.ts:528:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Full error details: Error: Could not extract any valid questions from file
+    at <anonymous> (/home/runner/workspace/server/routes.ts:528:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:46:16 PM [express] POST /api/admin/process-question-file 500 in 9430ms :: {"error":"Failed to proc…
