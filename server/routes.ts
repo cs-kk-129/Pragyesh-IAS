@@ -385,17 +385,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             messages: [
               {
                 role: "system",
-                content: `Extract ALL questions from the text chunk. Return simple JSON format to avoid token limits.
+                content: `Extract ONLY complete, standalone UPSC exam questions from this text chunk. 
 
-                CRITICAL: This is chunk ${chunkIndex + 1}/${textChunks.length} - extract EVERY question found.
+                RULES:
+                1. Extract ONLY full questions with multiple choice options (A, B, C, D)
+                2. Skip incomplete questions, fragments, or sub-parts
+                3. Skip headings, topic names, or reference text
+                4. Each question must be self-contained and answerable
+                5. This is chunk ${chunkIndex + 1}/${textChunks.length}
                 
                 Return format:
                 {
                   "questions": [
                     {
-                      "q": "Question text",
-                      "opts": ["A", "B", "C", "D"],
-                      "ans": "Correct answer",
+                      "q": "Complete question text",
+                      "opts": ["Option A", "Option B", "Option C", "Option D"],
+                      "ans": "Correct answer text",
                       "exp": "Brief explanation",
                       "subj": null,
                       "topic": null
@@ -403,11 +408,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ]
                 }
                 
-                Keep responses minimal to avoid truncation.`
+                IMPORTANT: Only extract complete, independent questions with 4 options.`
               },
               {
                 role: "user",
-                content: `Extract ALL questions from this chunk:\n\n${chunk}`
+                content: `Extract ONLY complete, standalone questions from this text chunk. Ignore headings, fragments, or incomplete text:\n\n${chunk}`
               }
             ],
             response_format: { type: "json_object" },
@@ -458,29 +463,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           if (result.questions && Array.isArray(result.questions)) {
-            // Convert minimal format to standard format with bilingual support
-            const convertedQuestions = result.questions.map((q: any) => ({
-              question: {
-                english: q.q || q.question || "",
-                hindi: q.q || q.question || "" // For now, keep same - translation will be done later
-              },
-              options: {
-                english: Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : []),
-                hindi: Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : [])
-              },
-              correctAnswer: {
-                english: q.ans || q.correctAnswer || "",
-                hindi: q.ans || q.correctAnswer || ""
-              },
-              explanation: {
-                english: q.exp || q.explanation || "",
-                hindi: q.exp || q.explanation || ""
-              },
-              subject: q.subj || q.subject || null,
-              topic: q.topic || null,
-              difficulty: q.difficulty || "medium",
-              marks: q.marks || 2
-            }));
+            // Convert minimal format to standard format - will add translation in batch later
+            const convertedQuestions = result.questions
+              .filter((q: any) => {
+                // Strict filtering to prevent over-extraction
+                const hasQuestion = q.q && q.q.length > 30 && q.q.includes('?'); // Must be a question
+                const hasOptions = Array.isArray(q.opts) && q.opts.length === 4;
+                const hasAnswer = q.ans && q.ans.length > 2;
+                const isNotFragment = !q.q.toLowerCase().includes('which of the following') || q.q.includes('?');
+                const hasCompleteOptions = q.opts.every((opt: string) => opt && opt.length > 2);
+                
+                return hasQuestion && hasOptions && hasAnswer && isNotFragment && hasCompleteOptions;
+              })
+              .map((q: any) => ({
+                question: {
+                  english: q.q || "",
+                  hindi: "" // Will be translated in batch processing
+                },
+                options: {
+                  english: Array.isArray(q.opts) ? q.opts : [],
+                  hindi: [] // Will be translated in batch processing
+                },
+                correctAnswer: {
+                  english: q.ans || "",
+                  hindi: "" // Will be translated in batch processing
+                },
+                explanation: {
+                  english: q.exp || q.explanation || "",
+                  hindi: "" // Will be translated in batch processing
+                },
+                subject: q.subj || q.subject || null,
+                topic: q.topic || null,
+                difficulty: q.difficulty || "medium",
+                marks: q.marks || 2
+              }));
             
             const chunkQuestionCount = convertedQuestions.length;
             allQuestions.push(...convertedQuestions);
@@ -527,19 +543,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
       
-      // Post-process for bilingual translation if needed
+      // Post-process for bilingual translation
       if (allQuestions.length > 0) {
-        console.log(`Post-processing: Adding bilingual support for ${allQuestions.length} questions...`);
+        console.log(`Post-processing: Adding Hindi translation for ${allQuestions.length} questions...`);
         
-        // Sample first question to detect language
-        const firstQuestion = allQuestions[0];
-        const isEnglish = /^[a-zA-Z0-9\s\-.,!?()]+$/.test(firstQuestion.question.english.substring(0, 50));
-        
-        if (isEnglish) {
-          console.log(`Detected English content - bilingual format already applied during extraction`);
-        } else {
-          console.log(`Detected mixed/Hindi content - format standardized during extraction`);
+        // Process questions in batches for translation
+        const TRANSLATION_BATCH_SIZE = 10;
+        for (let i = 0; i < allQuestions.length; i += TRANSLATION_BATCH_SIZE) {
+          const batch = allQuestions.slice(i, i + TRANSLATION_BATCH_SIZE);
+          
+          try {
+            console.log(`Translating batch ${Math.floor(i/TRANSLATION_BATCH_SIZE) + 1}/${Math.ceil(allQuestions.length/TRANSLATION_BATCH_SIZE)}`);
+            
+            // Create compact batch translation request
+            const batchText = batch.map((q, idx) => 
+              `Q${idx + 1}: ${q.question.english}\nA: ${q.options.english.join(' | ')}\nAns: ${q.correctAnswer.english}\nExp: ${q.explanation.english}`
+            ).join('\n\n');
+            
+            const translationResponse = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: `Translate these UPSC questions from English to Hindi. Maintain technical accuracy and UPSC terminology.
+                  
+                  Return JSON format:
+                  {
+                    "translations": [
+                      {
+                        "question": "हिंदी प्रश्न",
+                        "options": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"],
+                        "answer": "सही उत्तर",
+                        "explanation": "व्याख्या"
+                      }
+                    ]
+                  }`
+                },
+                {
+                  role: "user",
+                  content: `Translate these questions to Hindi:\n\n${batchText}`
+                }
+              ],
+              response_format: { type: "json_object" },
+              max_tokens: 3000,
+              temperature: 0.1
+            });
+
+            const translationResult = JSON.parse(translationResponse.choices[0].message.content || "{}");
+            
+            if (translationResult.translations && Array.isArray(translationResult.translations)) {
+              // Apply translations to the batch
+              batch.forEach((question, idx) => {
+                const translation = translationResult.translations[idx];
+                if (translation) {
+                  question.question.hindi = translation.question || question.question.english;
+                  question.options.hindi = Array.isArray(translation.options) ? translation.options : question.options.english;
+                  question.correctAnswer.hindi = translation.answer || question.correctAnswer.english;
+                  question.explanation.hindi = translation.explanation || question.explanation.english;
+                }
+              });
+            }
+            
+            // Small delay between translation batches
+            if (i + TRANSLATION_BATCH_SIZE < allQuestions.length) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+          } catch (translationError) {
+            console.error(`Translation error for batch ${Math.floor(i/TRANSLATION_BATCH_SIZE) + 1}:`, translationError);
+            // Keep English text as fallback
+            batch.forEach(question => {
+              question.question.hindi = question.question.english;
+              question.options.hindi = question.options.english;
+              question.correctAnswer.hindi = question.correctAnswer.english;
+              question.explanation.hindi = question.explanation.english;
+            });
+          }
         }
+        
+        console.log(`✓ Hindi translation completed for ${allQuestions.length} questions`);
       }
 
       res.json({ 
