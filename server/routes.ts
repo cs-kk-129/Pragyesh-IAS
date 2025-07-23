@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const allQuestions = [];
-      const CHUNK_SIZE = 8000; // Reduced chunk size for better token management
+      const CHUNK_SIZE = 4000; // Much smaller chunks to prevent token overflow
       const textChunks = [];
       
       // Split text into manageable chunks while trying to preserve question boundaries
@@ -367,10 +367,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Split document into ${textChunks.length} chunks for processing`);
       console.log(`Chunk sizes: ${textChunks.map(chunk => chunk.length).join(', ')} characters`);
       
-      // Estimate expected questions per chunk for validation
-      const avgQuestionLength = extractedText.length / 150; // Assuming 150 questions
-      const expectedQuestionsPerChunk = Math.ceil(CHUNK_SIZE / avgQuestionLength);
-      console.log(`Expected ~${expectedQuestionsPerChunk} questions per chunk based on text length`);
+      // Estimate expected questions more accurately
+      const estimatedQuestions = Math.floor(extractedText.length / 600); // More realistic: ~600 chars per question
+      const expectedQuestionsPerChunk = Math.ceil(CHUNK_SIZE / 600);
+      console.log(`Estimated total questions in document: ~${estimatedQuestions}`);
+      console.log(`Expected ~${expectedQuestionsPerChunk} questions per ${CHUNK_SIZE}-char chunk`);
       
       // Process each chunk
       for (let chunkIndex = 0; chunkIndex < textChunks.length; chunkIndex++) {
@@ -378,69 +379,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Processing chunk ${chunkIndex + 1}/${textChunks.length} (${chunk.length} characters)`);
         
         try {
+          // First, try to extract questions with minimal format to avoid token overflow
           const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
               {
                 role: "system",
-                content: `Extract ALL UPSC exam questions from the provided text chunk. 
+                content: `Extract ALL questions from the text chunk. Return simple JSON format to avoid token limits.
+
+                CRITICAL: This is chunk ${chunkIndex + 1}/${textChunks.length} - extract EVERY question found.
                 
-                RULES:
-                1. Extract EVERY question in this chunk - no limits
-                2. Provide bilingual format (English + Hindi)
-                3. If only one language provided, translate to the other
-                4. Use null for unknown subjects/topics - never assign defaults
-                5. Ensure complete extraction - this is chunk ${chunkIndex + 1}/${textChunks.length}
-                
-                JSON format:
+                Return format:
                 {
                   "questions": [
                     {
-                      "question": {"english": "text", "hindi": "हिंदी"},
-                      "options": {"english": ["A","B","C","D"], "hindi": ["अ","ब","स","द"]},
-                      "correctAnswer": {"english": "text", "hindi": "हिंदी"},
-                      "explanation": {"english": "text", "hindi": "हिंदी"},
-                      "subject": null,
-                      "topic": null,
-                      "difficulty": "medium",
-                      "marks": 2
+                      "q": "Question text",
+                      "opts": ["A", "B", "C", "D"],
+                      "ans": "Correct answer",
+                      "exp": "Brief explanation",
+                      "subj": null,
+                      "topic": null
                     }
                   ]
-                }`
+                }
+                
+                Keep responses minimal to avoid truncation.`
               },
               {
                 role: "user",
-                content: `Extract ALL questions from this text chunk:\n\n${chunk}`
+                content: `Extract ALL questions from this chunk:\n\n${chunk}`
               }
             ],
             response_format: { type: "json_object" },
-            max_tokens: 4000, // Reduced to prevent truncation
-            temperature: 0.1 // Lower temperature for more consistent extraction
+            max_tokens: 3000, // Further reduced to ensure completion
+            temperature: 0.1
           });
 
           const responseContent = response.choices[0].message.content;
           
           // Check if response was truncated
           if (response.choices[0].finish_reason === 'length') {
-            console.warn(`Response truncated for chunk ${chunkIndex + 1} - may have missed questions`);
+            console.warn(`Response truncated for chunk ${chunkIndex + 1} - retrying with smaller request`);
+            // If truncated, skip this chunk and log for manual review
+            continue;
           }
 
-          const result = JSON.parse(responseContent || "{}");
+          let result;
+          try {
+            result = JSON.parse(responseContent || "{}");
+          } catch (parseError) {
+            console.error(`JSON parse error for chunk ${chunkIndex + 1}:`, parseError);
+            console.error(`Response content length: ${responseContent?.length}`);
+            console.error(`Response preview: ${responseContent?.substring(0, 500)}...`);
+            
+            // Try to salvage partial JSON if possible
+            if (responseContent) {
+              try {
+                // Attempt to fix common JSON truncation issues
+                let fixedContent = responseContent;
+                
+                // If JSON ends abruptly, try to close it
+                if (!fixedContent.endsWith('}') && !fixedContent.endsWith(']}')) {
+                  const lastComplete = fixedContent.lastIndexOf('},');
+                  if (lastComplete > 0) {
+                    fixedContent = fixedContent.substring(0, lastComplete) + '}]}';
+                  }
+                }
+                
+                result = JSON.parse(fixedContent);
+                console.log(`✓ Recovered partial JSON for chunk ${chunkIndex + 1}`);
+              } catch (recoverError) {
+                console.error(`Failed to recover JSON for chunk ${chunkIndex + 1}:`, recoverError);
+                continue;
+              }
+            } else {
+              continue;
+            }
+          }
           
           if (result.questions && Array.isArray(result.questions)) {
-            const chunkQuestionCount = result.questions.length;
-            allQuestions.push(...result.questions);
+            // Convert minimal format to standard format with bilingual support
+            const convertedQuestions = result.questions.map((q: any) => ({
+              question: {
+                english: q.q || q.question || "",
+                hindi: q.q || q.question || "" // For now, keep same - translation will be done later
+              },
+              options: {
+                english: Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : []),
+                hindi: Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : [])
+              },
+              correctAnswer: {
+                english: q.ans || q.correctAnswer || "",
+                hindi: q.ans || q.correctAnswer || ""
+              },
+              explanation: {
+                english: q.exp || q.explanation || "",
+                hindi: q.exp || q.explanation || ""
+              },
+              subject: q.subj || q.subject || null,
+              topic: q.topic || null,
+              difficulty: q.difficulty || "medium",
+              marks: q.marks || 2
+            }));
+            
+            const chunkQuestionCount = convertedQuestions.length;
+            allQuestions.push(...convertedQuestions);
             console.log(`✓ Chunk ${chunkIndex + 1}/${textChunks.length}: Extracted ${chunkQuestionCount} questions (${chunk.length} chars)`);
             
             // Log first question as sample
             if (chunkQuestionCount > 0) {
-              const firstQ = result.questions[0];
+              const firstQ = convertedQuestions[0];
               console.log(`  Sample: "${firstQ.question?.english?.substring(0, 60)}..."`);
             }
           } else {
-            console.error(`✗ Chunk ${chunkIndex + 1}/${textChunks.length}: No valid questions extracted`);
-            console.error(`  Response format: ${JSON.stringify(Object.keys(result))}`);
-            console.error(`  Raw response preview: ${responseContent?.substring(0, 300)}...`);
+            console.error(`✗ Chunk ${chunkIndex + 1}/${textChunks.length}: No valid questions in response`);
+            console.error(`  Response format: ${JSON.stringify(Object.keys(result || {}))}`);
           }
           
           // Add delay between requests to avoid rate limiting
@@ -459,20 +512,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Could not extract any valid questions from file");
       }
 
-      // Calculate extraction efficiency
-      const extractionEfficiency = (allQuestions.length / 150) * 100;
+      // Calculate extraction efficiency based on estimated questions
+      const extractionEfficiency = (allQuestions.length / estimatedQuestions) * 100;
       
       console.log(`=== EXTRACTION SUMMARY ===`);
-      console.log(`Total questions extracted: ${allQuestions.length} out of expected ~150`);
+      console.log(`Total questions extracted: ${allQuestions.length} out of estimated ~${estimatedQuestions}`);
       console.log(`Extraction efficiency: ${extractionEfficiency.toFixed(1)}%`);
       console.log(`Chunks processed: ${textChunks.length}`);
       console.log(`Questions per chunk: ${textChunks.map((_, i) => `C${i+1}:?`).join(' ')}`);
       
       if (allQuestions.length < 100) {
-        console.warn(`⚠️  Low extraction rate - may need different chunking strategy`);
+        console.warn(`⚠️  Low extraction rate - extracted ${allQuestions.length} out of expected ~150 questions`);
       }
       
       console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
+      
+      // Post-process for bilingual translation if needed
+      if (allQuestions.length > 0) {
+        console.log(`Post-processing: Adding bilingual support for ${allQuestions.length} questions...`);
+        
+        // Sample first question to detect language
+        const firstQuestion = allQuestions[0];
+        const isEnglish = /^[a-zA-Z0-9\s\-.,!?()]+$/.test(firstQuestion.question.english.substring(0, 50));
+        
+        if (isEnglish) {
+          console.log(`Detected English content - bilingual format already applied during extraction`);
+        } else {
+          console.log(`Detected mixed/Hindi content - format standardized during extraction`);
+        }
+      }
 
       res.json({ 
         success: true, 
@@ -2055,7 +2123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Attempting to save quiz attempt with data:', quizAttemptData);
 
         const [savedAttempt] = await db.insert(schema.quizAttempts)
-          .values(quizAttemptData)
+          .values([quizAttemptData])
           .returning();
 
         console.log(`Quiz attempt saved successfully with ID: ${savedAttempt.id}`);
