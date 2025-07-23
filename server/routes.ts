@@ -387,11 +387,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 role: "system",
                 content: `Extract ONLY complete, standalone UPSC exam questions from this text chunk. 
 
+                DOCUMENT FORMAT NOTES:
+                - Some documents have answers embedded with questions (e.g., "Answer: B" after options)
+                - Some documents have answer keys at the end (separate from questions)
+                - Some documents have explanations embedded, others have them separately
+                - Extract questions regardless of answer location
+
                 RULES:
                 1. Extract ALL complete questions with multiple choice options (minimum 3 options)
                 2. Include questions with formats: "Which of the following...", "What is...", "Assertion (A):", etc.
-                3. Skip only non-question text like headings, instructions, or pure content
-                4. Include questions that may continue across lines
+                3. If answer is found near the question, extract it; if not found, leave as null
+                4. Include questions that may continue across lines or span multiple paragraphs
                 5. This is chunk ${chunkIndex + 1}/${textChunks.length} - extract everything you can find
                 
                 Return your response as JSON format:
@@ -400,17 +406,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     {
                       "q": "Complete question text",
                       "opts": ["Option A", "Option B", "Option C", "Option D"],
-                      "ans": "Option A",
-                      "exp": "Brief explanation (optional)",
+                      "ans": "Option A (if found) or null",
+                      "exp": "Brief explanation if available or null",
                       "subj": null,
                       "topic": null
                     }
                   ]
                 }
                 
-                IMPORTANT: Always include the 'ans' field with the correct option letter/text.
+                ANSWER EXTRACTION RULES:
+                - If answer is stated (e.g., "Answer: B", "Correct: A", "Sol: C"), extract it
+                - If answer appears in explanations (e.g., "The correct answer is B"), extract it  
+                - If no answer found in this chunk, set ans to null (might be in answer key section)
+                - Extract explanations if they appear near questions
                 
-                IMPORTANT: Extract ALL questions you find, even with 3+ options. Always include the correct answer in 'ans' field. Be thorough. Return JSON only.`
+                IMPORTANT: Extract ALL questions you find, even with 3+ options. Include answers only if found in this chunk. Be thorough. Return JSON only.`
               },
               {
                 role: "user",
@@ -565,6 +575,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
+      
+      // Post-process: Try to find answer keys for questions without answers
+      const answersWithoutKeys = allQuestions.filter(q => !q.correctAnswer?.english || q.correctAnswer.english === "To be determined").length;
+      if (answersWithoutKeys > 0) {
+        console.log(`Attempting to find answers for ${answersWithoutKeys} questions without answers...`);
+        await matchAnswersFromAnswerKey(allQuestions, extractedText);
+      }
       
       // Post-process for bilingual translation
       if (allQuestions.length > 0) {
@@ -747,6 +764,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to retrieve mock tests" });
     }
   });
+
+// Helper function to match answers from answer key sections
+async function matchAnswersFromAnswerKey(questions: any[], fullText: string) {
+  // Look for answer key patterns in the full document
+  const answerKeyPatterns = [
+    /answer\s*key/gi,
+    /answers?:/gi,
+    /solution\s*key/gi,
+    /correct\s*answers?/gi
+  ];
+  
+  let answerKeySection = '';
+  for (const pattern of answerKeyPatterns) {
+    const match = fullText.match(new RegExp(`${pattern.source}[\\s\\S]*`, 'gi'));
+    if (match && match[0].length > answerKeySection.length) {
+      answerKeySection = match[0];
+    }
+  }
+  
+  if (answerKeySection.length > 100) { // Only process if we found a substantial answer key section
+    console.log(`Found answer key section (${answerKeySection.length} chars), attempting to match answers...`);
+    
+    // Use AI to extract structured answers from the answer key
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `Extract answer mappings from this answer key section. Return JSON format with question numbers/identifiers mapped to their answers.
+            
+            Expected format:
+            {
+              "answers": {
+                "1": "A",
+                "2": "B", 
+                "3": "C",
+                "Q1": "A",
+                "Question 1": "B"
+              }
+            }
+            
+            Look for patterns like:
+            - "1. A" or "Q1: B" or "Answer 1: C"
+            - Sequential numbering with letters/options
+            - Any clear question-answer mappings
+            
+            Return JSON only.`
+          },
+          {
+            role: "user", 
+            content: `Extract all answer mappings from this answer key section:\n\n${answerKeySection.substring(0, 8000)}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000,
+        temperature: 0.1
+      });
+      
+      const answerData = JSON.parse(response.choices[0].message.content || "{}");
+      if (answerData.answers) {
+        let matchedCount = 0;
+        
+        // Try to match extracted answers to questions without answers
+        questions.forEach((question, index) => {
+          if (!question.correctAnswer?.english || question.correctAnswer.english === "To be determined") {
+            // Try various question number formats
+            const possibleKeys = [
+              (index + 1).toString(),
+              `Q${index + 1}`,
+              `Question ${index + 1}`,
+              `${index + 1}.`,
+              `(${index + 1})`
+            ];
+            
+            for (const key of possibleKeys) {
+              if (answerData.answers[key]) {
+                question.correctAnswer.english = answerData.answers[key];
+                matchedCount++;
+                break;
+              }
+            }
+          }
+        });
+        
+        if (matchedCount > 0) {
+          console.log(`✓ Matched ${matchedCount} answers from answer key section`);
+        }
+      }
+    } catch (error) {
+      console.log(`Could not process answer key section:`, error.message);
+    }
+  }
+}
 
   // Get admin evaluations - real mock test attempts
   app.get("/api/admin/evaluations", async (req, res) => {
@@ -2224,7 +2335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           accuracy: accuracy,
           timeTaken: Math.round(timeSpent),
           completedAt: new Date(),
-          answeredQuestions: JSON.stringify(evaluatedAnswers)
+          answeredQuestions: evaluatedAnswers
         };
 
         console.log('Attempting to save quiz attempt with data:', quizAttemptData);
