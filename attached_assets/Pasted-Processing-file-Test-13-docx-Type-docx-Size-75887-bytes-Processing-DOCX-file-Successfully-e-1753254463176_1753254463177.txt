@@ -1,0 +1,94 @@
+Processing file: Test-13.docx, Type: .docx, Size: 75887 bytes
+Processing DOCX file...
+Successfully extracted 89666 characters from DOCX
+Text length: 89666 characters. Processing in chunks for complete extraction.
+Split document into 12 chunks for processing
+Chunk sizes: 7965, 7821, 7769, 7721, 7950, 7854, 7980, 7879, 7987, 7918, 7906, 1658 characters
+Expected ~14 questions per chunk based on text length
+Processing chunk 1/12 (7965 characters)
+6:55:03 AM [express] GET /api/admin/evaluations 304 in 383ms :: {"evaluations":[{"id":5,"studentName…
+6:55:10 AM [express] GET /api/user 401 in 1ms
+Response truncated for chunk 1 - may have missed questions
+Error processing chunk 1: SyntaxError: Expected double-quoted property name in JSON at position 14103
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Expected double-quoted property name in JSON at position 14103
+Processing chunk 2/12 (7821 characters)
+Response truncated for chunk 2 - may have missed questions
+Error processing chunk 2: SyntaxError: Unterminated string in JSON at position 14472
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 14472
+Processing chunk 3/12 (7769 characters)
+Response truncated for chunk 3 - may have missed questions
+Error processing chunk 3: SyntaxError: Unterminated string in JSON at position 14822
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 14822
+Processing chunk 4/12 (7721 characters)
+Response truncated for chunk 4 - may have missed questions
+Error processing chunk 4: SyntaxError: Expected double-quoted property name in JSON at position 14741
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Expected double-quoted property name in JSON at position 14741
+Processing chunk 5/12 (7950 characters)
+Response truncated for chunk 5 - may have missed questions
+Error processing chunk 5: SyntaxError: Expected double-quoted property name in JSON at position 14328
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Expected double-quoted property name in JSON at position 14328
+Processing chunk 6/12 (7854 characters)
+Response truncated for chunk 6 - may have missed questions
+Error processing chunk 6: SyntaxError: Unterminated string in JSON at position 13938
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 13938
+Processing chunk 7/12 (7980 characters)
+Response truncated for chunk 7 - may have missed questions
+Error processing chunk 7: SyntaxError: Unterminated string in JSON at position 13124
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 13124
+Processing chunk 8/12 (7879 characters)
+Response truncated for chunk 8 - may have missed questions
+Error processing chunk 8: SyntaxError: Unterminated string in JSON at position 12995
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 12995
+Processing chunk 9/12 (7987 characters)
+Response truncated for chunk 9 - may have missed questions
+Error processing chunk 9: SyntaxError: Unterminated string in JSON at position 12909
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unterminated string in JSON at position 12909
+Processing chunk 10/12 (7918 characters)
+✓ Chunk 10/12: Extracted 10 questions (7918 chars)
+  Sample: "Centre–State legislative powers..."
+Processing chunk 11/12 (7906 characters)
+Response truncated for chunk 11 - may have missed questions
+Error processing chunk 11: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:428:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Chunk error details: Unexpected end of JSON input
+Processing chunk 12/12 (1658 characters)
+✓ Chunk 12/12: Extracted 4 questions (1658 chars)
+  Sample: "Who was the Prime Minister of India when the no-confidence m..."
+=== EXTRACTION SUMMARY ===
+Total questions extracted: 14 out of expected ~150
+Extraction efficiency: 9.3%
+Chunks processed: 12
+Questions per chunk: C1:? C2:? C3:? C4:? C5:? C6:? C7:? C8:? C9:? C10:? C11:? C12:?
+⚠️  Low extraction rate - may need different chunking strategy
+Successfully processed .docx file and extracted 14 questions total from 12 chunks
+7:03:38 AM [express] POST /api/admin/process-question-file 200 in 518692ms :: {"success":true,"quest…
+7:06:47 AM [express] GET /api/user 401 in 1ms
