@@ -388,11 +388,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 content: `Extract ONLY complete, standalone UPSC exam questions from this text chunk. 
 
                 RULES:
-                1. Extract ONLY full questions with multiple choice options (A, B, C, D)
-                2. Skip incomplete questions, fragments, or sub-parts
-                3. Skip headings, topic names, or reference text
-                4. Each question must be self-contained and answerable
-                5. This is chunk ${chunkIndex + 1}/${textChunks.length}
+                1. Extract ALL complete questions with multiple choice options (minimum 3 options)
+                2. Include questions with formats: "Which of the following...", "What is...", "Assertion (A):", etc.
+                3. Skip only non-question text like headings, instructions, or pure content
+                4. Include questions that may continue across lines
+                5. This is chunk ${chunkIndex + 1}/${textChunks.length} - extract everything you can find
                 
                 Return your response as JSON format:
                 {
@@ -408,15 +408,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ]
                 }
                 
-                IMPORTANT: Only extract complete, independent questions with 4 options. Return JSON only.`
+                IMPORTANT: Extract ALL questions you find, even with 3+ options. Be thorough. Return JSON only.`
               },
               {
                 role: "user",
-                content: `Extract ONLY complete, standalone questions from this text chunk. Ignore headings, fragments, or incomplete text. Return the extracted questions in JSON format:\n\n${chunk}`
+                content: `Extract ALL complete questions from this text chunk, including "Which of the following", "What is", "Assertion" style questions. Be thorough and extract everything that looks like a question with multiple choice options. Return the extracted questions in JSON format:\n\n${chunk}`
               }
             ],
             response_format: { type: "json_object" },
-            max_tokens: 3000, // Further reduced to ensure completion
+            max_tokens: 4000, // Increased for better extraction
             temperature: 0.1
           });
 
@@ -466,14 +466,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Convert minimal format to standard format - will add translation in batch later
             const convertedQuestions = result.questions
               .filter((q: any) => {
-                // Strict filtering to prevent over-extraction
-                const hasQuestion = q.q && q.q.length > 30 && q.q.includes('?'); // Must be a question
-                const hasOptions = Array.isArray(q.opts) && q.opts.length === 4;
-                const hasAnswer = q.ans && q.ans.length > 2;
-                const isNotFragment = !q.q.toLowerCase().includes('which of the following') || q.q.includes('?');
-                const hasCompleteOptions = q.opts.every((opt: string) => opt && opt.length > 2);
+                // Balanced filtering - not too strict
+                const hasQuestion = q.q && q.q.length > 15; // Minimum reasonable length
+                const hasOptions = Array.isArray(q.opts) && q.opts.length >= 3; // At least 3 options
+                const hasAnswer = q.ans && q.ans.length > 0;
+                const hasValidStructure = q.q && (
+                  q.q.includes('?') || 
+                  q.q.toLowerCase().includes('which') || 
+                  q.q.toLowerCase().includes('what') || 
+                  q.q.toLowerCase().includes('assertion') ||
+                  q.q.toLowerCase().includes('consider') ||
+                  q.q.toLowerCase().includes('statement') ||
+                  q.q.toLowerCase().includes('following') ||
+                  q.q.toLowerCase().includes('correct') ||
+                  q.q.toLowerCase().includes('identify')
+                );
                 
-                return hasQuestion && hasOptions && hasAnswer && isNotFragment && hasCompleteOptions;
+                const isValid = hasQuestion && hasOptions && hasAnswer && hasValidStructure;
+                
+                if (!isValid) {
+                  console.log(`Filtered out question: "${q.q?.substring(0, 50)}..." - hasQuestion:${hasQuestion}, hasOptions:${hasOptions}, hasAnswer:${hasAnswer}, hasValidStructure:${hasValidStructure}`);
+                }
+                
+                return isValid;
               })
               .map((q: any) => ({
                 question: {
@@ -506,6 +521,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (chunkQuestionCount > 0) {
               const firstQ = convertedQuestions[0];
               console.log(`  Sample: "${firstQ.question?.english?.substring(0, 60)}..."`);
+            } else {
+              // Debug why no questions were extracted
+              console.log(`  ⚠️ No questions extracted from chunk ${chunkIndex + 1}. Raw result had ${result.questions?.length || 0} potential questions`);
+              if (result.questions && result.questions.length > 0) {
+                console.log(`  First raw question: "${result.questions[0]?.q?.substring(0, 50)}..."`);
+              }
             }
           } else {
             console.error(`✗ Chunk ${chunkIndex + 1}/${textChunks.length}: No valid questions in response`);

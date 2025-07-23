@@ -1,0 +1,86 @@
+Processing file: Test-13.docx, Type: .docx, Size: 75887 bytes
+Processing DOCX file...
+Successfully extracted 89666 characters from DOCX
+Text length: 89666 characters. Processing in chunks for complete extraction.
+Split document into 23 chunks for processing
+Chunk sizes: 3967, 3965, 3895, 3820, 3962, 3769, 3995, 3721, 3909, 3950, 3873, 3854, 3970, 3980, 3989, 3880, 3955, 3987, 3963, 3918, 3920, 3907, 1658 characters
+Estimated total questions in document: ~149
+Expected ~7 questions per 4000-char chunk
+Processing chunk 1/23 (3967 characters)
+✓ Chunk 1/23: Extracted 4 questions (3967 chars)
+  Sample: "Which of the following is not listed in the Eleventh Schedul..."
+Processing chunk 2/23 (3965 characters)
+✓ Chunk 2/23: Extracted 0 questions (3965 chars)
+Processing chunk 3/23 (3895 characters)
+✓ Chunk 3/23: Extracted 4 questions (3895 chars)
+  Sample: "With reference to the Finance Commission of India, consider:..."
+Processing chunk 4/23 (3820 characters)
+✓ Chunk 4/23: Extracted 2 questions (3820 chars)
+  Sample: "Which one of the following is not among the constitutionally..."
+Processing chunk 5/23 (3962 characters)
+✓ Chunk 5/23: Extracted 3 questions (3962 chars)
+  Sample: "Which of the following statements regarding public services ..."
+Processing chunk 6/23 (3769 characters)
+✓ Chunk 6/23: Extracted 3 questions (3769 chars)
+  Sample: "Which one of the following statements regarding the 42ⁿᵈ Con..."
+Processing chunk 7/23 (3995 characters)
+✓ Chunk 7/23: Extracted 3 questions (3995 chars)
+  Sample: "Which of the following conditions must be satisfied before P..."
+Processing chunk 8/23 (3721 characters)
+✓ Chunk 8/23: Extracted 3 questions (3721 chars)
+  Sample: "Which action lies exclusively with the Lok Sabha and not wit..."
+Processing chunk 9/23 (3909 characters)
+✓ Chunk 9/23: Extracted 0 questions (3909 chars)
+Processing chunk 10/23 (3950 characters)
+✓ Chunk 10/23: Extracted 7 questions (3950 chars)
+  Sample: "Which statement about the CAT is incorrect?..."
+Processing chunk 11/23 (3873 characters)
+✓ Chunk 11/23: Extracted 8 questions (3873 chars)
+  Sample: "Which former Chief Justice of India later served first as Vi..."
+Processing chunk 12/23 (3854 characters)
+2:56:40 PM [express] GET /api/user 401 in 1ms
+✓ Chunk 12/23: Extracted 9 questions (3854 chars)
+  Sample: "Only one President has returned a non-Money Bill for reconsi..."
+Processing chunk 13/23 (3970 characters)
+✓ Chunk 13/23: Extracted 5 questions (3970 chars)
+  Sample: "Which Governor of Bihar later rose to become President of In..."
+Processing chunk 14/23 (3980 characters)
+✓ Chunk 14/23: Extracted 7 questions (3980 chars)
+  Sample: "Which Constitutional Amendment Act simultaneously – (i) inse..."
+Processing chunk 15/23 (3989 characters)
+2:57:42 PM [express] GET /api/admin/evaluations 304 in 1011ms :: {"evaluations":[{"id":5,"studentNam…
+✓ Chunk 15/23: Extracted 3 questions (3989 chars)
+  Sample: "What is the minimum population required for a metropolitan a..."
+Processing chunk 16/23 (3880 characters)
+✓ Chunk 16/23: Extracted 0 questions (3880 chars)
+Processing chunk 17/23 (3955 characters)
+✓ Chunk 17/23: Extracted 8 questions (3955 chars)
+  Sample: "Comptroller & Auditor‑General of India (CAG) audits any auth..."
+Processing chunk 18/23 (3987 characters)
+✓ Chunk 18/23: Extracted 0 questions (3987 chars)
+Processing chunk 19/23 (3963 characters)
+✓ Chunk 19/23: Extracted 0 questions (3963 chars)
+Processing chunk 20/23 (3918 characters)
+✓ Chunk 20/23: Extracted 0 questions (3918 chars)
+Processing chunk 21/23 (3920 characters)
+✓ Chunk 21/23: Extracted 0 questions (3920 chars)
+Processing chunk 22/23 (3907 characters)
+✓ Chunk 22/23: Extracted 0 questions (3907 chars)
+Processing chunk 23/23 (1658 characters)
+✓ Chunk 23/23: Extracted 0 questions (1658 chars)
+=== EXTRACTION SUMMARY ===
+Total questions extracted: 69 out of estimated ~149
+Extraction efficiency: 46.3%
+Chunks processed: 23
+Questions per chunk: C1:? C2:? C3:? C4:? C5:? C6:? C7:? C8:? C9:? C10:? C11:? C12:? C13:? C14:? C15:? C16:? C17:? C18:? C19:? C20:? C21:? C22:? C23:?
+⚠️  Low extraction rate - extracted 69 out of expected ~150 questions
+Successfully processed .docx file and extracted 69 questions total from 23 chunks
+Post-processing: Adding Hindi translation for 69 questions...
+Translating batch 1/7
+Translating batch 2/7
+Translating batch 3/7
+Translating batch 4/7
+Translating batch 5/7
+Translating batch 6/7
+Translating batch 7/7
+✓ Hindi translation completed for 69 questions
