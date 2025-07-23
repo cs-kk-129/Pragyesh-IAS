@@ -1,0 +1,275 @@
+Processing file: Test-13.docx, Type: .docx, Size: 75887 bytes
+Processing DOCX file...
+Successfully extracted 89666 characters from DOCX
+Text length: 89666 characters. Processing in chunks for complete extraction.
+Split document into 23 chunks for processing
+Chunk sizes: 3967, 3965, 3895, 3820, 3962, 3769, 3995, 3721, 3909, 3950, 3873, 3854, 3970, 3980, 3989, 3880, 3955, 3987, 3963, 3918, 3920, 3907, 1658 characters
+Estimated total questions in document: ~149
+Expected ~7 questions per 4000-char chunk
+Processing chunk 1/23 (3967 characters)
+Filtered out question: "Gram Sabha under Article 243-A exercises: approval..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): A State Finance Commission must be ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following is not listed in the Eleven..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following chronologically: Community D..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The minimum age for election as Sarpanch/Pradhan (..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Under Article 243-Q, an Urban Local Body (ULB) may..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): A Ward Committee must be constitute..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following subjects is not enumera..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following events in chronological orde..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "A Metropolitan Planning Committee (MPC) is mandato..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Under the Constitution, which of the following are..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The President may, by regulation, m..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following Articles is not directl..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 1/23: Extracted 0 questions (3967 chars)
+  ⚠️ No questions extracted from chunk 1. Raw result had 13 potential questions
+  First raw question: "Gram Sabha under Article 243-A exercises: approval..."
+Processing chunk 2/23 (3965 characters)
+Filtered out question: "How many Autonomous District Councils presently ex..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under Article 324, the Election Commission of Indi..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Chief Election Commissioner (CE..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following matters is not within t..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following election-related enactments ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "At the time of commencement of the Constitution (2..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "With reference to Public Service Commissions, cons..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Chairman of a State Public Serv..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The Union Public Service Commission is not constit..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Arrange the following in chronological order: Lee ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 2/23: Extracted 0 questions (3965 chars)
+  ⚠️ No questions extracted from chunk 2. Raw result had 10 potential questions
+  First raw question: "How many Autonomous District Councils presently ex..."
+Processing chunk 3/23 (3895 characters)
+Filtered out question: "With reference to the Finance Commission of India,..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): Decisions of the GST Council are ta..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following matters lies outside the ad..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following in chronological order: Firs..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The Chairperson of the GST Council is..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Concerning the Comptroller and Auditor General of ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Attorney General of India is no..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following is not a constitutional..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following events in chronological orde..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The Advocate General of a State is appointed by th..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+✓ Chunk 3/23: Extracted 0 questions (3895 chars)
+  ⚠️ No questions extracted from chunk 3. Raw result had 10 potential questions
+  First raw question: "With reference to the Finance Commission of India,..."
+Processing chunk 4/23 (3820 characters)
+Filtered out question: "Which of the above are correct?..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The National Commission for Schedul..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following is not among the consti..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following events in chronological orde..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under Articles 338, 338-A and 338-B, the term of o..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Concerning NITI Aayog, consider: It was establishe..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Chairperson of the National Hum..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following functions does not fall wit..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following statutes in chronological or..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The ex-officio Chairperson of the National Disaste..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+✓ Chunk 4/23: Extracted 0 questions (3820 chars)
+  ⚠️ No questions extracted from chunk 4. Raw result had 10 potential questions
+  First raw question: "Which of the above are correct?..."
+Processing chunk 5/23 (3962 characters)
+3:14:41 PM [express] GET /api/user 401 in 1ms
+Filtered out question: "Assertion (A): Hindi in the Devanagari script is t..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following statements regarding public..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Arrange the following language-related Constitutio..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under Article 300, a suit against the Union of Ind..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Under Article 352 (National Emergency), which of t..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): Article 359 empowers the President ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which one of the following statements about Presid..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Match each item in List I with the correct provisi..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "During a Financial Emergency (Article 360) the Pre..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+✓ Chunk 5/23: Extracted 0 questions (3962 chars)
+  ⚠️ No questions extracted from chunk 5. Raw result had 9 potential questions
+  First raw question: "Assertion (A): Hindi in the Devanagari script is t..."
+Processing chunk 6/23 (3769 characters)
+✓ Chunk 6/23: Extracted 7 questions (3769 chars)
+  Sample: "Which of the following propositions are correct regarding th..."
+Processing chunk 7/23 (3995 characters)
+Filtered out question: "Match each Constitutional Article in List I with i..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following conditions must be satisfie..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Article 262(2) allows Parliament to:..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Which of the following correctly pairs the constit..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under the Inter-State Water Disputes Act, 1956 as ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Pick the statement that is incorrect about River B..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which pair of river—major disputant States is mism..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following are correct about contempt ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Legal profession & education..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+✓ Chunk 7/23: Extracted 0 questions (3995 chars)
+  ⚠️ No questions extracted from chunk 7. Raw result had 9 potential questions
+  First raw question: "Match each Constitutional Article in List I with i..."
+Processing chunk 8/23 (3721 characters)
+Filtered out question: "Which option reflects the correct pair(s)?..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements about anti-defec..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which action lies exclusively with the Lok Sabha a..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Union law officers & Parliament: The Attorney-Gene..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the correct statements. The date for elec..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "If an area is newly brought under the Fifth Schedu..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "The right to property in India currently stands as..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Which pair best captures the core ingredients of t..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following assertions about the Parlia..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The Supreme Court (2017) recognised “Right to Priv..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the correct statement(s): The President m..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 8/23: Extracted 0 questions (3721 chars)
+  ⚠️ No questions extracted from chunk 8. Raw result had 11 potential questions
+  First raw question: "Which option reflects the correct pair(s)?..."
+Processing chunk 9/23 (3909 characters)
+Filtered out question: "Consider these statements: PVTGs are currently ide..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which features of the Members of Parliament Local ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "The Macro-Economic Framework Statement that accomp..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "In India, the directive to separate the judiciary ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Apart from Fundamental Rights, which constitutiona..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under India’s Legal Services Authorities Act and r..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following are true about the present-..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following assertions. The National Le..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under the Legal Services Authorities Act as amende..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+✓ Chunk 9/23: Extracted 0 questions (3909 chars)
+  ⚠️ No questions extracted from chunk 9. Raw result had 9 potential questions
+  First raw question: "Consider these statements: PVTGs are currently ide..."
+Processing chunk 10/23 (3950 characters)
+Filtered out question: "Which statement about the CAT is incorrect?..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under Part IX of the Constitution, which statement..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Negative liberty, in classical liberal thought, pr..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "Which feature best distinguishes India’s constitut..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the Directive Principle that most directl..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Under the 73ʳᵈ Amendment, reservation of seats for..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:false
+Filtered out question: "A PhD student is arrested under a local curfew ord..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "An unaided, non-minority engineering college denie..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "A superannuated official continues to sign files a..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Article 148(4) says the Comptroller and Auditor-Ge..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "A citizen files a suit alleging that passage of a ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 10/23: Extracted 0 questions (3950 chars)
+  ⚠️ No questions extracted from chunk 10. Raw result had 11 potential questions
+  First raw question: "Which statement about the CAT is incorrect?..."
+Processing chunk 11/23 (3873 characters)
+Filtered out question: "Identify the Prime Minister who assumed office wit..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the President whose death in office led t..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which former Chief Justice of India later served f..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who was the first Prime Minister of India to prese..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements regarding Lord C..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Article 124(7) bars a retired Supreme Court judge ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Regarding the tenure of Lord Lytton (1876-1880), c..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Only three Bills have led to a joint sitting of Pa..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements about Lord Curzo..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Article 93 says the Speaker remains in office “unt..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 11/23: Extracted 0 questions (3873 chars)
+  ⚠️ No questions extracted from chunk 11. Raw result had 10 potential questions
+  First raw question: "Identify the Prime Minister who assumed office wit..."
+Processing chunk 12/23 (3854 characters)
+Filtered out question: "Only one President has returned a non-Money Bill f..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements regarding the Pe..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which Prime-Ministerial confidence motion was defe..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements regarding the Do..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "An activist is illegally detained during a rally; ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Vernacular Press Act was introd..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Only once have two different Prime Ministers share..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): Lord Ripon is known as the ‘Father ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Article 319 bars a UPSC Chairman from “any further..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements regarding the Il..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Bihar has been under President’s Rule many times. ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 12/23: Extracted 0 questions (3854 chars)
+  ⚠️ No questions extracted from chunk 12. Raw result had 11 potential questions
+  First raw question: "Only one President has returned a non-Money Bill f..."
+Processing chunk 13/23 (3970 characters)
+Filtered out question: "Which Governor of Bihar later rose to become Presi..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Match the following treaties with the wars they co..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who was the first woman to preside over a sitting ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Match the following Viceroys/Governors-General wit..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who is the only person to have served as Prime Min..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Match the following Acts with the Governors-Genera..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the person who has been nominated by the ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Assertion (A): The Rampa Rebellion of 1922-24 was ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Lok Sabha has entertained only two No-Confidence M..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements about the Singhp..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who is the only President of India elected unoppos..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 13/23: Extracted 0 questions (3970 chars)
+  ⚠️ No questions extracted from chunk 13. Raw result had 11 potential questions
+  First raw question: "Which Governor of Bihar later rose to become Presi..."
+Processing chunk 14/23 (3980 characters)
+Filtered out question: "Which of the statements given above is/are correct..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which Constitutional Amendment Act simultaneously ..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements about the Khilaf..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Identify the only State Assembly that was elected,..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who among the following were the prominent leaders..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who holds the record for the longest continuous te..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Consider the following statements about the Ali br..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which President famously used a “pocket veto” by n..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Which of the following leaders resigned from their..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+Filtered out question: "Who is the only Vice-President to complete two ful..." - hasQuestion:true, hasOptions:true, hasAnswer:null, hasValidStructure:true
+✓ Chunk 14/23: Extracted 0 questions (3980 chars)
+  ⚠️ No questions extracted from chunk 14. Raw result had 10 potential questions
+  First raw question: "Which of the statements given above is/are correct..."
+Processing chunk 15/23 (3989 characters)
+✓ Chunk 15/23: Extracted 12 questions (3989 chars)
+  Sample: "Assertion (A): Article 243‑I requires every State Governor t..."
+Processing chunk 16/23 (3880 characters)
+Filtered out question: "Removal of the CEC..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Matter outside the ECI’s advisory role..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Election‑law chronology..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Composition of the ECI on 26 Jan 1950..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "UPSC & State PSCs..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Elevation of State PSC Chairman..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Consultation with UPSC not required in —..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Public Service Commission chronology..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Maximum age for State PSC member..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Finance Commission of India..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Decision‑making in the GST Council..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Outside the Finance Commission’s mandate..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Finance‑devolution chronology..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Chairperson of the GST Council..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+✓ Chunk 16/23: Extracted 0 questions (3880 chars)
+  ⚠️ No questions extracted from chunk 16. Raw result had 14 potential questions
+  First raw question: "Removal of the CEC..."
+Processing chunk 17/23 (3955 characters)
+3:18:47 PM [express] GET /api/admin/evaluations 304 in 1008ms :: {"evaluations":[{"id":5,"studentNam…
+Filtered out question: "Comptroller & Auditor‑General of India (CAG)..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Attorney‑General – private practice..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Grounds for removing the CAG..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "CAG‑related chronology..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Appointment of Advocate‑General..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "National Commission for Scheduled Castes (NCSC)..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Birth of the National Commission for Scheduled Tri..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Non‑mandated duty of NCST..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Backward‑class milestones..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Tenure of NCSC, NCST & NCBC members..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "NITI Aayog..." - hasQuestion:false, hasOptions:true, hasAnswer:true, hasValidStructure:false
+Filtered out question: "Chairperson of the NHRC..." - hasQuestion:true, hasOptions:true, hasAnswer:true, hasValidStructure:false
+✓ Chunk 17/23: Extracted 0 questions (3955 chars)
+  ⚠️ No questions extracted from chunk 17. Raw result had 12 potential questions
+  First raw question: "Comptroller & Auditor‑General of India (CAG)..."
+Processing chunk 18/23 (3987 characters)
+3:19:19 PM [express] GET /api/admin/evaluations 304 in 507ms :: {"evaluations":[{"id":5,"studentName…
+✓ Chunk 18/23: Extracted 11 questions (3987 chars)
+  Sample: "Which of the following is the ex-officio Chair of the NDMA?..."
+Processing chunk 19/23 (3963 characters)
+✓ Chunk 19/23: Extracted 9 questions (3963 chars)
+  Sample: "Which of the following statements about Centre–State legisla..."
+Processing chunk 20/23 (3918 characters)
+3:19:50 PM [express] GET /api/admin/evaluations 304 in 506ms :: {"evaluations":[{"id":5,"studentName…
+✓ Chunk 20/23: Extracted 16 questions (3918 chars)
+  Sample: "Which of the following is a power exclusive to the Lok Sabha..."
+Processing chunk 21/23 (3920 characters)
+3:20:20 PM [express] GET /api/admin/evaluations 304 in 531ms :: {"evaluations":[{"id":5,"studentName…
+✓ Chunk 21/23: Extracted 6 questions (3920 chars)
+  Sample: "Which of the following is the jurisdictional bar of a Perman..."
+Processing chunk 22/23 (3907 characters)
+✓ Chunk 22/23: Extracted 0 questions (3907 chars)
+  ⚠️ No questions extracted from chunk 22. Raw result had 0 potential questions
+Processing chunk 23/23 (1658 characters)
+✓ Chunk 23/23: Extracted 0 questions (1658 chars)
+  ⚠️ No questions extracted from chunk 23. Raw result had 0 potential questions
+=== EXTRACTION SUMMARY ===
+Total questions extracted: 61 out of estimated ~149
+Extraction efficiency: 40.9%
+Chunks processed: 23
+Questions per chunk: C1:? C2:? C3:? C4:? C5:? C6:? C7:? C8:? C9:? C10:? C11:? C12:? C13:? C14:? C15:? C16:? C17:? C18:? C19:? C20:? C21:? C22:? C23:?
+⚠️  Low extraction rate - extracted 61 out of expected ~150 questions
+Successfully processed .docx file and extracted 61 questions total from 23 chunks
+Post-processing: Adding Hindi translation for 61 questions...
+Translating batch 1/7
+3:20:51 PM [express] GET /api/admin/evaluations 304 in 516ms :: {"evaluations":[{"id":5,"studentName…
+Translating batch 2/7
+Translating batch 3/7
+Translating batch 4/7
+Translating batch 5/7
+Translating batch 6/7
+Translating batch 7/7
+✓ Hindi translation completed for 61 questions
+3:23:22 PM [express] POST /api/admin/process-question-file 200 in 595654ms :: {"success":true,"quest…

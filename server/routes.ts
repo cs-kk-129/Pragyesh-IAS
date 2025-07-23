@@ -400,15 +400,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     {
                       "q": "Complete question text",
                       "opts": ["Option A", "Option B", "Option C", "Option D"],
-                      "ans": "Correct answer text",
-                      "exp": "Brief explanation",
+                      "ans": "Option A",
+                      "exp": "Brief explanation (optional)",
                       "subj": null,
                       "topic": null
                     }
                   ]
                 }
                 
-                IMPORTANT: Extract ALL questions you find, even with 3+ options. Be thorough. Return JSON only.`
+                IMPORTANT: Always include the 'ans' field with the correct option letter/text.
+                
+                IMPORTANT: Extract ALL questions you find, even with 3+ options. Always include the correct answer in 'ans' field. Be thorough. Return JSON only.`
               },
               {
                 role: "user",
@@ -469,7 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Balanced filtering - not too strict
                 const hasQuestion = q.q && q.q.length > 15; // Minimum reasonable length
                 const hasOptions = Array.isArray(q.opts) && q.opts.length >= 3; // At least 3 options
-                const hasAnswer = q.ans && q.ans.length > 0;
+                const hasAnswer = q.ans || q.answer || q.correct_answer || q.correctAnswer || ""; // Accept any answer field or empty
                 const hasValidStructure = q.q && (
                   q.q.includes('?') || 
                   q.q.toLowerCase().includes('which') || 
@@ -482,10 +484,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   q.q.toLowerCase().includes('identify')
                 );
                 
-                const isValid = hasQuestion && hasOptions && hasAnswer && hasValidStructure;
+                const isValid = hasQuestion && hasOptions && hasValidStructure; // Remove hasAnswer requirement
                 
                 if (!isValid) {
-                  console.log(`Filtered out question: "${q.q?.substring(0, 50)}..." - hasQuestion:${hasQuestion}, hasOptions:${hasOptions}, hasAnswer:${hasAnswer}, hasValidStructure:${hasValidStructure}`);
+                  console.log(`Filtered out question: "${q.q?.substring(0, 50)}..." - hasQuestion:${hasQuestion}, hasOptions:${hasOptions}, hasValidStructure:${hasValidStructure}`);
                 }
                 
                 return isValid;
@@ -500,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   hindi: [] // Will be translated in batch processing
                 },
                 correctAnswer: {
-                  english: q.ans || "",
+                  english: q.ans || q.answer || q.correct_answer || q.correctAnswer || "To be determined",
                   hindi: "" // Will be translated in batch processing
                 },
                 explanation: {
