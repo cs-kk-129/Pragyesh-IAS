@@ -343,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("OpenAI API key not configured");
       }
       
-      const allQuestions = [];
+      const allQuestions: any[] = [];
       const CHUNK_SIZE = 4000; // Much smaller chunks to prevent token overflow
       const textChunks = [];
       
@@ -404,23 +404,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 {
                   "questions": [
                     {
-                      "q": "Complete question text",
+                      "q": "Complete question text with EXACT formatting including lists",
                       "opts": ["Option A", "Option B", "Option C", "Option D"],
-                      "ans": "Option A (if found) or null",
-                      "exp": "Brief explanation if available or null",
+                      "ans": "EXACT answer text as found in document (not just option letter)",
+                      "exp": "COMPLETE explanation/solution as written in document (not summarized)",
                       "subj": null,
                       "topic": null
                     }
                   ]
                 }
                 
-                ANSWER EXTRACTION RULES:
-                - If answer is stated (e.g., "Answer: B", "Correct: A", "Sol: C"), extract it
-                - If answer appears in explanations (e.g., "The correct answer is B"), extract it  
-                - If no answer found in this chunk, set ans to null (might be in answer key section)
-                - Extract explanations if they appear near questions
+                CRITICAL FORMATTING RULES:
+                - PRESERVE EXACT QUESTION TEXT including numbered/bulleted lists
+                - Use \n for line breaks, preserve list structure with proper indentation
+                - Extract COMPLETE explanations word-for-word, never summarize
+                - Extract EXACT answer text, not just option letters
+                - If lists use bullets (•) or numbers (1., 2.), preserve that formatting
                 
-                IMPORTANT: Extract ALL questions you find, even with 3+ options. Include answers only if found in this chunk. Be thorough. Return JSON only.`
+                IMPORTANT: 
+                - Extract ALL questions you find, even with 3+ options
+                - PRESERVE exact text including numbered/bulleted lists using \n for line breaks
+                - Include complete answers and explanations as found, never summarize
+                - Return JSON only with exact formatting preserved`
               },
               {
                 role: "user",
@@ -526,7 +531,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }));
             
             const chunkQuestionCount = convertedQuestions.length;
-            allQuestions.push(...convertedQuestions);
+            
+            // Add deduplication logic
+            convertedQuestions.forEach((newQ: any) => {
+              const isDuplicate = allQuestions.some(existingQ => {
+                // Check for exact question text match or very high similarity
+                const existingText = existingQ.question?.english?.toLowerCase().replace(/\s+/g, ' ').trim();
+                const newText = newQ.question?.english?.toLowerCase().replace(/\s+/g, ' ').trim();
+                
+                if (!existingText || !newText) return false;
+                
+                // Exact match
+                if (existingText === newText) return true;
+                
+                // Very high similarity (90% of characters match)
+                const similarity = calculateSimilarity(existingText, newText);
+                return similarity > 0.9;
+              });
+              
+              if (!isDuplicate) {
+                allQuestions.push(newQ);
+              } else {
+                console.log(`  Skipped duplicate question: "${newQ.question?.english?.substring(0, 50)}..."`);
+              }
+            });
             console.log(`✓ Chunk ${chunkIndex + 1}/${textChunks.length}: Extracted ${chunkQuestionCount} questions (${chunk.length} chars)`);
             
             // Log first question as sample
@@ -595,26 +623,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             console.log(`Translating batch ${Math.floor(i/TRANSLATION_BATCH_SIZE) + 1}/${Math.ceil(allQuestions.length/TRANSLATION_BATCH_SIZE)}`);
             
-            // Create compact batch translation request
+            // Create detailed batch translation request with full content preservation
             const batchText = batch.map((q, idx) => 
-              `Q${idx + 1}: ${q.question.english}\nA: ${q.options.english.join(' | ')}\nAns: ${q.correctAnswer.english}\nExp: ${q.explanation.english}`
-            ).join('\n\n');
+              `Q${idx + 1}: ${q.question.english}\nOptions: ${q.options.english.join('\n')}\nCorrect Answer: ${q.correctAnswer.english}\nExplanation: ${q.explanation.english}`
+            ).join('\n\n---\n\n');
             
             const translationResponse = await openai.chat.completions.create({
               model: "gpt-4o",
               messages: [
                 {
                   role: "system",
-                  content: `Translate these UPSC questions from English to Hindi. Maintain technical accuracy and UPSC terminology.
+                  content: `Translate these UPSC questions from English to Hindi. Maintain technical accuracy and UPSC terminology. PRESERVE EXACT FORMATTING including lists, line breaks, and structures.
+                  
+                  CRITICAL: Do NOT modify, summarize, or change the content of answers and explanations. Only translate the language.
                   
                   Return your response as JSON format:
                   {
                     "translations": [
                       {
-                        "question": "हिंदी प्रश्न",
+                        "question": "हिंदी प्रश्न with EXACT formatting preserved",
                         "options": ["विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D"],
-                        "answer": "सही उत्तर",
-                        "explanation": "व्याख्या"
+                        "answer": "EXACT translated answer (not just option letter)",
+                        "explanation": "COMPLETE translated explanation (never summarized)"
                       }
                     ]
                   }
@@ -853,10 +883,33 @@ async function matchAnswersFromAnswerKey(questions: any[], fullText: string) {
           console.log(`✓ Matched ${matchedCount} answers from answer key section`);
         }
       }
-    } catch (error) {
-      console.log(`Could not process answer key section:`, error.message);
+    } catch (error: any) {
+      console.log(`Could not process answer key section:`, error?.message || error);
     }
   }
+}
+
+// Helper function to calculate text similarity
+function calculateSimilarity(str1: string, str2: string): number {
+  const len1 = str1.length;
+  const len2 = str2.length;
+  
+  if (len1 === 0 && len2 === 0) return 1;
+  if (len1 === 0 || len2 === 0) return 0;
+  
+  const maxLen = Math.max(len1, len2);
+  const minLen = Math.min(len1, len2);
+  
+  // Simple character-based similarity
+  let matches = 0;
+  const shorter = len1 < len2 ? str1 : str2;
+  const longer = len1 >= len2 ? str1 : str2;
+  
+  for (let i = 0; i < shorter.length; i++) {
+    if (longer.includes(shorter[i])) matches++;
+  }
+  
+  return matches / maxLen;
 }
 
   // Get admin evaluations - real mock test attempts
