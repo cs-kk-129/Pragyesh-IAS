@@ -11,13 +11,19 @@ import os
 import signal
 from pathlib import Path
 
+# Fix Windows console encoding for Unicode characters
+if os.name == 'nt':  # Windows
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+
 def check_requirements():
     """Check if required dependencies are available"""
     print("Checking system requirements...")
     
     # Check Node.js
     try:
-        subprocess.run(["node", "--version"], check=True, capture_output=True)
+        subprocess.run(["node", "--version"], check=True, capture_output=True, shell=True)
         print("✓ Node.js is available")
     except subprocess.CalledProcessError:
         print("✗ Node.js is not installed or not in PATH")
@@ -46,50 +52,59 @@ def start_fastapi_backend():
     # Change to backend directory
     backend_dir = Path("backend")
     
-    # Start FastAPI server
+    # Start FastAPI server with real-time output
     env = os.environ.copy()
     env["PYTHONPATH"] = str(backend_dir.absolute())
     
-    process = subprocess.Popen(
-        [sys.executable, "run_backend.py"],
-        cwd=backend_dir,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    
-    # Wait a moment for server to start
-    time.sleep(3)
-    
-    if process.poll() is None:
-        print("✓ FastAPI backend started on http://localhost:8001")
-        return process
-    else:
-        print("✗ Failed to start FastAPI backend")
-        stdout, stderr = process.communicate()
-        print(f"Error: {stderr.decode()}")
+    try:
+        process = subprocess.Popen(
+            [sys.executable, "run_backend.py"],
+            cwd=backend_dir,
+            env=env,
+            creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == 'nt' else 0
+        )
+        
+        # Wait a moment for server to start
+        time.sleep(5)
+        
+        if process.poll() is None:
+            print("✓ FastAPI backend started on http://localhost:8001")
+            return process
+        else:
+            print("✗ Failed to start FastAPI backend")
+            return None
+            
+    except Exception as e:
+        print(f"✗ Error starting backend: {e}")
         return None
 
 def start_nodejs_frontend():
     """Start the Node.js frontend"""
     print("Starting Node.js frontend...")
     
-    process = subprocess.Popen(
-        ["npm", "run", "dev"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    
-    # Wait a moment for server to start
-    time.sleep(3)
-    
-    if process.poll() is None:
-        print("✓ Node.js frontend started on http://localhost:5000")
-        return process
-    else:
-        print("✗ Failed to start Node.js frontend")
-        stdout, stderr = process.communicate()
-        print(f"Error: {stderr.decode()}")
+    try:
+        # On Windows, use npm.cmd and create new console
+        if os.name == 'nt':
+            process = subprocess.Popen(
+                ["npm", "run", "dev"],
+                shell=True,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+        else:
+            process = subprocess.Popen(["npm", "run", "dev"])
+        
+        # Wait a moment for server to start
+        time.sleep(5)
+        
+        if process.poll() is None:
+            print("✓ Node.js frontend started on http://localhost:5000")
+            return process
+        else:
+            print("✗ Failed to start Node.js frontend")
+            return None
+            
+    except Exception as e:
+        print(f"✗ Error starting frontend: {e}")
         return None
 
 def cleanup_processes(processes):
@@ -106,7 +121,7 @@ def cleanup_processes(processes):
 
 def main():
     """Main startup routine"""
-    print("🚀 Starting Integrated UPSC Evaluation System")
+    print("Starting Integrated UPSC Evaluation System")
     print("=" * 50)
     
     if not check_requirements():
@@ -131,16 +146,16 @@ def main():
             sys.exit(1)
         
         print("\n" + "=" * 50)
-        print("🎉 System Ready!")
+        print("System Ready!")
         print("Frontend: http://localhost:5000")
         print("Backend API: http://localhost:8001")
         print("API Docs: http://localhost:8001/docs")
         print("\nFeatures Available:")
-        print("• Advanced mock test evaluation with AI recommendations")
-        print("• PDF report generation with detailed analysis")
-        print("• Subject-wise and topic-wise performance tracking")
-        print("• Time management analysis")
-        print("• Personalized study recommendations")
+        print("- Advanced mock test evaluation with AI recommendations")
+        print("- PDF report generation with detailed analysis")  
+        print("- Subject-wise and topic-wise performance tracking")
+        print("- Time management analysis")
+        print("- Personalized study recommendations")
         print("\nPress Ctrl+C to stop all services")
         print("=" * 50)
         
