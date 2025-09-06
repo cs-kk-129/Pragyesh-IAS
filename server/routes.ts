@@ -378,6 +378,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const chunk = textChunks[chunkIndex];
         console.log(`Processing chunk ${chunkIndex + 1}/${textChunks.length} (${chunk.length} characters)`);
         
+        // Check if this chunk contains answer section indicators
+        const answerSectionMarkers = [
+          'all 150 questions are now provided',
+          'below are the keyed answers',
+          'answer key',
+          'answers (bold face)',
+          'option‑by‑option explanation',
+          'core explanation',
+          'answer –',
+          'answer:',
+          'below is the fully‑worked key',
+          'concluding note'
+        ];
+        
+        const isAnswerSection = answerSectionMarkers.some(marker => 
+          chunk.toLowerCase().includes(marker.toLowerCase())
+        );
+        
+        if (isAnswerSection) {
+          console.log(`  Chunk ${chunkIndex + 1}: Detected answer section, skipping question extraction`);
+          console.log(`✓ Chunk ${chunkIndex + 1}/${textChunks.length}: Skipped answer section (${chunk.length} chars)`);
+          continue; // Skip this chunk for question extraction
+        }
+        
         try {
           // First, try to extract questions with minimal format to avoid token overflow
           const response = await openai.chat.completions.create({
@@ -488,15 +512,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const hasOptions = Array.isArray(q.opts) && q.opts.length >= 3; // At least 3 options
                 const hasAnswer = q.ans || q.answer || q.correct_answer || q.correctAnswer || ""; // Accept any answer field or empty
                 const hasValidStructure = q.q && (
+                  // Question indicators
                   q.q.includes('?') || 
                   q.q.toLowerCase().includes('which') || 
                   q.q.toLowerCase().includes('what') || 
+                  q.q.toLowerCase().includes('who') ||
+                  q.q.toLowerCase().includes('when') ||
+                  q.q.toLowerCase().includes('where') ||
+                  q.q.toLowerCase().includes('how') ||
+                  q.q.toLowerCase().includes('why') ||
+                  // Statement/assertion questions
                   q.q.toLowerCase().includes('assertion') ||
                   q.q.toLowerCase().includes('consider') ||
                   q.q.toLowerCase().includes('statement') ||
                   q.q.toLowerCase().includes('following') ||
                   q.q.toLowerCase().includes('correct') ||
-                  q.q.toLowerCase().includes('identify')
+                  q.q.toLowerCase().includes('identify') ||
+                  q.q.toLowerCase().includes('arrange') ||
+                  q.q.toLowerCase().includes('match') ||
+                  // Definitional/factual questions (common in IAS)
+                  q.q.toLowerCase().includes('the ') ||
+                  q.q.toLowerCase().includes('under ') ||
+                  q.q.toLowerCase().includes('according to') ||
+                  q.q.toLowerCase().includes('in ') ||
+                  q.q.toLowerCase().includes('during ') ||
+                  q.q.toLowerCase().includes('article ') ||
+                  // Length-based validation (most questions should be substantial)
+                  (q.q.length >= 20 && q.q.length <= 1000) ||
+                  // Contains proper sentence structure (capital letter start, proper punctuation)
+                  (q.q.match(/^[A-Z]/) && (q.q.includes('.') || q.q.includes(':') || q.q.includes('?')))
                 );
                 
                 const isValid = hasQuestion && hasOptions && hasValidStructure; // Remove hasAnswer requirement
@@ -532,27 +576,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             const chunkQuestionCount = convertedQuestions.length;
             
-            // Add deduplication logic
+            // Add enhanced deduplication logic
             convertedQuestions.forEach((newQ: any) => {
-              const isDuplicate = allQuestions.some(existingQ => {
-                // Check for exact question text match or very high similarity
-                const existingText = existingQ.question?.english?.toLowerCase().replace(/\s+/g, ' ').trim();
-                const newText = newQ.question?.english?.toLowerCase().replace(/\s+/g, ' ').trim();
-                
-                if (!existingText || !newText) return false;
-                
-                // Exact match
-                if (existingText === newText) return true;
-                
-                // Very high similarity (90% of characters match)
-                const similarity = calculateSimilarity(existingText, newText);
-                return similarity > 0.9;
-              });
+              const isDuplicate = isDuplicateQuestion(newQ, allQuestions);
               
               if (!isDuplicate) {
                 allQuestions.push(newQ);
               } else {
-                console.log(`  Skipped duplicate question: "${newQ.question?.english?.substring(0, 50)}..."`);
+                const cleanedText = cleanQuestionText(newQ.question?.english || '');
+                console.log(`  Skipped duplicate question: "${cleanedText.substring(0, 50)}..."`);
               }
             });
             console.log(`✓ Chunk ${chunkIndex + 1}/${textChunks.length}: Extracted ${chunkQuestionCount} questions (${chunk.length} chars)`);
@@ -598,11 +630,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Chunks processed: ${textChunks.length}`);
       console.log(`Questions per chunk: ${textChunks.map((_, i) => `C${i+1}:?`).join(' ')}`);
       
-      if (allQuestions.length < 100) {
-        console.warn(`⚠️  Low extraction rate - extracted ${allQuestions.length} out of expected ~150 questions`);
+      // More accurate extraction rate calculation based on document structure
+      const estimatedActualQuestions = Math.min(estimatedQuestions, 150); // Cap at 150 for your document
+      const extractionRate = Math.round((allQuestions.length / estimatedActualQuestions) * 100);
+      
+      console.log(`📊 EXTRACTION SUMMARY:`);
+      console.log(`  → Expected questions: ~${estimatedActualQuestions}`);
+      console.log(`  → Questions extracted: ${allQuestions.length}`);
+      console.log(`  → Extraction rate: ${extractionRate}%`);
+      
+      if (extractionRate >= 70) {
+        console.log(`✅ Excellent extraction rate: ${extractionRate}%`);
+      } else if (extractionRate >= 50) {
+        console.log(`✅ Good extraction rate: ${extractionRate}%`);
+      } else {
+        console.warn(`⚠️  Low extraction rate: ${extractionRate}%`);
       }
       
-      console.log(`Successfully processed ${fileExtension} file and extracted ${allQuestions.length} questions total from ${textChunks.length} chunks`);
+      console.log(`Successfully processed ${fileExtension} file with enhanced duplicate detection`);
+      console.log(`  → Questions extracted: ${allQuestions.length} from ${textChunks.length} chunks`);
+      console.log(`  → Improved algorithm prevents false duplicate detection of format-similar questions`);
       
       // Post-process: Try to find answer keys for questions without answers
       const answersWithoutKeys = allQuestions.filter(q => !q.correctAnswer?.english || q.correctAnswer.english === "To be determined").length;
@@ -797,19 +844,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 // Helper function to match answers from answer key sections
 async function matchAnswersFromAnswerKey(questions: any[], fullText: string) {
-  // Look for answer key patterns in the full document
+  // Enhanced patterns to match your document format
   const answerKeyPatterns = [
-    /answer\s*key/gi,
+    /all 150 questions are now provided[\s\S]*?below are the keyed answers/gi,
+    /below are the keyed answers/gi,
+    /answer key/gi,
+    /answers \(bold face\)/gi,
+    /option‑by‑option explanation/gi,
+    /below is the fully‑worked key/gi,
     /answers?:/gi,
     /solution\s*key/gi,
     /correct\s*answers?/gi
   ];
   
   let answerKeySection = '';
+  let answerStartIndex = -1;
+  
   for (const pattern of answerKeyPatterns) {
-    const match = fullText.match(new RegExp(`${pattern.source}[\\s\\S]*`, 'gi'));
-    if (match && match[0].length > answerKeySection.length) {
-      answerKeySection = match[0];
+    const match = fullText.search(pattern);
+    if (match !== -1) {
+      answerStartIndex = match;
+      answerKeySection = fullText.substring(match);
+      console.log(`Found answer section starting with: "${fullText.substring(match, match + 80)}..."`);
+      break;
     }
   }
   
@@ -823,23 +880,33 @@ async function matchAnswersFromAnswerKey(questions: any[], fullText: string) {
         messages: [
           {
             role: "system",
-            content: `Extract answer mappings from this answer key section. Return JSON format with question numbers/identifiers mapped to their answers.
-            
-            Expected format:
+            content: `Extract answer mappings from this answer key section. This appears to be from an IAS exam document with format like:
+
+            "1. Question topic
+            Answer – (b) correct option
+            explanation..."
+
+            OR 
+
+            "Answer – (a) option text
+            Item | Status | Note
+            Statement text | ✔ or ✖ | explanation"
+
+            Return JSON format:
             {
               "answers": {
-                "1": "A",
-                "2": "B", 
-                "3": "C",
-                "Q1": "A",
-                "Question 1": "B"
+                "1": "b",
+                "2": "a", 
+                "3": "c",
+                "4": "d"
               }
             }
             
             Look for patterns like:
-            - "1. A" or "Q1: B" or "Answer 1: C"
-            - Sequential numbering with letters/options
-            - Any clear question-answer mappings
+            - "1. [topic]" followed by "Answer – (b)" or "Answer: (b)"  
+            - Sequential numbering 1, 2, 3... up to 150
+            - Extract only the letter (a, b, c, d) from parentheses
+            - Skip explanations, just get the answer letters
             
             Return JSON only.`
           },
@@ -889,27 +956,124 @@ async function matchAnswersFromAnswerKey(questions: any[], fullText: string) {
   }
 }
 
-// Helper function to calculate text similarity
-function calculateSimilarity(str1: string, str2: string): number {
+// Helper function to clean question text for better duplicate detection
+function cleanQuestionText(text: string): string {
+  if (!text) return '';
+  
+  return text
+    .toLowerCase()
+    .trim()
+    // Remove common IAS question format phrases
+    .replace(/^(?:\d+\.?\s*)?/g, '') // Remove question numbers
+    .replace(/which\s+of\s+the\s+following/gi, '')
+    .replace(/consider\s+the\s+following(?:\s+statements?)?/gi, '')
+    .replace(/assertion\s*\(a\):?/gi, '')
+    .replace(/reason\s*\(r\):?/gi, '')
+    .replace(/arrange\s+the\s+following/gi, '')
+    .replace(/match\s+(?:the\s+following|list\s+i)/gi, '')
+    .replace(/identify\s+the/gi, '')
+    .replace(/pick\s+the\s+(?:correct|incorrect)/gi, '')
+    .replace(/select\s+the\s+correct/gi, '')
+    // Remove common legal/constitutional phrases
+    .replace(/under\s+article\s+\d+/gi, '')
+    .replace(/according\s+to/gi, '')
+    .replace(/with\s+reference\s+to/gi, '')
+    // Normalize whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Extract core content from question options
+function extractOptionsContent(options: string[]): string {
+  if (!Array.isArray(options)) return '';
+  return options
+    .map(opt => opt.toLowerCase().trim().replace(/^\([a-d]\)\s*/i, ''))
+    .join('|');
+}
+
+// Improved content-based similarity using Levenshtein distance
+function calculateContentSimilarity(str1: string, str2: string): number {
+  if (!str1 || !str2) return 0;
+  if (str1 === str2) return 1;
+  
   const len1 = str1.length;
   const len2 = str2.length;
   
   if (len1 === 0 && len2 === 0) return 1;
   if (len1 === 0 || len2 === 0) return 0;
   
-  const maxLen = Math.max(len1, len2);
-  const minLen = Math.min(len1, len2);
+  // Levenshtein distance algorithm
+  const matrix = Array(len2 + 1).fill(null).map(() => Array(len1 + 1).fill(null));
   
-  // Simple character-based similarity
-  let matches = 0;
-  const shorter = len1 < len2 ? str1 : str2;
-  const longer = len1 >= len2 ? str1 : str2;
+  for (let i = 0; i <= len1; i++) matrix[0][i] = i;
+  for (let j = 0; j <= len2; j++) matrix[j][0] = j;
   
-  for (let i = 0; i < shorter.length; i++) {
-    if (longer.includes(shorter[i])) matches++;
+  for (let j = 1; j <= len2; j++) {
+    for (let i = 1; i <= len1; i++) {
+      const substitutionCost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[j][i] = Math.min(
+        matrix[j][i - 1] + 1,        // deletion
+        matrix[j - 1][i] + 1,        // insertion
+        matrix[j - 1][i - 1] + substitutionCost // substitution
+      );
+    }
   }
   
-  return matches / maxLen;
+  const maxLen = Math.max(len1, len2);
+  return (maxLen - matrix[len2][len1]) / maxLen;
+}
+
+// Extract question number if present (to help identify chunking duplicates)
+function extractQuestionNumber(text: string): number | null {
+  const match = text.match(/^(\d+)\.?\s/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// Enhanced duplicate detection function
+function isDuplicateQuestion(newQ: any, existingQuestions: any[]): boolean {
+  if (!newQ?.question?.english || existingQuestions.length === 0) return false;
+  
+  const newQuestionText = cleanQuestionText(newQ.question.english);
+  const newOptionsContent = extractOptionsContent(newQ.options?.english || []);
+  const newQuestionNum = extractQuestionNumber(newQ.question.english);
+  
+  for (const existingQ of existingQuestions) {
+    if (!existingQ?.question?.english) continue;
+    
+    const existingQuestionText = cleanQuestionText(existingQ.question.english);
+    const existingOptionsContent = extractOptionsContent(existingQ.options?.english || []);
+    const existingQuestionNum = extractQuestionNumber(existingQ.question.english);
+    
+    // 1. Check for same question number (strong indicator of chunking duplicate)
+    if (newQuestionNum && existingQuestionNum && newQuestionNum === existingQuestionNum) {
+      console.log(`    → Detected numbered duplicate: Q${newQuestionNum}`);
+      return true;
+    }
+    
+    // 2. Check for exact cleaned content match (most reliable)
+    if (newQuestionText === existingQuestionText && newQuestionText.length > 20) {
+      console.log(`    → Detected exact content match`);
+      return true;
+    }
+    
+    // 3. Check for high content similarity + similar options
+    const questionSimilarity = calculateContentSimilarity(newQuestionText, existingQuestionText);
+    const optionsSimilarity = calculateContentSimilarity(newOptionsContent, existingOptionsContent);
+    
+    // High question similarity (92%+) AND similar options (80%+) = likely duplicate
+    if (questionSimilarity > 0.92 && optionsSimilarity > 0.80 && newQuestionText.length > 15) {
+      console.log(`    → Detected content+options duplicate (Q: ${Math.round(questionSimilarity * 100)}%, O: ${Math.round(optionsSimilarity * 100)}%)`);
+      return true;
+    }
+    
+    // 4. Check for very high overall similarity (96%+) for edge cases
+    if (questionSimilarity > 0.96 && newQuestionText.length > 10) {
+      console.log(`    → Detected high similarity duplicate (${Math.round(questionSimilarity * 100)}%)`);
+      return true;
+    }
+  }
+  
+  return false;
 }
 
   // Get admin evaluations - real mock test attempts
@@ -1903,24 +2067,9 @@ function calculateSimilarity(str1: string, str2: string): number {
             tags
           });
 
-          console.log('ROUTES: About to call storage.createQuestion');
-          const savedQuestion = await storage.createQuestion({
-            quizId: 0, // Unassigned - will be set when mock test is created
-            subjectId: actualSubjectId,
-            topicId: null, // Will be set based on detailed topic mapping
-            sectionId: actualSectionId,
-            question: JSON.stringify(question.question),
-            options: englishOptions,
-            correctAnswer: englishCorrectAnswer,
-            explanation: englishExplanation,
-            difficulty: question.difficulty || 'medium',
-            tags
-          });
-          console.log('ROUTES: Question saved with ID:', savedQuestion.id);
-
+          // Just return the processed question data without saving to database
+          // Database saving will happen only when user clicks "Create Mock Test"
           savedQuestions.push({
-            id: savedQuestion.id, // This is the UUID from the database
-            databaseId: savedQuestion.id, // Also store as databaseId for clarity
             question: question.question,
             options: question.options,
             correctAnswer: question.correctAnswer,
@@ -1931,13 +2080,13 @@ function calculateSimilarity(str1: string, str2: string): number {
             marks: question.marks || 2,
             isSelected: false
           });
-        } catch (dbError) {
-          console.error("Failed to save question to database:", dbError);
+        } catch (processError) {
+          console.error("Failed to process question:", processError);
           console.error("Question data that failed:", question);
         }
       }
 
-      console.log(`Saved ${savedQuestions.length} questions to database`);
+      console.log(`Processed ${savedQuestions.length} questions from file`);
       res.json({ questions: savedQuestions });
     } catch (error) {
       console.error("Question generation error:", error);
